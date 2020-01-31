@@ -6,8 +6,13 @@ export function BoardListItemRenderer(props) {
     const { post, isFirst } = props;
 
     return (
-        <TouchableHighlight onPress={() => console.log(post.title + "Clicked!")}>
-            <View style={style.post} onPress={() => console.log(post.title + 'Clicked!')}>
+        <TouchableHighlight 
+            onPress={() => console.log(post.title + "Clicked!")}
+            // TODO: implement navigate to the page onPress
+        >
+            <View 
+                style={style.post} 
+            >
                 <View style={getItemStyle(isFirst)}>
                     <Text numberOfLines={1} style={style.title}>{post.title}</Text>
                     <Text numberOfLines={2} style={style.description}>{post.content}</Text>

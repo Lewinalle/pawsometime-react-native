@@ -1,12 +1,8 @@
-import * as WebBrowser from 'expo-web-browser';
 import React from 'react';
 import {
-  Image,
-  Platform,
   ScrollView,
   StyleSheet,
   Text,
-  TouchableOpacity,
   TouchableHighlight,
   View,
 } from 'react-native';
@@ -43,11 +39,11 @@ const mapDispatchToProps = {
     test
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(Home);
-
 Home.navigationOptions = {
     title: "Home"
 };
+
+export default connect(mapStateToProps, mapDispatchToProps)(Home);
 
 // function handleHelpPress() {
 //   WebBrowser.openBrowserAsync(

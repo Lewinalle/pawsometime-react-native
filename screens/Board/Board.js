@@ -1,20 +1,16 @@
-import * as WebBrowser from 'expo-web-browser';
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import {
-  Image,
-  Platform,
   ScrollView,
   StyleSheet,
   Text,
-  TouchableOpacity,
   View,
 } from 'react-native';
 import { BoardListItem } from '../../components/BoardListItem';
-import { ListItem, Card, Divider } from 'react-native-elements';
+import { BoardSearch } from '../../components/BoardSearch';
 
 import { connect } from 'react-redux';
 
-import { test } from '../../redux/actions/test.actions'
+import { test } from '../../redux/actions/test.actions';
 
 const Board = props => {
     return (
@@ -23,7 +19,9 @@ const Board = props => {
                 style={styles.container}
                 contentContainerStyle={styles.contentContainer}
             >
-                <Text>Redux Testing: {props.text}</Text>
+                <View>
+                    <BoardSearch />
+                </View>
                 <View>
                     {posts.map((item, index) => 
                         <BoardListItem 
@@ -46,19 +44,20 @@ const mapDispatchToProps = {
     test
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(Board);
-
 Board.navigationOptions = {
     title: "Board"
 };
+
+export default connect(mapStateToProps, mapDispatchToProps)(Board);
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: '#fff',
+        marginVertical: 5,
     },
     contentContainer: {
-        paddingHorizontal: 8,
+        paddingHorizontal: 10,
     },
 });
 

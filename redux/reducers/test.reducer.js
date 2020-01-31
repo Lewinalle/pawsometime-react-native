@@ -7,7 +7,6 @@ const initialState = {
 const test = (state = initialState, action = {}) => {
     switch(action.type) {
         case SET_TEXT:
-            console.log('setting',action.payload.data );
             return { 
                 ...state, 
                 text: action.payload.data 

@@ -20,7 +20,6 @@ export function BoardListItem(props) {
 const style = StyleSheet.create({
     itemStyle: {
         flex: 1,
-        paddingHorizontal: 4,
         backgroundColor: '#fff',
     },
     title: {
