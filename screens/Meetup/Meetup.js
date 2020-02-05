@@ -4,10 +4,12 @@ import {
   StyleSheet,
   Text,
   View,
+  TouchableHighlight,
 } from 'react-native';
 import MeetupListCard from '../../components/MeetupListCard';
 import MapView, { Marker, Callout}  from 'react-native-maps';
 import dimensions from '../../constants/Layout';
+import { MeetupSearch } from '../../components/MeetupSearch';
 
 const MAX_TITLE_LENGTH = 30;
 const MAP_WIDTH = dimensions.window.width - 32;
@@ -49,8 +51,18 @@ const Meetup = props => {
         });
     }
 
+
+    const [showModal, setShowModal] = useState(false);
+    const triggerModal = bool => {
+        setShowModal(bool);
+    }
+
     return (
         <View style={styles.container}>
+            <MeetupSearch 
+                showModal={showModal}
+                triggerModal={triggerModal}
+            />
             <MapView
                 ref={mapRef}
                 style={styles.map}
@@ -85,7 +97,9 @@ const Meetup = props => {
                     );
                 })}
             </MapView>
+            <TouchableHighlight onPress={() => triggerModal(true)}>
             <Text>Touch item or marker twice to go to the meetup page</Text>
+            </TouchableHighlight>
             <ScrollView
                 ref={scrollviewRef}
                 style={styles.container}
