@@ -14,142 +14,136 @@ import Board from '../screens/Board/Board';
 import Shopping from '../screens/Shopping/Shopping';
 
 const config = Platform.select({
-  web: { headerMode: 'screen' },
-  default: {},
+	web: { headerMode: 'screen' },
+	default: {}
 });
-
 
 /** Settings Tab */
 
 const HomeStack = createStackNavigator(
-  {
-    Home,
-  },
-  config
+	{
+		Home
+	},
+	config
 );
 
 HomeStack.navigationOptions = {
-  title: 'Home',
-  tabBarLabel: 'Home',
-  tabBarIcon: ({ focused }) => (
-    <FontAwesome5
-      name="home"
-      size={24}
-      style={{ marginBottom: -5 }}
-      color={focused ? Colors.tabIconSelected : Colors.tabIconDefault}
-    />
-  ),
+	title: 'Home',
+	tabBarLabel: 'Home',
+	tabBarIcon: ({ focused }) => (
+		<FontAwesome5
+			name="home"
+			size={24}
+			style={{ marginBottom: -5 }}
+			color={focused ? Colors.tabIconSelected : Colors.tabIconDefault}
+		/>
+	)
 };
 
 HomeStack.path = '';
 
-
 /** Meetup Tab */
 
 const MeetupStack = createStackNavigator(
-  {
-    Meetup,
-  },
-  config
+	{
+		Meetup
+	},
+	config
 );
 
 MeetupStack.navigationOptions = {
-  tabBarLabel: 'Meetup',
-  tabBarIcon: ({ focused }) => (
-    <FontAwesome
-      name="meetup"
-      size={26}
-      style={{ marginBottom: -5 }}
-      color={focused ? Colors.tabIconSelected : Colors.tabIconDefault}
-    />
-  ),
+	tabBarLabel: 'Meetup',
+	tabBarIcon: ({ focused }) => (
+		<FontAwesome
+			name="meetup"
+			size={26}
+			style={{ marginBottom: -5 }}
+			color={focused ? Colors.tabIconSelected : Colors.tabIconDefault}
+		/>
+	)
 };
 
 MeetupStack.path = '';
 
-
 /** Board Tab */
 
 const BoardStack = createStackNavigator(
-  {
-    Board,
-  },
-  config
+	{
+		Board
+	},
+	config
 );
 
 BoardStack.navigationOptions = {
-  tabBarLabel: 'Board',
-  tabBarIcon: ({ focused }) => (
-    <Entypo
-      name="blackboard"
-      size={23}
-      style={{ marginBottom: -5 }}
-      color={focused ? Colors.tabIconSelected : Colors.tabIconDefault}
-    />
-  ),
+	tabBarLabel: 'Board',
+	tabBarIcon: ({ focused }) => (
+		<Entypo
+			name="blackboard"
+			size={23}
+			style={{ marginBottom: -5 }}
+			color={focused ? Colors.tabIconSelected : Colors.tabIconDefault}
+		/>
+	)
 };
 
 BoardStack.path = '';
 
-
 /** Shoppings Tab */
 
 const ShoppingStack = createStackNavigator(
-  {
-    Shopping,
-  },
-  config
+	{
+		Shopping
+	},
+	config
 );
 
 ShoppingStack.navigationOptions = {
-  tabBarLabel: 'Shopping',
-  tabBarIcon: ({ focused }) => (
-    <FontAwesome
-      name="shopping-bag"
-      size={22}
-      style={{ marginBottom: -4 }}
-      color={focused ? Colors.tabIconSelected : Colors.tabIconDefault}
-    />
-  ),
+	tabBarLabel: 'Shopping',
+	tabBarIcon: ({ focused }) => (
+		<FontAwesome
+			name="shopping-bag"
+			size={22}
+			style={{ marginBottom: -4 }}
+			color={focused ? Colors.tabIconSelected : Colors.tabIconDefault}
+		/>
+	)
 };
 
 ShoppingStack.path = '';
 
-
 /** Settings Tab */
 
 const SettingsStack = createStackNavigator(
-  {
-    Settings,
-    Help,
-    About,
-  },
-  config
+	{
+		Settings,
+		Help,
+		About
+	},
+	config
 );
 
 SettingsStack.navigationOptions = {
-  tabBarLabel: 'Settings',
-  tabBarIcon: ({ focused }) => (
-    <Ionicons
-      name="md-settings"
-      size={26}
-      style={{ marginBottom: -4 }}
-      color={focused ? Colors.tabIconSelected : Colors.tabIconDefault}
-    />
-  ),
+	tabBarLabel: 'Settings',
+	tabBarIcon: ({ focused }) => (
+		<Ionicons
+			name="md-settings"
+			size={26}
+			style={{ marginBottom: -4 }}
+			color={focused ? Colors.tabIconSelected : Colors.tabIconDefault}
+		/>
+	)
 };
 
 SettingsStack.path = '';
 
-
 /** Combine All Tabs */
 
 const tabNavigator = createBottomTabNavigator({
-  HomeStack,
-  MeetupStack,
-  BoardStack,
-  ShoppingStack,
-  SettingsStack,
+	HomeStack,
+	MeetupStack,
+	BoardStack,
+	ShoppingStack,
+	SettingsStack
 });
 
 tabNavigator.path = '';
