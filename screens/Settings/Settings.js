@@ -12,6 +12,8 @@ import SettingsLogn from './SettingsLogin';
 import SettingsRegister from './SettingsRegister';
 import SettingsForgot from './SettingsForgot';
 
+import _ from 'lodash';
+
 const Settings = (props) => {
 	const [ pageType, setPageType ] = useState('login');
 
@@ -29,7 +31,20 @@ const Settings = (props) => {
 			<Button
 				title="test get idtoken and user attributes"
 				onPress={async () => {
-					console.log(await fetchUsers());
+					// console.log(await fetchUsers());
+					let test = {
+						lat: 13.123131,
+						lon: 41.13123213,
+						title: "title one"
+					}
+
+					let result = '';
+
+					_.forIn(test, function(value, key) {
+						result = `${result}&${key}=${value}`;
+					});
+
+					console.log(result);
 				}}
 			/>
 		</View>
