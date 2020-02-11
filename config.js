@@ -1,7 +1,7 @@
 // DEV
 const POSTS_API_URL = 'https://a2k42a0d03.execute-api.us-west-2.amazonaws.com/dev';
-const MEETUPS_API_URL = 'https://cbqtcrgp5j.execute-api.us-west-2.amazonaws.com/dev';
-const USERS_API_URL = 'https://vjrqmrpvvk.execute-api.us-west-2.amazonaws.com/dev';
+const MEETUPS_API_URL = 'https://vjrqmrpvvk.execute-api.us-west-2.amazonaws.com/dev';
+const USERS_API_URL = 'https://cbqtcrgp5j.execute-api.us-west-2.amazonaws.com/dev';
 const OTHERS_API_URL = 'https://38hwhw3s37.execute-api.us-west-2.amazonaws.com/dev';
 
 const GEO_DB_API_URL = 'https://wft-geo-db.p.rapidapi.com/v1';
@@ -17,8 +17,8 @@ const S3_BASE_URL = 'https://pawsometime-serverless-s3.s3-us-west-2.amazonaws.co
 /**
 // PROD
 const POSTS_API_URL = 'https://a2k42a0d03.execute-api.us-west-2.amazonaws.com/dev';
-const MEETUPS_API_URL = 'https://cbqtcrgp5j.execute-api.us-west-2.amazonaws.com/dev';
-const USERS_API_URL = 'https://vjrqmrpvvk.execute-api.us-west-2.amazonaws.com/dev';
+const MEETUPS_API_URL = 'https://vjrqmrpvvk.execute-api.us-west-2.amazonaws.com/dev';
+const USERS_API_URL = 'https://cbqtcrgp5j.execute-api.us-west-2.amazonaws.com/dev';
 const OTHERS_API_URL = 'https://38hwhw3s37.execute-api.us-west-2.amazonaws.com/dev';
 
 const GEO_DB_API_URL = 'https://wft-geo-db.p.rapidapi.com/v1';

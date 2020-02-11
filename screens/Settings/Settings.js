@@ -1,48 +1,53 @@
-import React from 'react';
-import {
-    View,
-} from 'react-native';
+import React, { useState } from 'react';
+import { View, Text } from 'react-native';
+import { Button } from 'react-native-elements';
+import { Auth } from 'aws-amplify';
+import { connect } from 'react-redux';
+import { setAuthStatus, setAuthUser } from '../../redux/actions/auth.actions';
+import { fetchUsers } from '../../Services/users';
+
 import { SettingsListItem } from '../../components/SettingsListItem';
+import SettingsDefault from './SettingsDefault';
+import SettingsLogn from './SettingsLogin';
+import SettingsRegister from './SettingsRegister';
+import SettingsForgot from './SettingsForgot';
 
-const profileSettings = [
-    {
-        title: 'Profile info',
-        description: 'View and update profile info',
-        icon: 'AntDesign.profile'
-    }
-];
+const Settings = (props) => {
+	const [ pageType, setPageType ] = useState('login');
 
-const appSettings = [
-    {
-        title: 'Help',
-        description: 'Let us help you',
-        icon: 'Ionicons.ios-help-circle-outline',
-        to: 'Help',
-    },
-    {
-        title: 'About',
-        description: 'View details and description of application',
-        icon: 'Feather.info',
-        to: 'About',
-    }
-];
+	return (
+		<View>
+			{pageType === 'default' && <SettingsDefault {...props} setPageType={setPageType} />}
+			{pageType === 'login' && <SettingsLogn setPageType={setPageType} />}
+			{pageType === 'register' && <SettingsRegister setPageType={setPageType} />}
+			{pageType === 'forgot' && <SettingsForgot setPageType={setPageType} />}
 
-export default function Settings(props) {
-    return (
-        <View>
-            {appSettings.map((item, index) => (
-                <SettingsListItem
-                    key={index}
-                    title={item.title}
-                    description={item.description}
-                    icon={item.icon}
-                    onPress={() => props.navigation.navigate(item.to)}
-                />
-            ))}
-        </View>
-    );
-}
+			<Button buttonStyle={{ marginTop: 70 }} title="default" onPress={() => setPageType('default')} />
+			<Button title="login" onPress={() => setPageType('login')} />
+			<Button title="register" onPress={() => setPageType('register')} />
+			<Button title="forgot" onPress={() => setPageType('forgot')} />
+			<Button
+				title="test get idtoken and user attributes"
+				onPress={async () => {
+					console.log(await fetchUsers());
+				}}
+			/>
+		</View>
+	);
+};
 
 Settings.navigationOptions = {
-    title: 'Settings',
+	title: 'Profile'
 };
+
+const mapStateToProps = ({ auth }) => ({
+	isAuthenticated: auth.isAuthenticated,
+	currentUser: auth.currentUser
+});
+
+const mapDispatchToProps = {
+	setAuthStatus,
+	setAuthUser
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(Settings);

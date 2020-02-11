@@ -2,7 +2,7 @@ import React from 'react';
 import { Platform } from 'react-native';
 import { createStackNavigator } from 'react-navigation-stack';
 import { createBottomTabNavigator } from 'react-navigation-tabs';
-import { Ionicons, FontAwesome, Entypo, FontAwesome5 } from '@expo/vector-icons';
+import { Ionicons, FontAwesome, Entypo, FontAwesome5, AntDesign } from '@expo/vector-icons';
 import Colors from '../constants/Colors';
 
 import Home from '../screens/Home/Home';
@@ -18,7 +18,7 @@ const config = Platform.select({
 	default: {}
 });
 
-/** Settings Tab */
+/** Home Tab */
 
 const HomeStack = createStackNavigator(
 	{
@@ -123,10 +123,10 @@ const SettingsStack = createStackNavigator(
 );
 
 SettingsStack.navigationOptions = {
-	tabBarLabel: 'Settings',
+	tabBarLabel: 'Profile',
 	tabBarIcon: ({ focused }) => (
-		<Ionicons
-			name="md-settings"
+		<AntDesign
+			name="profile"
 			size={26}
 			style={{ marginBottom: -4 }}
 			color={focused ? Colors.tabIconSelected : Colors.tabIconDefault}
