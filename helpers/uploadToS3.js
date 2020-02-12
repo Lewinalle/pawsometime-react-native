@@ -1,5 +1,6 @@
 import Config from '../config';
 import axios from 'axios';
+import { S3UploadUrl } from '../Services/general';
 
 export const uploadToS3 = async (fileUri, fileType, fileName) => {
 	try {
@@ -7,14 +8,8 @@ export const uploadToS3 = async (fileUri, fileType, fileName) => {
 			fileName: fileName,
 			contentType: fileType
 		};
-		const postOptions = {
-			method: 'POST',
-			headers: { 'Content-Type': 'application/json' },
-			data: JSON.stringify(postBody),
-			url: `${Config.OTHERS_API_URL}/s3/uploadurl`
-		};
 
-		const s3SignedUrl = await axios(postOptions);
+		const s3SignedUrl = await S3UploadUrl(postBody);
 
 		// Uploading by axios(put) didn't work, replacing with XHR
 		const xhr = new XMLHttpRequest();
@@ -28,7 +23,7 @@ export const uploadToS3 = async (fileUri, fileType, fileName) => {
 				}
 			}
 		};
-		xhr.open('PUT', s3SignedUrl.data);
+		xhr.open('PUT', s3SignedUrl);
 		xhr.setRequestHeader('Content-Type', fileType);
 		xhr.send({ uri: fileUri, type: fileType, name: fileName });
 

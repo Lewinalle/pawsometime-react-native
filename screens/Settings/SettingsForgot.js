@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Alert } from 'react-native';
+import { View, Text, Alert, StyleSheet } from 'react-native';
 import { Button, Input } from 'react-native-elements';
 import { Auth } from 'aws-amplify';
 
@@ -8,6 +8,7 @@ import { connect } from 'react-redux';
 import { validator } from '../../Utils/Validator';
 import _ from 'lodash';
 import SettingsSet from './SettingsSet';
+import { ScrollView } from 'react-native-gesture-handler';
 
 const SettingsForgot = (props) => {
 	const [ isForgotPage, setIsForgotPage ] = useState(true);
@@ -89,21 +90,25 @@ const SettingsForgot = (props) => {
 	// }
 
 	return isForgotPage ? (
-		<View>
-			<Text>
-				Please enter the email address associated with your account and we'll email you a password reset link.
-			</Text>
-			<Input
-				label="EMAIL"
-				placeholder="email"
-				value={email}
-				autoCompleteType="email"
-				onChangeText={(text) => onInputChange('email', text)}
-			/>
-			<Button title="Submit" onPress={handleSubmit} disabled={isSending} />
-			<Text>{errors.blankfield ? 'Email must be provided.' : ''}</Text>
-			<Text>{errors.cognito && errors.cognito.message ? errors.cognito.message : ''}</Text>
-		</View>
+		<ScrollView>
+			<View>
+				<Text>
+					Please enter the email address associated with your account and we'll email you a password reset
+					link.
+				</Text>
+				<Input
+					label="EMAIL"
+					placeholder="email"
+					value={email}
+					autoCompleteType="email"
+					onChangeText={(text) => onInputChange('email', text)}
+				/>
+				<Button title="Submit" onPress={handleSubmit} disabled={isSending} />
+				<Text>{errors.blankfield ? 'Email must be provided.' : ''}</Text>
+				<Text>{errors.cognito && errors.cognito.message ? errors.cognito.message : ''}</Text>
+				<Button title="Back To Settings" onPress={() => props.setPageType('default')} />
+			</View>
+		</ScrollView>
 	) : (
 		<View>
 			<SettingsSet email={email} setPageType={props.setPageType} />

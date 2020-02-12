@@ -1,26 +1,44 @@
 import React from 'react';
-import { View } from 'react-native';
+import { View, StyleSheet } from 'react-native';
 import { SettingsListItem } from '../../components/SettingsListItem';
 
 const profileSettings = [
 	{
-		title: 'Profile info',
-		description: 'View and update profile info',
-		icon: 'AntDesign.profile'
+		title: 'Change Profile',
+		description: 'Update your picture and greetings',
+		icon: 'AntDesign.profile',
+		iconSize: 27,
+		to: 'ChangeProfile'
+	},
+	{
+		title: 'Friends',
+		description: 'Find and add friends',
+		icon: 'FontAwesome5.user-friends',
+		iconSize: 21,
+		to: 'Friends'
+	},
+	{
+		title: 'My Meetups',
+		description: 'View and manage my meetups',
+		icon: 'FontAwesome.meetup',
+		iconSize: 24,
+		to: 'MyMeetups'
+	},
+	{
+		title: 'My Posts',
+		description: 'View and manage my posts',
+		icon: 'Entypo.news',
+		iconSize: 26,
+		to: 'MyPosts'
 	}
 ];
 
 const appSettings = [
 	{
-		title: 'Help',
-		description: 'Let us help you',
-		icon: 'Ionicons.ios-help-circle-outline',
-		to: 'Help'
-	},
-	{
 		title: 'About',
 		description: 'View details and description of application',
 		icon: 'Feather.info',
+		iconSize: 28,
 		to: 'About'
 	}
 ];
@@ -34,6 +52,7 @@ const SettingsDefault = (props) => {
 					title={item.title}
 					description={item.description}
 					icon={item.icon}
+					iconSize={item.iconSize}
 					onPress={() => props.navigation.navigate(item.to)}
 				/>
 			))}
@@ -43,6 +62,7 @@ const SettingsDefault = (props) => {
 					title={item.title}
 					description={item.description}
 					icon={item.icon}
+					iconSize={item.iconSize}
 					onPress={() => props.navigation.navigate(item.to)}
 				/>
 			))}

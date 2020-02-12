@@ -7,8 +7,12 @@ import Colors from '../constants/Colors';
 
 import Home from '../screens/Home/Home';
 import Settings from '../screens/Settings/Settings';
-import Help from '../screens/Settings/Help';
 import About from '../screens/Settings/About';
+import ChangeProfile from '../screens/Settings/ChangeProfile';
+import MyMeetups from '../screens/Settings/MyMeetups';
+import MyPosts from '../screens/Settings/MyPosts';
+import Friends from '../screens/Settings/Friends';
+import ChangePassword from '../screens/Settings/ChangePassword';
 import Meetup from '../screens/Meetup/Meetup';
 import Board from '../screens/Board/Board';
 import Shopping from '../screens/Shopping/Shopping';
@@ -116,7 +120,11 @@ ShoppingStack.path = '';
 const SettingsStack = createStackNavigator(
 	{
 		Settings,
-		Help,
+		ChangeProfile,
+		Friends,
+		MyMeetups,
+		MyPosts,
+		ChangePassword,
 		About
 	},
 	config

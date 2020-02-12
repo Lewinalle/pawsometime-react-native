@@ -31,7 +31,7 @@ const AppManager = (props) => {
 				console.log(user);
 
 				const DBUser = await fetchUserInfo(user.attributes.sub);
-				await props.setDBUser(user);
+				await props.setDBUser(DBUser);
 				console.log('Current DB User in AppManager.js: ');
 				console.log(DBUser);
 			} catch (err) {

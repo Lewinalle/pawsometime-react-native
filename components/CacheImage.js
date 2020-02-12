@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, Image, Text, View } from 'react-native';
+import { StyleSheet, View } from 'react-native';
+import { Image, Text } from 'react-native-elements';
 
 import shorthash from 'shorthash';
 import * as FileSystem from 'expo-file-system';
@@ -9,19 +10,19 @@ export default (CacheImage = (props) => {
 
 	useEffect(() => {
 		const fetchImage = async () => {
-			let test;
+			let imageSource;
 			const name = shorthash.unique(props.uri);
 			const path = `${FileSystem.cacheDirectory}${name}`;
 			const image = await FileSystem.getInfoAsync(path);
 			if (image.exists) {
 				console.log('Read image from cache');
-				test = { uri: image.uri };
-				setSource(test);
+				imageSource = { uri: image.uri };
+				setSource(imageSource);
 			} else {
 				console.log('Downloading image from url to cache.');
 				const newImage = await FileSystem.downloadAsync(props.uri, path);
-				test = { uri: newImage.uri };
-				setSource(test);
+				imageSource = { uri: newImage.uri };
+				setSource(imageSource);
 			}
 		};
 		fetchImage();

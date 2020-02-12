@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, StyleSheet } from 'react-native';
 import { Button } from 'react-native-elements';
 import { Auth } from 'aws-amplify';
 import { connect } from 'react-redux';
@@ -31,19 +31,26 @@ const Settings = (props) => {
 			{pageType === 'forgot' && <SettingsForgot setPageType={setPageType} />}
 			{pageType === 'set' && <SettingsSet setPageType={setPageType} />}
 
-			<Button buttonStyle={{ marginTop: 70 }} title="default" onPress={() => setPageType('default')} />
-			<Button title="login" onPress={() => setPageType('login')} />
-			<Button title="register" onPress={() => setPageType('register')} />
-			<Button title="forgot" onPress={() => setPageType('forgot')} />
-			<Button title="set" onPress={() => setPageType('set')} />
-			<Button
-				title="test isAuthenticated and currentCognitoUser and DBUser"
-				onPress={async () => {
-					console.log(props.isAuthenticated);
-					console.log(props.currentCognitoUser);
-					console.log(props.currentDBUser);
-				}}
-			/>
+			{pageType === 'default' && (
+				<View>
+					<Button buttonStyle={{ marginTop: 70 }} title="default" onPress={() => setPageType('default')} />
+					<Button title="login" onPress={() => setPageType('login')} />
+					<Button title="register" onPress={() => setPageType('register')} />
+					<Button title="forgot" onPress={() => setPageType('forgot')} />
+					<Button title="set" onPress={() => setPageType('set')} />
+					<Button
+						title="test isAuthenticated and currentCognitoUser and DBUser"
+						onPress={async () => {
+							console.log('--------------------------------------------isAuthenticated---');
+							console.log(props.isAuthenticated);
+							console.log('--------------------------------------------currentCognitoUser---');
+							console.log(props.currentCognitoUser);
+							console.log('--------------------------------------------currentDBUser---');
+							console.log(props.currentDBUser);
+						}}
+					/>
+				</View>
+			)}
 		</View>
 	);
 };
@@ -51,6 +58,8 @@ const Settings = (props) => {
 Settings.navigationOptions = {
 	title: 'Profile'
 };
+
+const styles = StyleSheet.create({});
 
 const mapStateToProps = ({ auth }) => ({
 	isAuthenticated: auth.isAuthenticated,

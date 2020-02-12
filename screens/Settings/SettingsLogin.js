@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Alert } from 'react-native';
+import { View, Text, Alert, StyleSheet } from 'react-native';
 import { Button, Input } from 'react-native-elements';
 import { Auth } from 'aws-amplify';
 
@@ -8,9 +8,11 @@ import { setAuthStatus, setCognitoUser } from '../../redux/actions/auth.actions'
 import { setDBUser } from '../../redux/actions/auth.actions';
 import { fetchUserInfo, updateUser } from '../../Services/users';
 
+import dimensions from '../../constants/Layout';
 import { validator } from '../../Utils/Validator';
 
 import _ from 'lodash';
+import { ScrollView } from 'react-native-gesture-handler';
 
 const SettingsLogin = (props) => {
 	const [ email, setEmail ] = useState(null);
@@ -107,29 +109,52 @@ const SettingsLogin = (props) => {
 	// }
 
 	return (
-		<View>
-			<Input
-				label="EMAIL"
-				placeholder="email"
-				value={email}
-				autoCompleteType="email"
-				onChangeText={(text) => onInputChange('email', text)}
-			/>
-			<Input
-				label="PASSWORD"
-				placeholder="password"
-				value={password}
-				autoCompleteType="password"
-				secureTextEntry
-				onChangeText={(text) => onInputChange('password', text)}
-			/>
-
-			<Button title="Sign In" onPress={handleSubmit} disabled={isLoggingin} />
-			<Text>{errors.blankfield ? 'Email and Password must be provided' : ''}</Text>
-			<Text>{errors.cognito && errors.cognito.message ? errors.cognito.message : ''}</Text>
-		</View>
+		<ScrollView style={styles.scrollView}>
+			<View style={styles.container}>
+				<View style={styles.innerContainer}>
+					<Input
+						label="EMAIL"
+						placeholder="pawsometime@gmail.com"
+						value={email}
+						autoCompleteType="email"
+						onChangeText={(text) => onInputChange('email', text)}
+						containerStyle={{ marginBottom: 15 }}
+					/>
+					<Input
+						label="PASSWORD"
+						placeholder="password"
+						value={password}
+						autoCompleteType="password"
+						secureTextEntry
+						onChangeText={(text) => onInputChange('password', text)}
+						containerStyle={{ marginBottom: 20 }}
+					/>
+					<Button title="Sign In" onPress={handleSubmit} disabled={isLoggingin} />
+					<Text>{errors.blankfield ? 'Email and Password must be provided' : ''}</Text>
+					<Text>{errors.cognito && errors.cognito.message ? errors.cognito.message : ''}</Text>
+					<Button title="Back To Settings" onPress={() => props.setPageType('default')} />
+				</View>
+			</View>
+		</ScrollView>
 	);
 };
+
+const styles = StyleSheet.create({
+	scrollView: {
+		backgroundColor: 'yellow',
+		minHeight: dimensions.window.height
+	},
+	container: {
+		padding: 20
+	},
+	innerContainer: {
+		backgroundColor: 'white',
+		padding: 20
+	},
+	signInButton: {
+		marginTop: 10
+	}
+});
 
 const mapStateToProps = ({ auth }) => ({
 	isAuthenticated: auth.isAuthenticated,

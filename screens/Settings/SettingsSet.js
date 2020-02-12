@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Alert } from 'react-native';
+import { View, Text, Alert, StyleSheet } from 'react-native';
 import { Button, Input } from 'react-native-elements';
 import { Auth } from 'aws-amplify';
 
 import { connect } from 'react-redux';
 
 import { validator } from '../../Utils/Validator';
+import { ScrollView } from 'react-native-gesture-handler';
 
 const SettingsSet = (props) => {
 	const [ email, setEmail ] = useState(props.email ? props.email : '');
@@ -111,39 +112,41 @@ const SettingsSet = (props) => {
 	// }
 
 	return (
-		<View>
-			<Input
-				label="EMAIL"
-				placeholder="email"
-				value={email}
-				errorMessage={errors.email}
-				autoCompleteType="email"
-				onChangeText={(text) => onInputChange('email', text)}
-			/>
-			<Input
-				label="PASSWORD"
-				placeholder="password"
-				value={password}
-				errorMessage={errors.password}
-				autoCompleteType="password"
-				secureTextEntry
-				onChangeText={(text) => onInputChange('password', text)}
-			/>
-			<Input
-				label="VERIFICATION CODE"
-				placeholder="code"
-				value={code}
-				onChangeText={(text) => onInputChange('code', text)}
-			/>
-			<Button
-				title="Reset Password"
-				onPress={handleSubmit}
-				disabled={errors.email !== '' || errors.password !== '' || isSending}
-			/>
-			<Text>{errors.blankfield ? 'Every field must be filled.' : ''}</Text>
-			<Text>{errors.cognito && errors.cognito.message ? errors.cognito.message : ''}</Text>
-			<Text>{props.email}</Text>
-		</View>
+		<ScrollView>
+			<View>
+				<Input
+					label="EMAIL"
+					placeholder="email"
+					value={email}
+					errorMessage={errors.email}
+					autoCompleteType="email"
+					onChangeText={(text) => onInputChange('email', text)}
+				/>
+				<Input
+					label="PASSWORD"
+					placeholder="password"
+					value={password}
+					errorMessage={errors.password}
+					autoCompleteType="password"
+					secureTextEntry
+					onChangeText={(text) => onInputChange('password', text)}
+				/>
+				<Input
+					label="VERIFICATION CODE"
+					placeholder="code"
+					value={code}
+					onChangeText={(text) => onInputChange('code', text)}
+				/>
+				<Button
+					title="Reset Password"
+					onPress={handleSubmit}
+					disabled={errors.email !== '' || errors.password !== '' || isSending}
+				/>
+				<Text>{errors.blankfield ? 'Every field must be filled.' : ''}</Text>
+				<Text>{errors.cognito && errors.cognito.message ? errors.cognito.message : ''}</Text>
+				<Button title="Back To Settings" onPress={() => props.setPageType('default')} />
+			</View>
+		</ScrollView>
 	);
 };
 
