@@ -3,20 +3,6 @@ import axios from 'axios';
 import { Auth } from 'aws-amplify';
 import _ from 'lodash';
 
-const setHeaders = (setContentType) => {
-	const token = Auth.currentSession().getIdToken().getJwtToken();
-
-	let headers = {
-		Authorization: `Bearer ${token}`
-	};
-
-	if (setContentType) {
-		headers['Content-Type'] = 'application/json';
-	}
-
-	return headers;
-};
-
 export const fetchPosts = async (params) => {
 	let query = '';
 	_.forIn(params, function(value, key) {
@@ -48,39 +34,50 @@ export const fetchPostInfo = async (id) => {
 };
 
 export const createPost = async (data) => {
+	const token = await (await Auth.currentSession()).getIdToken().getJwtToken();
 	const options = {
 		method: 'POST',
 		url: `${Config.POSTS_API_URL}/posts`,
-		headers: setHeaders(true),
-		body: JSON.stringify(data)
+		headers: {
+			Authorization: `Bearer ${token}`,
+			'Content-Type': 'application/json'
+		},
+		data
 	};
 
 	const res = await axios(options);
 
 	return res.data;
-}
+};
 
 export const updatePost = async (id, data) => {
+	const token = await (await Auth.currentSession()).getIdToken().getJwtToken();
 	const options = {
 		method: 'PUT',
 		url: `${Config.POSTS_API_URL}/posts/${id}`,
-		headers: setHeaders(true),
-		body: JSON.stringify(data)
+		headers: {
+			Authorization: `Bearer ${token}`,
+			'Content-Type': 'application/json'
+		},
+		data
 	};
 
 	const res = await axios(options);
 
 	return res.data;
-}
+};
 
 export const deletePost = async (id) => {
+	const token = await (await Auth.currentSession()).getIdToken().getJwtToken();
 	const options = {
 		method: 'DELETE',
 		url: `${Config.POSTS_API_URL}/posts/${id}`,
-		headers: setHeaders(false)
+		headers: {
+			Authorization: `Bearer ${token}`
+		}
 	};
 
 	const res = await axios(options);
 
 	return res.data;
-}
+};

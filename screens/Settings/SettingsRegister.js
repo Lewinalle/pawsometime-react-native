@@ -4,7 +4,6 @@ import { Button, Input } from 'react-native-elements';
 import { Auth } from 'aws-amplify';
 
 import { connect } from 'react-redux';
-import { setAuthStatus, setAuthUser } from '../../redux/actions/auth.actions';
 
 import { validator } from '../../Utils/Validator';
 
@@ -63,9 +62,9 @@ const SettingsRegister = (props) => {
 				}
 			});
 
-			setIsRegistering(false);
-
 			console.log(signUpResponse);
+
+			setIsRegistering(false);
 
 			Alert.alert(
 				'Verification email sent!',
@@ -181,7 +180,7 @@ const SettingsRegister = (props) => {
 				onChangeText={(text) => onInputChange('confirm_password', text)}
 			/>
 			<Input
-				label="USERNAME"
+				label="USERNAME (MUST BE UNIQUE)"
 				placeholder="password"
 				value={username}
 				errorMessage={errors.duplicateName === true ? 'Username has already been taken.' : ''}
@@ -204,9 +203,4 @@ const mapStateToProps = ({ auth }) => ({
 	isAuthenticated: auth.isAuthenticated
 });
 
-const mapDispatchToProps = {
-	setAuthStatus,
-	setAuthUser
-};
-
-export default connect(mapStateToProps, mapDispatchToProps)(SettingsRegister);
+export default connect(mapStateToProps)(SettingsRegister);

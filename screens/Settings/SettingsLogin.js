@@ -1,12 +1,16 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text } from 'react-native';
+import { View, Text, Alert } from 'react-native';
 import { Button, Input } from 'react-native-elements';
 import { Auth } from 'aws-amplify';
 
 import { connect } from 'react-redux';
-import { setAuthStatus, setAuthUser } from '../../redux/actions/auth.actions';
+import { setAuthStatus, setCognitoUser } from '../../redux/actions/auth.actions';
+import { setDBUser } from '../../redux/actions/auth.actions';
+import { fetchUserInfo, updateUser } from '../../Services/users';
 
 import { validator } from '../../Utils/Validator';
+
+import _ from 'lodash';
 
 const SettingsLogin = (props) => {
 	const [ email, setEmail ] = useState(null);
@@ -27,9 +31,7 @@ const SettingsLogin = (props) => {
 	const clearErrorState = () => {
 		setErrors({
 			cognito: null,
-			blankfield: false,
-			email: '',
-			password: ''
+			blankfield: false
 		});
 	};
 
@@ -50,13 +52,37 @@ const SettingsLogin = (props) => {
 				password
 			});
 
-			setIsLoggingin(false);
 			console.log(user);
 
-			props.setAuthStatus(true);
-			props.setAuthUser(user);
+			await props.setAuthStatus(true);
+			await props.setCognitoUser(user);
 
-			props.setPageType('default');
+			try {
+				const DBUser = await fetchUserInfo(user.attributes.sub);
+
+				let updatedUser;
+				if (DBUser && DBUser.neverLoggedIn) {
+					const body = JSON.stringify({ neverLoggedIn: false });
+					updatedUser = await updateUser(user.attributes.sub, body);
+				}
+
+				await props.setDBUser(updatedUser ? updatedUser : DBUser);
+
+				props.setPageType('default');
+
+				setIsLoggingin(false);
+
+				if (updatedUser) {
+					Alert.alert(
+						'Wecome to Pawsometime!',
+						'You can set your greetings and profile picture in Profile tab.',
+						[ { text: 'OK' } ],
+						{ cancelable: false }
+					);
+				}
+			} catch (err) {
+				console.log(err);
+			}
 		} catch (error) {
 			let err = null;
 			!error.message ? (err = { message: error }) : (err = error);
@@ -67,36 +93,11 @@ const SettingsLogin = (props) => {
 	};
 
 	const onInputChange = (target, text) => {
-		const validated = validator(target, text);
-
 		if (target === 'email') {
 			setEmail(text);
-			if (!validated) {
-				setErrors({
-					...errors,
-					email: 'Email entered is not valid.'
-				});
-			} else {
-				setErrors({
-					...errors,
-					email: ''
-				});
-			}
 		}
 		if (target === 'password') {
 			setPassword(text);
-			if (!validated) {
-				setErrors({
-					...errors,
-					password:
-						'Password must be at least 8 characters and contain: 1+ upper-case, 1+ lower-case and 1+ number.'
-				});
-			} else {
-				setErrors({
-					...errors,
-					password: ''
-				});
-			}
 		}
 	};
 
@@ -123,7 +124,7 @@ const SettingsLogin = (props) => {
 				onChangeText={(text) => onInputChange('password', text)}
 			/>
 
-			<Button title="Sign Up" onPress={handleSubmit} disabled={isLoggingin} />
+			<Button title="Sign In" onPress={handleSubmit} disabled={isLoggingin} />
 			<Text>{errors.blankfield ? 'Email and Password must be provided' : ''}</Text>
 			<Text>{errors.cognito && errors.cognito.message ? errors.cognito.message : ''}</Text>
 		</View>
@@ -131,12 +132,15 @@ const SettingsLogin = (props) => {
 };
 
 const mapStateToProps = ({ auth }) => ({
-	isAuthenticated: auth.isAuthenticated
+	isAuthenticated: auth.isAuthenticated,
+	currentDBUser: auth.currentDBUser,
+	currentCognitoUser: auth.currentCognitoUser
 });
 
 const mapDispatchToProps = {
 	setAuthStatus,
-	setAuthUser
+	setCognitoUser,
+	setDBUser
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(SettingsLogin);

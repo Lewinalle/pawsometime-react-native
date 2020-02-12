@@ -6,12 +6,11 @@ import { Auth } from 'aws-amplify';
 import { connect } from 'react-redux';
 
 import { validator } from '../../Utils/Validator';
-import _ from 'lodash';
-import SettingsSet from './SettingsSet';
 
-const SettingsForgot = (props) => {
-	const [ isForgotPage, setIsForgotPage ] = useState(true);
-	const [ email, setEmail ] = useState(null);
+const SettingsSet = (props) => {
+	const [ email, setEmail ] = useState(props.email ? props.email : '');
+	const [ password, setPassword ] = useState('');
+	const [ code, setCode ] = useState('');
 	const [ errors, setErrors ] = useState({
 		cognito: null,
 		blankfield: false,
@@ -40,7 +39,7 @@ const SettingsForgot = (props) => {
 		event.preventDefault();
 		clearErrorState();
 
-		if (!email) {
+		if (!email || !password || !code) {
 			setErrors({ ...errors, blankfield: true });
 			return;
 		}
@@ -48,14 +47,16 @@ const SettingsForgot = (props) => {
 		try {
 			setIsSending(true);
 
-			await Auth.forgotPassword(email);
+			const res = await Auth.forgotPasswordSubmit(email, code, password);
+
+			console.log(res);
 
 			setIsSending(false);
 
 			Alert.alert(
-				'Verification email sent!',
-				'Please check your email to get the reset code and set a new password.',
-				[ { text: 'OK', onPress: () => setIsForgotPage(false) } ],
+				'Success!',
+				'Please use the new password to sign in.',
+				[ { text: 'OK', onPress: () => props.setPageType('login') } ],
 				{ cancelable: false }
 			);
 		} catch (error) {
@@ -69,17 +70,38 @@ const SettingsForgot = (props) => {
 
 	const onInputChange = (target, text) => {
 		const validated = validator(target, text);
-		setEmail(text);
-		if (!validated) {
-			setErrors({
-				...errors,
-				email: 'Email entered is not valid.'
-			});
-		} else {
-			setErrors({
-				...errors,
-				email: ''
-			});
+
+		if (target === 'email') {
+			setEmail(text);
+			if (!validated) {
+				setErrors({
+					...errors,
+					email: 'Email entered is not valid.'
+				});
+			} else {
+				setErrors({
+					...errors,
+					email: ''
+				});
+			}
+		}
+		if (target === 'password') {
+			setPassword(text);
+			if (!validated) {
+				setErrors({
+					...errors,
+					password:
+						'Password must be at least 8 characters and contain: 1+ upper-case, 1+ lower-case and 1+ number.'
+				});
+			} else {
+				setErrors({
+					...errors,
+					password: ''
+				});
+			}
+		}
+		if (target === 'code') {
+			setCode(text);
 		}
 	};
 
@@ -88,25 +110,39 @@ const SettingsForgot = (props) => {
 	// 	return null;
 	// }
 
-	return isForgotPage ? (
+	return (
 		<View>
-			<Text>
-				Please enter the email address associated with your account and we'll email you a password reset link.
-			</Text>
 			<Input
 				label="EMAIL"
 				placeholder="email"
 				value={email}
+				errorMessage={errors.email}
 				autoCompleteType="email"
 				onChangeText={(text) => onInputChange('email', text)}
 			/>
-			<Button title="Submit" onPress={handleSubmit} disabled={isSending} />
-			<Text>{errors.blankfield ? 'Email must be provided.' : ''}</Text>
+			<Input
+				label="PASSWORD"
+				placeholder="password"
+				value={password}
+				errorMessage={errors.password}
+				autoCompleteType="password"
+				secureTextEntry
+				onChangeText={(text) => onInputChange('password', text)}
+			/>
+			<Input
+				label="VERIFICATION CODE"
+				placeholder="code"
+				value={code}
+				onChangeText={(text) => onInputChange('code', text)}
+			/>
+			<Button
+				title="Reset Password"
+				onPress={handleSubmit}
+				disabled={errors.email !== '' || errors.password !== '' || isSending}
+			/>
+			<Text>{errors.blankfield ? 'Every field must be filled.' : ''}</Text>
 			<Text>{errors.cognito && errors.cognito.message ? errors.cognito.message : ''}</Text>
-		</View>
-	) : (
-		<View>
-			<SettingsSet email={email} setPageType={props.setPageType} />
+			<Text>{props.email}</Text>
 		</View>
 	);
 };
@@ -115,4 +151,4 @@ const mapStateToProps = ({ auth }) => ({
 	isAuthenticated: auth.isAuthenticated
 });
 
-export default connect(mapStateToProps)(SettingsForgot);
+export default connect(mapStateToProps)(SettingsSet);

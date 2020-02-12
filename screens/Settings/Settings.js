@@ -1,50 +1,47 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, Text } from 'react-native';
 import { Button } from 'react-native-elements';
 import { Auth } from 'aws-amplify';
 import { connect } from 'react-redux';
-import { setAuthStatus, setAuthUser } from '../../redux/actions/auth.actions';
 import { fetchUsers } from '../../Services/users';
 
 import { SettingsListItem } from '../../components/SettingsListItem';
 import SettingsDefault from './SettingsDefault';
-import SettingsLogn from './SettingsLogin';
+import SettingsLogin from './SettingsLogin';
 import SettingsRegister from './SettingsRegister';
 import SettingsForgot from './SettingsForgot';
+import SettingsSet from './SettingsSet';
 
 import _ from 'lodash';
 
 const Settings = (props) => {
 	const [ pageType, setPageType ] = useState('login');
 
+	useEffect(() => {
+		if (props.isAuthenticated) {
+			setPageType('default');
+		}
+	}, []);
+
 	return (
 		<View>
 			{pageType === 'default' && <SettingsDefault {...props} setPageType={setPageType} />}
-			{pageType === 'login' && <SettingsLogn setPageType={setPageType} />}
+			{pageType === 'login' && <SettingsLogin setPageType={setPageType} />}
 			{pageType === 'register' && <SettingsRegister setPageType={setPageType} />}
 			{pageType === 'forgot' && <SettingsForgot setPageType={setPageType} />}
+			{pageType === 'set' && <SettingsSet setPageType={setPageType} />}
 
 			<Button buttonStyle={{ marginTop: 70 }} title="default" onPress={() => setPageType('default')} />
 			<Button title="login" onPress={() => setPageType('login')} />
 			<Button title="register" onPress={() => setPageType('register')} />
 			<Button title="forgot" onPress={() => setPageType('forgot')} />
+			<Button title="set" onPress={() => setPageType('set')} />
 			<Button
-				title="test get idtoken and user attributes"
+				title="test isAuthenticated and currentCognitoUser and DBUser"
 				onPress={async () => {
-					// console.log(await fetchUsers());
-					let test = {
-						lat: 13.123131,
-						lon: 41.13123213,
-						title: "title one"
-					}
-
-					let result = '';
-
-					_.forIn(test, function(value, key) {
-						result = `${result}&${key}=${value}`;
-					});
-
-					console.log(result);
+					console.log(props.isAuthenticated);
+					console.log(props.currentCognitoUser);
+					console.log(props.currentDBUser);
 				}}
 			/>
 		</View>
@@ -57,12 +54,8 @@ Settings.navigationOptions = {
 
 const mapStateToProps = ({ auth }) => ({
 	isAuthenticated: auth.isAuthenticated,
-	currentUser: auth.currentUser
+	currentCognitoUser: auth.currentCognitoUser,
+	currentDBUser: auth.currentDBUser
 });
 
-const mapDispatchToProps = {
-	setAuthStatus,
-	setAuthUser
-};
-
-export default connect(mapStateToProps, mapDispatchToProps)(Settings);
+export default connect(mapStateToProps)(Settings);

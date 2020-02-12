@@ -3,20 +3,6 @@ import axios from 'axios';
 import { Auth } from 'aws-amplify';
 import _ from 'lodash';
 
-const setHeaders = (setContentType) => {
-	const token = Auth.currentSession().getIdToken().getJwtToken();
-
-	let headers = {
-		Authorization: `Bearer ${token}`
-	};
-
-	if (setContentType) {
-		headers['Content-Type'] = 'application/json';
-	}
-
-	return headers;
-};
-
 export const fetchMeetups = async (params) => {
 	let query = '';
 	_.forIn(params, function(value, key) {
@@ -48,91 +34,118 @@ export const fetchMeetupInfo = async (id) => {
 };
 
 export const createMeetup = async (data) => {
+	const token = await (await Auth.currentSession()).getIdToken().getJwtToken();
 	const options = {
 		method: 'POST',
 		url: `${Config.MEETUPS_API_URL}/meetups`,
-		headers: setHeaders(true),
-		body: JSON.stringify(data)
+		headers: {
+			Authorization: `Bearer ${token}`,
+			'Content-Type': 'application/json'
+		},
+		data
 	};
 
 	const res = await axios(options);
 
 	return res.data;
-}
+};
 
 export const updateMeetup = async (id, data) => {
+	const token = await (await Auth.currentSession()).getIdToken().getJwtToken();
 	const options = {
 		method: 'PUT',
 		url: `${Config.MEETUPS_API_URL}/meetups/${id}`,
-		headers: setHeaders(true),
-		body: JSON.stringify(data)
+		headers: {
+			Authorization: `Bearer ${token}`,
+			'Content-Type': 'application/json'
+		},
+		data
 	};
 
 	const res = await axios(options);
 
 	return res.data;
-}
+};
 
 export const deleteMeetup = async (id) => {
+	const token = await (await Auth.currentSession()).getIdToken().getJwtToken();
 	const options = {
 		method: 'DELETE',
 		url: `${Config.MEETUPS_API_URL}/meetups/${id}`,
-		headers: setHeaders(false)
+		headers: {
+			Authorization: `Bearer ${token}`
+		}
 	};
 
 	const res = await axios(options);
 
 	return res.data;
-}
+};
 
 export const autoJoin = async (id, data) => {
+	const token = await (await Auth.currentSession()).getIdToken().getJwtToken();
 	const options = {
 		method: 'POST',
 		url: `${Config.MEETUPS_API_URL}/meetups/${id}/join`,
-		headers: setHeaders(true),
-		body: JSON.stringify(data)
+		headers: {
+			Authorization: `Bearer ${token}`,
+			'Content-Type': 'application/json'
+		},
+		data
 	};
 
 	const res = await axios(options);
 
 	return res.data;
-}
+};
 
 export const requestJoin = async (id, data) => {
+	const token = await (await Auth.currentSession()).getIdToken().getJwtToken();
 	const options = {
 		method: 'POST',
 		url: `${Config.MEETUPS_API_URL}/meetups/${id}/request`,
-		headers: setHeaders(true),
-		body: JSON.stringify(data)
+		headers: {
+			Authorization: `Bearer ${token}`,
+			'Content-Type': 'application/json'
+		},
+		data
 	};
 
 	const res = await axios(options);
 
 	return res.data;
-}
+};
 
 export const acceptJoin = async (id, data) => {
+	const token = await (await Auth.currentSession()).getIdToken().getJwtToken();
 	const options = {
 		method: 'POST',
 		url: `${Config.MEETUPS_API_URL}/meetups/${id}/accept`,
-		headers: setHeaders(true),
-		body: JSON.stringify(data)
+		headers: {
+			Authorization: `Bearer ${token}`,
+			'Content-Type': 'application/json'
+		},
+		data
 	};
 
 	const res = await axios(options);
 
 	return res.data;
-}
+};
 
 export const rejectJoin = async (id, data) => {
+	const token = await (await Auth.currentSession()).getIdToken().getJwtToken();
 	const options = {
 		method: 'POST',
 		url: `${Config.MEETUPS_API_URL}/meetups/${id}/reject`,
-		headers: setHeaders(true),
-		body: JSON.stringify(data)
+		headers: {
+			Authorization: `Bearer ${token}`,
+			'Content-Type': 'application/json'
+		},
+		data
 	};
 
 	const res = await axios(options);
 
 	return res.data;
-}
+};
