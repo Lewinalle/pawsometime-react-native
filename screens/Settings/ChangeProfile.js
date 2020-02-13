@@ -19,7 +19,6 @@ const ChangeProfile = (props) => {
 	const [ newDescription, setNewDescription ] = useState(props.currentDBUser ? props.currentDBUser.description : '');
 
 	const pickImage = async () => {
-		console.log('PICKING IMAGE');
 		getPermissionAsync();
 
 		let result = await ImagePicker.launchImageLibraryAsync({
@@ -36,10 +35,6 @@ const ChangeProfile = (props) => {
 			const name = nameArr[nameArr.length - 1];
 			const typeArr = name.split('.');
 			const type = 'image/' + typeArr[typeArr.length - 1];
-
-			console.log(result.uri);
-			console.log(name);
-			console.log(type);
 
 			setImageUri(result.uri);
 			setImageName(name);
@@ -70,8 +65,6 @@ const ChangeProfile = (props) => {
 				}
 				const newUser = await updateUser(props.currentDBUser.id, body);
 
-				console.log(newUser);
-
 				setDBUser(newUser);
 			}
 		} catch (err) {
@@ -97,7 +90,6 @@ const ChangeProfile = (props) => {
 							)}
 						</View>
 						<View style={{ marginTop: 20, alignSelf: 'stretch' }}>
-							{/* <Text>{props.currentDBUser.description}</Text> */}
 							<Input
 								placeholder="Greetings!"
 								value={newDescription}

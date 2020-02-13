@@ -6,12 +6,13 @@ import shorthash from 'shorthash';
 import * as FileSystem from 'expo-file-system';
 
 export default (CacheImage = (props) => {
+	const { uri, style } = props;
 	const [ source, setSource ] = useState(null);
 
 	useEffect(() => {
 		const fetchImage = async () => {
 			let imageSource;
-			const name = shorthash.unique(props.uri);
+			const name = shorthash.unique(uri);
 			const path = `${FileSystem.cacheDirectory}${name}`;
 			const image = await FileSystem.getInfoAsync(path);
 			if (image.exists) {
@@ -20,7 +21,7 @@ export default (CacheImage = (props) => {
 				setSource(imageSource);
 			} else {
 				console.log('Downloading image from url to cache.');
-				const newImage = await FileSystem.downloadAsync(props.uri, path);
+				const newImage = await FileSystem.downloadAsync(uri, path);
 				imageSource = { uri: newImage.uri };
 				setSource(imageSource);
 			}
@@ -30,7 +31,7 @@ export default (CacheImage = (props) => {
 
 	return (
 		<View>
-			<Image style={props.style} source={source} />
+			<Image style={style} source={source} />
 		</View>
 	);
 });

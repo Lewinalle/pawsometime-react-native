@@ -1,5 +1,3 @@
-import Config from '../config';
-import axios from 'axios';
 import { S3UploadUrl } from '../Services/general';
 
 export const uploadToS3 = async (fileUri, fileType, fileName) => {

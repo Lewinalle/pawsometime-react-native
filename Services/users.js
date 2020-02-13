@@ -76,7 +76,7 @@ export const requestFriend = async (data) => {
 
 		const res = await axios(options);
 
-		return res.data;
+		return res.data.user;
 	} catch (err) {
 		console.log(err);
 	}
@@ -97,7 +97,7 @@ export const acceptFriend = async (data) => {
 
 		const res = await axios(options);
 
-		return res.data;
+		return res.data.user;
 	} catch (err) {
 		console.log(err);
 	}
@@ -118,7 +118,49 @@ export const rejectFriend = async (data) => {
 
 		const res = await axios(options);
 
-		return res.data;
+		return res.data.user;
+	} catch (err) {
+		console.log(err);
+	}
+};
+
+export const cancelFriend = async (data) => {
+	try {
+		const token = await (await Auth.currentSession()).getIdToken().getJwtToken();
+		const options = {
+			method: 'POST',
+			url: `${Config.USERS_API_URL}/users/friends/cancel`,
+			headers: {
+				Authorization: `Bearer ${token}`,
+				'Content-Type': 'application/json'
+			},
+			data
+		};
+
+		const res = await axios(options);
+
+		return res.data.user;
+	} catch (err) {
+		console.log(err);
+	}
+};
+
+export const removeFriend = async (data) => {
+	try {
+		const token = await (await Auth.currentSession()).getIdToken().getJwtToken();
+		const options = {
+			method: 'POST',
+			url: `${Config.USERS_API_URL}/users/friends/remove`,
+			headers: {
+				Authorization: `Bearer ${token}`,
+				'Content-Type': 'application/json'
+			},
+			data
+		};
+
+		const res = await axios(options);
+
+		return res.data.user;
 	} catch (err) {
 		console.log(err);
 	}
