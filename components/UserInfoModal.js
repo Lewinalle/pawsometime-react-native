@@ -2,10 +2,11 @@ import React, { useState, useEffect, useRef, memo } from 'react';
 import { View, StyleSheet, TouchableOpacity, TouchableWithoutFeedback, Modal, Alert } from 'react-native';
 import { Card, Text, Image, Overlay, Tooltip } from 'react-native-elements';
 import { vectorIcon } from '../Utils/Icon';
-import { CacheImage } from './CacheImage';
+import CacheImage from './CacheImage';
 import { connect } from 'react-redux';
 import { setAuthStatus, setCognitoUser, setDBUser } from '../redux/actions/auth.actions';
 import { fetchUserInfo, updateUser, acceptFriend, requestFriend } from '../Services/users';
+//TODO DELETE THIS AFTER AND CLEAN UP CODE
 
 const UserInfoModal = memo((props) => {
 	const { user, showModal, triggerModal } = props;
@@ -33,19 +34,25 @@ const UserInfoModal = memo((props) => {
 
 	const handleFriendRequest = async () => {
 		if (relationStatus === 'pending') {
-			const res = await acceptFriend({
-				userId: props.currentDBUser.id,
-				friendId: user.id
-			});
+			// TODO: UNCOMMENT TO TEST
+			// const res = await acceptFriend({
+			// 	userId: props.currentDBUser.id,
+			// 	friendId: user.id
+			// });
 
-			await setDBUser(res);
+			// await setDBUser(res);
+
+			console.log('Accept Friend!');
 		} else if (relationStatus === 'none') {
-			const res = await requestFriend({
-				userId: props.currentDBUser.id,
-				friendId: user.id
-			});
+			// TODO: UNCOMMENT TO TEST
+			// const res = await requestFriend({
+			// 	userId: props.currentDBUser.id,
+			// 	friendId: user.id
+			// });
 
-			await setDBUser(res);
+			// await setDBUser(res);
+
+			console.log('Request Friend!');
 		}
 	};
 
@@ -117,7 +124,7 @@ const UserInfoModal = memo((props) => {
 					<CacheImage uri={user.avatar} style={{ width: imageWidth, height: imageWidth }} />
 				) : (
 					<Image
-						source={require('../assets/images/default-profile.jpg')}
+						source={require('../assets/images/profile-default.png')}
 						style={{ width: imageWidth, height: imageWidth }}
 					/>
 				)}

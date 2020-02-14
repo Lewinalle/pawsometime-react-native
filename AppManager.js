@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Platform, StatusBar, StyleSheet, View } from 'react-native';
+import { Platform, StatusBar, StyleSheet, View, AsyncStorage } from 'react-native';
 import AppNavigator from './navigation/AppNavigator';
 import Amplify, { Auth } from 'aws-amplify';
 import Config from './config';
@@ -20,6 +20,7 @@ const AppManager = (props) => {
 	useEffect(() => {
 		const persistUserAuth = async () => {
 			try {
+				// TODO: remove console logs!
 				const session = await Auth.currentSession();
 				await props.setAuthStatus(true);
 				console.log('Current Session in AppManager.js: ');
@@ -34,11 +35,14 @@ const AppManager = (props) => {
 				await props.setDBUser(DBUser);
 				console.log('Current DB User in AppManager.js: ');
 				console.log(DBUser);
+				console.log(DBUser);
+				await AsyncStorage.setItem('user_id', user.attributes.sub);
 			} catch (err) {
 				console.log(err);
 			}
 		};
 		persistUserAuth();
+		props.hideSplash();
 	}, []);
 
 	return <AppNavigator />;

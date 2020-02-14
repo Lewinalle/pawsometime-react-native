@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { ScrollView, StyleSheet, View, TouchableOpacity } from 'react-native';
-import { Text, Input, Card } from 'react-native-elements';
+import { Text, Input, Card, SearchBar } from 'react-native-elements';
 import UserCardList from '../../components/UserCardList';
 import { connect } from 'react-redux';
 import { setAuthStatus, setCognitoUser, setDBUser } from '../../redux/actions/auth.actions';
@@ -8,45 +8,89 @@ import { fetchUserInfo, fetchUsers, updateUser, acceptFriend, requestFriend } fr
 import _ from 'lodash';
 
 const Friends = (props) => {
+	const [ searchTerm, setSearchTerm ] = useState('');
+	// // REMOVE BELOW TO TEST
+	// const [ pendingUsers, setPendingUsers ] = useState(pendingUsersTest);
+	// const [ sentUsers, setSentUsers ] = useState(sentUsersTest);
+	// const [ friendsUsers, setFriendsUsers ] = useState(friendsUsersTest);
+
+	// let allPendingUsers = pendingUsersTest;
+	// let allSentUsers = sentUsersTest;
+	// let allFriendsUsers = friendsUsersTest;
+
 	// TODO: UNCOMMENT BELOW TO TEST
-	// const { user } = props;
-	// const [ isFetching, setIsFetching ] = useState(true);
-	// const [ pendingUsers, setPendingUsers ] = useState([]);
-	// const [ sentUsers, setSentUsers ] = useState([]);
-	// const [ friendsUsers, setFriendsUsers ] = useState([]);
+	const { currentDBUser } = props;
+	const [ isFetching, setIsFetching ] = useState(true);
+	const [ pendingUsers, setPendingUsers ] = useState([]);
+	const [ sentUsers, setSentUsers ] = useState([]);
+	const [ friendsUsers, setFriendsUsers ] = useState([]);
 
-	// useEffect(() => {
-	// 	const fetchFriends = async () => {
-	// 		let params = '';
-	// 		const concatArr = _.concat(user.friends.pending, user.friends.sent, user.friends.friends);
-	// 		concatArr.map((id) => {
-	// 			if (params !== '') {
-	// 				params += ',';
-	// 			}
-	// 			params += id;
-	// 			params = `userIds=[${params}]`;
-	// 		});
-	// 		const fetchedUsers = await fetchUsers(params);
+	let allPendingUsers;
+	let allSentUsers;
+	let allFriendsUsers;
 
-	// 		const pendings = _.filter(fetchedUsers, (user) => _.includes(user.friends.pending, user.id));
-	// 		await setPendingUsers(pendings);
+	useEffect(() => {
+		const fetchFriends = async () => {
+			let params = '';
+			const concatArr = _.concat(
+				currentDBUser.friends.pending,
+				currentDBUser.friends.sent,
+				currentDBUser.friends.friends
+			);
+			concatArr.map((id) => {
+				if (params !== '') {
+					params += ',';
+				}
+				params += id;
+				params = `userIds=[${params}]`;
+			});
+			const fetchedUsers = await fetchUsers(params);
 
-	// 		const sents = _.filter(fetchedUsers, (user) => _.includes(user.friends.sent, user.id));
-	// 		await setSentUsers(sents);
+			const allPendingUsers = _.filter(fetchedUsers, (user) => _.includes(user.friends.pending, user.id));
+			await setPendingUsers(allPendingUsers);
 
-	// 		const friends = _.filter(fetchedUsers, (user) => _.includes(user.friends.friends, user.id));
-	// 		await setFriendsUsers(friends);
+			const allSentUsers = _.filter(fetchedUsers, (user) => _.includes(user.friends.sent, user.id));
+			await setSentUsers(allSentUsers);
 
-	// 		setIsFetching(false);
-	// 	};
-	// 	fetchFriends();
-	// }, []);
+			const allFriendsUsers = _.filter(fetchedUsers, (user) => _.includes(user.friends.friends, user.id));
+			await setFriendsUsers(allFriendsUsers);
+
+			setIsFetching(false);
+		};
+		fetchFriends();
+	}, []);
+
+	const handleSearch = (search) => {
+		setSearchTerm(search);
+
+		const pendings = _.filter(
+			allPendingUsers,
+			(user) =>
+				_.includes(user.username.toLowerCase(), search.toLowerCase()) ||
+				_.includes(user.description.toLowerCase(), search.toLowerCase())
+		);
+		setPendingUsers(pendings);
+
+		const sents = _.filter(allSentUsers, (user) => (user) =>
+			_.includes(user.username.toLowerCase(), search.toLowerCase()) ||
+			_.includes(user.description.toLowerCase(), search.toLowerCase())
+		);
+		setSentUsers(sents);
+
+		const friends = _.filter(
+			allFriendsUsers,
+			(user) =>
+				_.includes(user.username.toLowerCase(), search.toLowerCase()) ||
+				_.includes(user.description.toLowerCase(), search.toLowerCase())
+		);
+		setFriendsUsers(friends);
+	};
 
 	const renderNoFriends = () => {
 		return (
 			<Card
 				title="No Firends Yet"
-				image={require('../../assets/images/default-profile.jpg')}
+				image={require('../../assets/images/profile-default.png')}
 				imageStyle={{ height: 350 }}
 				containerStyle={{ margin: 0, borderRadius: 8 }}
 			>
@@ -57,14 +101,20 @@ const Friends = (props) => {
 		);
 	};
 
-	// if (isFetching) {
-	// 	return null;
-	// }
+	if (isFetching) {
+		return null;
+	}
 
 	return (
 		<View style={{ padding: 5, flex: 1, flexDirection: 'column', alignItems: 'center' }}>
 			<View style={{ marginBottom: 10, padding: 10, backgroundColor: 'grey', alignSelf: 'stretch' }}>
-				<Text>Search Users</Text>
+				<SearchBar
+					containerStyle={{ backgroundColor: 'white', borderTopWidth: 0, borderBottomWidth: 0 }}
+					inputContainerStyle={{ backgroundColor: 'white' }}
+					placeholder="Search friends.."
+					onChangeText={handleSearch}
+					value={searchTerm}
+				/>
 			</View>
 			<ScrollView
 				style={{ alignSelf: 'stretch', paddingTop: 0 }}
@@ -111,147 +161,56 @@ const mapDispatchToProps = {
 
 export default connect(mapStateToProps, mapDispatchToProps)(Friends);
 
-const pendingUsers = [
+//TODO DELETE BELOW AFTER AND CLEAN UP CODE
+const pendingUsersTest = [
 	{
-		avatar: null,
+		avatar: 'https://pawsometime-serverless-s3.s3-us-west-2.amazonaws.com/bb3eba54-20ba-4177-a331-91399d096cfe.jpg',
 		createdAt: 1581384629928,
-		description:
-			'description modifieddescription modifieddescription modifieddescription modifieddescription modifieddescription modified',
-		email: 'alphaboy000@gmail.com',
+		description: 'description one',
+		email: 'email one',
 		friends: {
 			friends: [],
 			pending: [],
 			sent: []
 		},
-		id: '22b28c22-c9e9-4ee1-91bc-afd47733bb1c',
+		id: '11111',
 		neverLoggedIn: false,
 		updatedAt: 1581455320366,
-		username: 'Lewis one'
-	},
-	{
-		avatar: null,
-		createdAt: 1581384629928,
-		description: 'description modified',
-		email: 'alphaboy000@gmail.com',
-		friends: {
-			friends: [],
-			pending: [],
-			sent: []
-		},
-		id: '22b28c22-c9e9-4ee1-91bc-afd47733bb1c',
-		neverLoggedIn: false,
-		updatedAt: 1581455320366,
-		username: 'Lewis one'
-	},
-	{
-		avatar: null,
-		createdAt: 1581384629928,
-		description: 'description modified',
-		email: 'alphaboy000@gmail.com',
-		friends: {
-			friends: [],
-			pending: [],
-			sent: []
-		},
-		id: '22b28c22-c9e9-4ee1-91bc-afd47733bb1c',
-		neverLoggedIn: false,
-		updatedAt: 1581455320366,
-		username: 'Lewis one'
+		username: 'name one'
 	}
 ];
 
-const sentUsers = [
+const sentUsersTest = [
 	{
 		avatar: null,
 		createdAt: 1581384629928,
-		description:
-			'description modifieddescription modifieddescription modifieddescription modifieddescription modifieddescription modified',
-		email: 'alphaboy000@gmail.com',
+		description: 'description two',
+		email: 'email two',
 		friends: {
 			friends: [],
 			pending: [],
 			sent: []
 		},
-		id: '22b28c22-c9e9-4ee1-91bc-afd47733bb1c',
+		id: '22222',
 		neverLoggedIn: false,
 		updatedAt: 1581455320366,
-		username: 'Lewis one'
-	},
-	{
-		avatar: null,
-		createdAt: 1581384629928,
-		description: 'description modified',
-		email: 'alphaboy000@gmail.com',
-		friends: {
-			friends: [],
-			pending: [],
-			sent: []
-		},
-		id: '22b28c22-c9e9-4ee1-91bc-afd47733bb1c',
-		neverLoggedIn: false,
-		updatedAt: 1581455320366,
-		username: 'Lewis one'
-	},
-	{
-		avatar: null,
-		createdAt: 1581384629928,
-		description: 'description modified',
-		email: 'alphaboy000@gmail.com',
-		friends: {
-			friends: [],
-			pending: [],
-			sent: []
-		},
-		id: '22b28c22-c9e9-4ee1-91bc-afd47733bb1c',
-		neverLoggedIn: false,
-		updatedAt: 1581455320366,
-		username: 'Lewis one'
+		username: 'name two'
 	}
 ];
 
-const friendsUsers = [
+const friendsUsersTest = [
 	{
 		avatar: null,
 		createdAt: 1581384629928,
 		description:
 			'description modifieddescription modifieddescription modifieddescription modifieddescription modifieddescription modified',
-		email: 'alphaboy000@gmail.com',
+		email: 'email three',
 		friends: {
 			friends: [],
 			pending: [],
 			sent: []
 		},
-		id: '22b28c22-c9e9-4ee1-91bc-afd47733bb1c',
-		neverLoggedIn: false,
-		updatedAt: 1581455320366,
-		username: 'Lewis one'
-	},
-	{
-		avatar: null,
-		createdAt: 1581384629928,
-		description: 'description modified',
-		email: 'alphaboy000@gmail.com',
-		friends: {
-			friends: [],
-			pending: [],
-			sent: []
-		},
-		id: '22b28c22-c9e9-4ee1-91bc-afd47733bb1c',
-		neverLoggedIn: false,
-		updatedAt: 1581455320366,
-		username: 'Lewis one'
-	},
-	{
-		avatar: null,
-		createdAt: 1581384629928,
-		description: 'description modified',
-		email: 'alphaboy000@gmail.com',
-		friends: {
-			friends: [],
-			pending: [],
-			sent: []
-		},
-		id: '22b28c22-c9e9-4ee1-91bc-afd47733bb1c',
+		id: '33333',
 		neverLoggedIn: false,
 		updatedAt: 1581455320366,
 		username: 'Lewis one'

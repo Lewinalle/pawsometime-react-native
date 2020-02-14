@@ -1,5 +1,4 @@
-import { SET_COGNITO_USER, SET_DB_USER } from './index.actions';
-import { SET_AUTH_STATUS } from './index.actions';
+import { SET_COGNITO_USER, SET_DB_USER, SIGN_OUT, SET_AUTH_STATUS } from './index.actions';
 
 export const setAuthStatus = (data) => (dispatch) => {
 	dispatch({
@@ -25,5 +24,11 @@ export const setDBUser = (data) => (dispatch) => {
 		payload: {
 			data
 		}
+	});
+};
+
+export const signOut = () => (dispatch) => {
+	dispatch({
+		type: SIGN_OUT
 	});
 };

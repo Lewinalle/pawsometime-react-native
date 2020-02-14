@@ -84,7 +84,7 @@ const ChangeProfile = (props) => {
 								<CacheImage style={{ width: 300, height: 300 }} uri={props.currentDBUser.avatar} />
 							) : (
 								<Image
-									source={require('../../assets/images/default-profile.jpg')}
+									source={require('../../assets/images/profile-default.png')}
 									style={{ width: 300, height: 300 }}
 								/>
 							)}

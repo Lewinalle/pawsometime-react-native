@@ -1,70 +1,108 @@
-import React, { useState, useEffect } from 'react';
-import { View, Text, StyleSheet } from 'react-native';
-import { Button } from 'react-native-elements';
-import { Auth } from 'aws-amplify';
-import { connect } from 'react-redux';
-import { fetchUsers } from '../../Services/users';
-
+import React from 'react';
+import { View, StyleSheet, Alert, AsyncStorage } from 'react-native';
 import { SettingsListItem } from '../../components/SettingsListItem';
-import SettingsDefault from './SettingsDefault';
-import SettingsLogin from './SettingsLogin';
-import SettingsRegister from './SettingsRegister';
-import SettingsForgot from './SettingsForgot';
-import SettingsSet from './SettingsSet';
+import { connect } from 'react-redux';
+import { signOut } from '../../redux/actions/auth.actions';
+import { Auth } from 'aws-amplify';
 
-import _ from 'lodash';
+const profileSettings = [
+	{
+		title: 'Change Profile',
+		description: 'Update your picture and greetings',
+		icon: 'AntDesign.profile',
+		iconSize: 27,
+		to: 'ChangeProfile'
+	},
+	{
+		title: 'Friends',
+		description: 'Find and add friends',
+		icon: 'FontAwesome5.user-friends',
+		iconSize: 21,
+		to: 'Friends'
+	},
+	{
+		title: 'My Meetups',
+		description: 'View and manage my meetups',
+		icon: 'FontAwesome.meetup',
+		iconSize: 24,
+		to: 'MyMeetups'
+	},
+	{
+		title: 'My Posts',
+		description: 'View and manage my posts',
+		icon: 'Entypo.news',
+		iconSize: 26,
+		to: 'MyPosts'
+	}
+];
+
+const appSettings = [
+	{
+		title: 'About',
+		description: 'View details and description of application',
+		icon: 'Feather.info',
+		iconSize: 28,
+		to: 'About'
+	}
+];
 
 const Settings = (props) => {
-	const [ pageType, setPageType ] = useState('login');
-
-	useEffect(() => {
-		if (props.isAuthenticated) {
-			setPageType('default');
-		}
-	}, []);
-
 	return (
 		<View>
-			{pageType === 'default' && <SettingsDefault {...props} setPageType={setPageType} />}
-			{pageType === 'login' && <SettingsLogin setPageType={setPageType} />}
-			{pageType === 'register' && <SettingsRegister setPageType={setPageType} />}
-			{pageType === 'forgot' && <SettingsForgot setPageType={setPageType} />}
-			{pageType === 'set' && <SettingsSet setPageType={setPageType} />}
-
-			{pageType === 'default' && (
-				<View>
-					<Button buttonStyle={{ marginTop: 70 }} title="default" onPress={() => setPageType('default')} />
-					<Button title="login" onPress={() => setPageType('login')} />
-					<Button title="register" onPress={() => setPageType('register')} />
-					<Button title="forgot" onPress={() => setPageType('forgot')} />
-					<Button title="set" onPress={() => setPageType('set')} />
-					<Button
-						title="test isAuthenticated and currentCognitoUser and DBUser"
-						onPress={async () => {
-							console.log('--------------------------------------------isAuthenticated---');
-							console.log(props.isAuthenticated);
-							console.log('--------------------------------------------currentCognitoUser---');
-							console.log(props.currentCognitoUser);
-							console.log('--------------------------------------------currentDBUser---');
-							console.log(props.currentDBUser);
-						}}
-					/>
-				</View>
-			)}
+			{profileSettings.map((item, index) => (
+				<SettingsListItem
+					key={index}
+					title={item.title}
+					description={item.description}
+					icon={item.icon}
+					iconSize={item.iconSize}
+					onPress={() => props.navigation.navigate(item.to)}
+				/>
+			))}
+			{appSettings.map((item, index) => (
+				<SettingsListItem
+					key={index}
+					title={item.title}
+					description={item.description}
+					icon={item.icon}
+					iconSize={item.iconSize}
+					onPress={() => props.navigation.navigate(item.to)}
+				/>
+			))}
+			<SettingsListItem
+				key="sign-out"
+				title="Sign Out"
+				description="Sign out from the app"
+				icon="AntDesign.logout"
+				iconSize={26}
+				onPress={async () => {
+					Alert.alert(
+						'Sign Out',
+						'Do you really want to logout?',
+						[
+							{
+								text: 'Yes',
+								onPress: async () => {
+									await AsyncStorage.removeItem('user_id');
+									await props.signOut();
+									await Auth.signOut();
+									props.navigation.navigate('Auth');
+								}
+							},
+							{
+								text: 'No'
+							}
+						],
+						{ cancelable: false }
+					);
+				}}
+			/>
 		</View>
 	);
 };
 
-Settings.navigationOptions = {
-	title: 'Profile'
+const mapDispatchToProps = {
+	signOut
 };
 
-const styles = StyleSheet.create({});
-
-const mapStateToProps = ({ auth }) => ({
-	isAuthenticated: auth.isAuthenticated,
-	currentCognitoUser: auth.currentCognitoUser,
-	currentDBUser: auth.currentDBUser
-});
-
-export default connect(mapStateToProps)(Settings);
+export default connect(null, mapDispatchToProps)(Settings);

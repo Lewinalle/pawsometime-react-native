@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef, memo } from 'react';
 import { View, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { Card, Text, Image, Divider, Button } from 'react-native-elements';
 import { vectorIcon } from '../Utils/Icon';
-import { CacheImage } from './CacheImage';
+import CacheImage from './CacheImage';
 import UserInfoModal from './UserInfoModal';
 import { connect } from 'react-redux';
 import { setAuthStatus, setCognitoUser, setDBUser } from '../redux/actions/auth.actions';
@@ -15,6 +15,7 @@ import {
 	removeFriend,
 	rejectFriend
 } from '../Services/users';
+//TODO DELETE THIS AFTER AND CLEAN UP CODE
 
 const UserCardList = memo((props) => {
 	const { users, title, userType } = props;
@@ -173,7 +174,7 @@ const UserCardList = memo((props) => {
 									<CacheImage uri={user.avatar} style={{ width: 50, height: 50 }} />
 								) : (
 									<Image
-										source={require('../assets/images/default-profile.jpg')}
+										source={require('../assets/images/profile-default.png')}
 										style={{ width: 50, height: 50 }}
 									/>
 								)}
