@@ -1,7 +1,12 @@
-import { FETCH_NEWS } from '../actions/index.actions';
+import { FETCH_NEWS, SET_CURRENT_LOCATION } from '../actions/index.actions';
+import Config from '../../config';
 
 const initialState = {
-	news: []
+	news: [],
+	currentLocation: {
+		lat: Config.DEFAULT_LAT,
+		lon: Config.DEFAULT_LON
+	}
 };
 
 const newsReducer = (state = initialState, action = {}) => {
@@ -9,7 +14,12 @@ const newsReducer = (state = initialState, action = {}) => {
 		case FETCH_NEWS:
 			return {
 				...state,
-				posts: action.payload.data
+				news: action.payload.data
+			};
+		case SET_CURRENT_LOCATION:
+			return {
+				...state,
+				currentLocation: action.payload.data
 			};
 		default:
 			return state;

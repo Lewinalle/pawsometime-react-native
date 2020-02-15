@@ -1,7 +1,8 @@
-import { FETCH_MEETUPS } from '../actions/index.actions';
+import { FETCH_MEETUPS, FETCH_USER_MEETUPS } from '../actions/index.actions';
 
 const initialState = {
-	meetups: []
+	meetups: [],
+	userMeetups: []
 };
 
 const meetupsReducer = (state = initialState, action = {}) => {
@@ -9,7 +10,12 @@ const meetupsReducer = (state = initialState, action = {}) => {
 		case FETCH_MEETUPS:
 			return {
 				...state,
-				posts: action.payload.data
+				meetups: action.payload.data
+			};
+		case FETCH_USER_MEETUPS:
+			return {
+				...state,
+				userMeetups: action.payload.data
 			};
 		default:
 			return state;

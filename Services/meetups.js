@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Auth } from 'aws-amplify';
 import _ from 'lodash';
 
-export const fetchMeetups = async (params) => {
+export const getMeetups = async (params) => {
 	let query = '';
 	_.forIn(params, function(value, key) {
 		if (query !== '') {

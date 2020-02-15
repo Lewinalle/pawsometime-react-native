@@ -7,7 +7,7 @@ import { connect } from 'react-redux';
 
 import { validator } from '../../Utils/Validator';
 import { ScrollView } from 'react-native-gesture-handler';
-import { fetchUsers } from '../../Services/users';
+import { getUsers } from '../../Services/users';
 
 const Register = (props) => {
 	const [ email, setEmail ] = useState(null);

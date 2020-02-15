@@ -4,7 +4,8 @@ import { Text, Input, Card, SearchBar } from 'react-native-elements';
 import UserCardList from '../../components/UserCardList';
 import { connect } from 'react-redux';
 import { setAuthStatus, setCognitoUser, setDBUser } from '../../redux/actions/auth.actions';
-import { fetchUserInfo, fetchUsers, updateUser, acceptFriend, requestFriend } from '../../Services/users';
+import { fetchUserInfo, getUsers, updateUser, acceptFriend, requestFriend } from '../../Services/users';
+import { formatUsersIdsParams } from '../../Utils/FormatParams';
 import _ from 'lodash';
 
 const Friends = (props) => {
@@ -31,29 +32,28 @@ const Friends = (props) => {
 
 	useEffect(() => {
 		const fetchFriends = async () => {
-			let params = '';
 			const concatArr = _.concat(
 				currentDBUser.friends.pending,
 				currentDBUser.friends.sent,
 				currentDBUser.friends.friends
 			);
-			concatArr.map((id) => {
-				if (params !== '') {
-					params += ',';
-				}
-				params += id;
-				params = `userIds=[${params}]`;
-			});
-			const fetchedUsers = await fetchUsers(params);
 
-			const allPendingUsers = _.filter(fetchedUsers, (user) => _.includes(user.friends.pending, user.id));
-			await setPendingUsers(allPendingUsers);
+			if (concatArr.length > 0) {
+				let params = {
+					userIds: formatUsersIdsParams(concatArr)
+				};
 
-			const allSentUsers = _.filter(fetchedUsers, (user) => _.includes(user.friends.sent, user.id));
-			await setSentUsers(allSentUsers);
+				const fetchedUsers = await getUsers(params);
 
-			const allFriendsUsers = _.filter(fetchedUsers, (user) => _.includes(user.friends.friends, user.id));
-			await setFriendsUsers(allFriendsUsers);
+				const allPendingUsers = _.filter(fetchedUsers, (user) => _.includes(user.friends.pending, user.id));
+				await setPendingUsers(allPendingUsers);
+
+				const allSentUsers = _.filter(fetchedUsers, (user) => _.includes(user.friends.sent, user.id));
+				await setSentUsers(allSentUsers);
+
+				const allFriendsUsers = _.filter(fetchedUsers, (user) => _.includes(user.friends.friends, user.id));
+				await setFriendsUsers(allFriendsUsers);
+			}
 
 			setIsFetching(false);
 		};

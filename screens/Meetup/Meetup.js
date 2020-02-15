@@ -4,6 +4,7 @@ import MeetupListCard from '../../components/MeetupListCard';
 import MapView, { Marker, Callout } from 'react-native-maps';
 import dimensions from '../../constants/Layout';
 import { CitySearch } from '../../components/CitySearch';
+import { connect } from 'react-redux';
 
 const MAX_TITLE_LENGTH = 30;
 const MAP_WIDTH = dimensions.window.width - 32;
@@ -57,10 +58,8 @@ const Meetup = (props) => {
 				ref={mapRef}
 				style={styles.map}
 				initialRegion={{
-					// TODO: replace with user's current location
-					// initial is focused at 'Madison Square Park' for now
-					latitude: 40.7425999,
-					longitude: -73.9877701,
+					latitude: props.currentLocation.lat,
+					longitude: props.currentLocation.lon,
 					latitudeDelta: LAT_DELTA,
 					longitudeDelta: LON_DELTA
 				}}
@@ -126,7 +125,11 @@ Meetup.navigationOptions = {
 	title: 'Meetup'
 };
 
-export default Meetup;
+const mapStateToProps = ({ others }) => ({
+	currentLocation: others.currentLocation
+});
+
+export default connect(mapStateToProps)(Meetup);
 
 const styles = StyleSheet.create({
 	map: {

@@ -3,7 +3,7 @@ import axios from 'axios';
 import { Auth } from 'aws-amplify';
 import _ from 'lodash';
 
-export const fetchNews = async () => {
+export const getNews = async () => {
 	const options = {
 		method: 'GET',
 		url: `${Config.OTHERS_API_URL}/news`

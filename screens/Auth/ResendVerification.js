@@ -7,7 +7,6 @@ import { connect } from 'react-redux';
 
 import { validator } from '../../Utils/Validator';
 import _ from 'lodash';
-import SettingsSet from './SetPassword';
 import { ScrollView } from 'react-native-gesture-handler';
 
 const ResendVerification = (props) => {
