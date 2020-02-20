@@ -1,5 +1,5 @@
 // DEV
-const POSTS_API_URL = 'https://a2k42a0d03.execute-api.us-west-2.amazonaws.com/dev';
+const POSTS_API_URL = 'https://vivwds2271.execute-api.us-west-2.amazonaws.com/dev';
 const MEETUPS_API_URL = 'https://vjrqmrpvvk.execute-api.us-west-2.amazonaws.com/dev';
 const USERS_API_URL = 'https://cbqtcrgp5j.execute-api.us-west-2.amazonaws.com/dev';
 const OTHERS_API_URL = 'https://38hwhw3s37.execute-api.us-west-2.amazonaws.com/dev';
@@ -17,9 +17,11 @@ const S3_BASE_URL = 'https://pawsometime-serverless-s3.s3-us-west-2.amazonaws.co
 const DEFAULT_LAT = 40.7425999; // when location can't be found, it sets to New York - Manhattan
 const DEFAULT_LON = -73.9877701;
 
+const DEFAULT_DATA_SIZE = 200;
+
 /**
 // PROD
-const POSTS_API_URL = 'https://a2k42a0d03.execute-api.us-west-2.amazonaws.com/dev';
+const POSTS_API_URL = 'https://vivwds2271.execute-api.us-west-2.amazonaws.com/dev';
 const MEETUPS_API_URL = 'https://vjrqmrpvvk.execute-api.us-west-2.amazonaws.com/dev';
 const USERS_API_URL = 'https://cbqtcrgp5j.execute-api.us-west-2.amazonaws.com/dev';
 const OTHERS_API_URL = 'https://38hwhw3s37.execute-api.us-west-2.amazonaws.com/dev';
@@ -36,6 +38,8 @@ const S3_BASE_URL = 'https://pawsometime-serverless-s3.s3-us-west-2.amazonaws.co
 
 const DEFAULT_LAT = 40.7425999;		// when location can't be found, it sets to New York - Manhattan
 const DEFAULT_LON = -73.9877701;
+
+const DEFAULT_DATA_SIZE = 200;
 */
 
 export default {
@@ -51,5 +55,6 @@ export default {
 	COGNITO_APP_CLIENT_ID,
 	S3_BASE_URL,
 	DEFAULT_LAT,
-	DEFAULT_LON
+	DEFAULT_LON,
+	DEFAULT_DATA_SIZE
 };

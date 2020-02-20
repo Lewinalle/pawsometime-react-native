@@ -1,21 +1,66 @@
-import { FETCH_POSTS, FETCH_USER_POSTS } from '../actions/index.actions';
+import {
+	FETCH_GENERAL_POSTS,
+	FETCH_QUESTION_POSTS,
+	FETCH_TIP_POSTS,
+	FETCH_TRADE_POSTS,
+	FETCH_USER_GENERAL_POSTS,
+	FETCH_USER_QUESTION_POSTS,
+	FETCH_USER_TIP_POSTS,
+	FETCH_USER_TRADE_POSTS
+} from '../actions/index.actions';
 
 const initialState = {
-	posts: [],
-	userPosts: []
+	generalPosts: [],
+	questionPosts: [],
+	tipPosts: [],
+	tradePosts: [],
+	userGeneralPosts: [],
+	userQuestionPosts: [],
+	userTipPosts: [],
+	userTradePosts: []
 };
 
 const postsReducer = (state = initialState, action = {}) => {
 	switch (action.type) {
-		case FETCH_POSTS:
+		case FETCH_GENERAL_POSTS:
 			return {
 				...state,
-				posts: action.payload.data
+				generalPosts: action.payload.data
 			};
-		case FETCH_USER_POSTS:
+		case FETCH_QUESTION_POSTS:
 			return {
 				...state,
-				userPosts: action.payload.data
+				questionPosts: action.payload.data
+			};
+		case FETCH_TIP_POSTS:
+			return {
+				...state,
+				tipPosts: action.payload.data
+			};
+		case FETCH_TRADE_POSTS:
+			return {
+				...state,
+				tradePosts: action.payload.data
+			};
+		case FETCH_USER_GENERAL_POSTS:
+			return {
+				...state,
+				userGeneralPosts: action.payload.data
+			};
+		case FETCH_USER_QUESTION_POSTS:
+			return {
+				...state,
+				userQuestionPosts: action.payload.data
+			};
+		case FETCH_USER_TIP_POSTS:
+			return {
+				...state,
+				userTipPosts: action.payload.data
+			};
+		case FETCH_USER_TRADE_POSTS:
+			return {
+				...state,
+				userTradePosts: action.payload.data
 			};
 		default:
 			return state;

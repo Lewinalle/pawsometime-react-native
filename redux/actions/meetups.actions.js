@@ -21,6 +21,10 @@ export const fetchMeetups = (params = {}) => async (dispatch) => {
 };
 
 export const fetchUserMeetups = (userId, params = {}) => async (dispatch) => {
+	if (!userId) {
+		return;
+	}
+
 	const query = {
 		...params,
 		userId

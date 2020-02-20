@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { ScrollView, StyleSheet, View, KeyboardAvoidingView } from 'react-native';
+import { ScrollView, StyleSheet, View, KeyboardAvoidingView, Alert } from 'react-native';
 import { Text, Button, Image, Input } from 'react-native-elements';
+import { Header } from 'react-navigation-stack';
 import { connect } from 'react-redux';
 import { setAuthStatus, setCognitoUser } from '../../redux/actions/auth.actions';
 import { setDBUser } from '../../redux/actions/auth.actions';
@@ -13,10 +14,11 @@ import Config from '../../config';
 import * as Permissions from 'expo-permissions';
 
 const ChangeProfile = (props) => {
-	const [ imageUri, setImageUri ] = useState(props.currentDBUser ? props.currentDBUser.avatar : null);
+	const [ imageUri, setImageUri ] = useState(null);
 	const [ imageName, setImageName ] = useState(null);
 	const [ imageType, setImageType ] = useState(null);
 	const [ newDescription, setNewDescription ] = useState(props.currentDBUser ? props.currentDBUser.description : '');
+	const [ isUpdating, setIsUpdating ] = useState(false);
 
 	const pickImage = async () => {
 		getPermissionAsync();
@@ -53,6 +55,10 @@ const ChangeProfile = (props) => {
 
 	const handleSubmit = async () => {
 		try {
+			setIsUpdating(true);
+
+			console.log(imageUri, newDescription);
+
 			if (imageUri) {
 				await uploadToS3(imageUri, imageType, imageName);
 			}
@@ -65,16 +71,40 @@ const ChangeProfile = (props) => {
 				}
 				const newUser = await updateUser(props.currentDBUser.id, body);
 
-				setDBUser(newUser);
+				await props.setDBUser(newUser);
 			}
+
+			Alert.alert(
+				'Updated!',
+				'Your profile has been updated.',
+				[
+					{
+						text: 'OK',
+						onPress: async () => {
+							setIsUpdating(false);
+						}
+					}
+				],
+				{
+					cancelable: false
+				}
+			);
 		} catch (err) {
 			console.log(err);
 		}
 	};
 
 	return (
-		<View>
-			<KeyboardAvoidingView behavior="height" keyboardVerticalOffset={100}>
+		<View
+			style={{
+				padding: 20,
+				flex: 1,
+				flexDirection: 'column',
+				alignItems: 'center',
+				alignItems: 'stretch'
+			}}
+		>
+			<KeyboardAvoidingView style={{ flex: 1 }} behavior="height" keyboardVerticalOffset={Header.HEIGHT + 50}>
 				<ScrollView contentContainerStyle={{ padding: 20 }}>
 					<View style={{ alignSelf: 'stretch' }}>
 						<View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
@@ -93,7 +123,7 @@ const ChangeProfile = (props) => {
 							<Input
 								placeholder="Greetings!"
 								value={newDescription}
-								blurOnSubmit
+								returnKeyType="none"
 								multiline={true}
 								numberOfLines={3}
 								containerStyle={{
@@ -111,8 +141,8 @@ const ChangeProfile = (props) => {
 							/>
 						</View>
 						<View style={{ marginTop: 20, flex: 1, flexDirection: 'row', justifyContent: 'space-evenly' }}>
-							<Button title="Choose New Picture" onPress={pickImage} />
-							<Button title="Update" onPress={() => handleSubmit()} />
+							<Button title="Choose New Picture" onPress={pickImage} disabled={isUpdating} />
+							<Button title="Update" onPress={() => handleSubmit()} disabled={isUpdating} />
 						</View>
 					</View>
 				</ScrollView>

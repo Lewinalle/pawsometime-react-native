@@ -10,6 +10,8 @@ import { fetchMeetups, fetchUserMeetups } from './redux/actions/meetups.actions'
 import { fetchPosts, fetchUserPosts } from './redux/actions/posts.actions';
 import { setCurrentLocation } from './redux/actions/others.actions';
 
+const postTypes = [ 'general', 'qna', 'tips', 'trade' ];
+
 const AppManager = (props) => {
 	Amplify.configure({
 		Auth: {
@@ -28,43 +30,43 @@ const AppManager = (props) => {
 				await props.setAuthStatus(true);
 				// console.log('Current Session in AppManager.js: ');
 				// console.log(session);
-
 				const user = await Auth.currentAuthenticatedUser();
 				await props.setCognitoUser(user);
 				await props.setAuthStatus(true);
 				// console.log('Current Authenticated User in AppManager.js: ');
 				// console.log(user);
-
 				const DBUser = await fetchUserInfo(user.attributes.sub);
 				await props.setDBUser(DBUser);
 				// console.log('Current DB User in AppManager.js: ');
 				// console.log(DBUser);
 				await AsyncStorage.setItem('user_id', user.attributes.sub);
-
-				if (user) {
-					let currentLocation;
-					await navigator.geolocation.getCurrentPosition(
-						async (position) => {
-							currentLocation = {
-								lat: position.coords.latitude,
-								lon: position.coords.longitude
-							};
-							await props.setCurrentLocation(currentLocation);
-							await props.fetchUserMeetups(user.attributes.sub, {
-								lat: currentLocation.lat,
-								lon: currentLocation.lon
-							});
-						},
-						async (error) => {
-							await props.fetchUserMeetups(user.attributes.sub);
-							Alert.alert(error.message);
-						},
-						{ enableHighAccuracy: true, timeout: 10000, maximumAge: 1000 }
-					);
-					await props.fetchMeetups();
-					await props.fetchPosts();
-					await props.fetchUserPosts(user.attributes.sub);
-				}
+				// if (user) {
+				// 	let currentLocation;
+				// 	await navigator.geolocation.getCurrentPosition(
+				// 		async (position) => {
+				// 			currentLocation = {
+				// 				lat: position.coords.latitude,
+				// 				lon: position.coords.longitude
+				// 			};
+				// 			await props.setCurrentLocation(currentLocation);
+				// 			await props.fetchMeetups({
+				// 				lat: currentLocation.lat,
+				// 				lon: currentLocation.lon
+				// 			});
+				// 		},
+				// 		async (error) => {
+				// 			await props.fetchMeetups();
+				// 			// Alert.alert(error.message);
+				// 		},
+				// 		{ enableHighAccuracy: true, timeout: 10000, maximumAge: 1000 }
+				// 	);
+				// 	// TODO: UNCOMMENT BELOW
+				// 	await props.fetchUserMeetups(user.attributes.sub);
+				// 	await postTypes.map(async (type) => {
+				// 		await fetchPosts({ type });
+				// 		await fetchUserPosts(user.attributes.sub, { type });
+				// 	});
+				// }
 			} catch (err) {
 				console.log(err);
 			}
@@ -83,9 +85,9 @@ const mapDispatchToProps = {
 	setCognitoUser,
 	setDBUser,
 	fetchMeetups,
-	fetchUserMeetups,
 	fetchPosts,
 	fetchUserPosts,
+	fetchUserMeetups,
 	setCurrentLocation
 };
 

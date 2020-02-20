@@ -2,6 +2,9 @@ import Config from '../config';
 import axios from 'axios';
 import { Auth } from 'aws-amplify';
 import _ from 'lodash';
+import { AsyncStorage } from 'react-native';
+
+const CACHE_SECONDS = 15;
 
 export const getPosts = async (params) => {
 	let query = '';
@@ -17,15 +20,33 @@ export const getPosts = async (params) => {
 		url: `${Config.POSTS_API_URL}/posts?${query ? query : ''}`
 	};
 
-	const res = await axios(options);
+	const fromCache = await AsyncStorage.getItem(`getPosts-${params.type}`);
+	const cacheUpdated = await AsyncStorage.getItem(`getPosts-${params.type}-updated`);
+	if (!fromCache || !cacheUpdated || Number(+new Date()) - Number(cacheUpdated) > CACHE_SECONDS * 1000) {
+		try {
+			console.log('fetching new list!');
+			const res = await axios(options);
 
-	return res.data;
+			const timestamp = new Date().getTime();
+
+			await AsyncStorage.setItem(`getPosts-${params.type}`, JSON.stringify(res.data));
+			await AsyncStorage.setItem(`getPosts-${params.type}-updated`, timestamp.toString());
+
+			return res.data;
+		} catch (error) {
+			console.log(error);
+			return [];
+		}
+	} else {
+		console.log('reading from cache!');
+		return JSON.parse(fromCache);
+	}
 };
 
-export const fetchPostInfo = async (id) => {
+export const fetchPostInfo = async (id, type) => {
 	const options = {
 		method: 'GET',
-		url: `${Config.POSTS_API_URL}/posts/${id}`
+		url: `${Config.POSTS_API_URL}/posts/${id}?type=${type}`
 	};
 
 	const res = await axios(options);
@@ -67,11 +88,11 @@ export const updatePost = async (id, data) => {
 	return res.data;
 };
 
-export const deletePost = async (id) => {
+export const deletePost = async (id, type) => {
 	const token = await (await Auth.currentSession()).getIdToken().getJwtToken();
 	const options = {
 		method: 'DELETE',
-		url: `${Config.POSTS_API_URL}/posts/${id}`,
+		url: `${Config.POSTS_API_URL}/posts/${type}/${id}`,
 		headers: {
 			Authorization: `Bearer ${token}`
 		}
