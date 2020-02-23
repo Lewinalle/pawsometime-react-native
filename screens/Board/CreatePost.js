@@ -122,7 +122,7 @@ const CreatePost = (props) => {
 				}
 			);
 		} catch (error) {
-			console.error(error);
+			console.log(error);
 			alert('Something went wrong. Please try again.');
 		}
 	};

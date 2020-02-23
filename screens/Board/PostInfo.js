@@ -25,49 +25,35 @@ import { vectorIcon } from '../../Utils/Icon';
 import { likeResource, addComment, deleteComment } from '../../Services/general';
 import { fetchPostInfo, deletePost } from '../../Services/posts';
 
-const boardTypes = [
-	{
-		label: 'General',
-		value: 'general'
-	},
-	{
-		label: 'Questions',
-		value: 'qna'
-	},
-	{
-		label: 'Tips',
-		value: 'tips'
-	},
-	{
-		label: 'Trade',
-		value: 'trade'
-	}
-];
-
 const PostInfo = (props) => {
 	const [ post, setPost ] = useState(props.navigation.getParam('post') ? props.navigation.getParam('post') : {});
 	const [ comment, setComment ] = useState('');
 	const [ isSubmitting, setIsSubmitting ] = useState(false);
 	const [ containerWidth, setContainerWidth ] = useState(350);
-	const [ imageType, setImageType ] = useState(null);
-	const [ title, setTitle ] = useState('');
-	const [ description, setDescription ] = useState('');
-	const [ type, setType ] = useState('general');
 
 	const containerRef = useRef(null);
 
 	const postType = props.navigation.getParam('postType');
-	const handleLikeComment = props.navigation.getParam('handleLikeComment');
+	const handlePostInfoAction = props.navigation.getParam('handlePostInfoAction');
 
 	const dateTime = new Date(post.updatedAt);
 	const hasUserLiked = post.likes.includes(props.currentDBUser.id);
 
-	console.log(post.likes, hasUserLiked);
-
 	const refresh = async () => {
+		if (isSubmitting) {
+			console.log('already submitting, wait!');
+			return;
+		}
+
+		setIsSubmitting(true);
+
 		const newPost = await fetchPostInfo(post.id, postType);
 
 		setPost(newPost);
+
+		setTimeout(() => {
+			setIsSubmitting(false);
+		}, 1000);
 	};
 
 	const handleLike = async () => {
@@ -96,6 +82,7 @@ const PostInfo = (props) => {
 		};
 
 		await likeResource(post.id, body);
+		await handlePostInfoAction(post.id, hasUserLiked ? 1 : 0);
 
 		setIsSubmitting(false);
 	};
@@ -126,10 +113,10 @@ const PostInfo = (props) => {
 				[
 					{
 						text: 'OK',
-						onPress: () => {
-							console.log(isSubmitting);
+						onPress: async () => {
+							await handlePostInfoAction(post.id, 2);
+
 							setTimeout(() => {
-								console.log(isSubmitting);
 								setIsSubmitting(false);
 							}, 1000);
 						}
@@ -142,7 +129,58 @@ const PostInfo = (props) => {
 		}
 	};
 
-	const handleDeleteComment = async (commentId) => {};
+	const handleDeleteComment = async (commentId) => {
+		if (isSubmitting) {
+			console.log('already submitting, wait!');
+			return;
+		}
+
+		console.log('delete!');
+
+		Alert.alert(
+			'Warning!',
+			'Are you sure you want to delete this comment?',
+			[
+				{
+					text: 'Yes',
+					onPress: async () => {
+						setIsSubmitting(true);
+
+						const body = {
+							resource: `posts_${postType}`
+						};
+
+						await deleteComment(post.id, commentId, body);
+
+						// update frontend without refreshing
+						let newPost = post;
+						newPost.comments = newPost.comments.filter((item) => item.id !== commentId);
+						setPost(newPost);
+
+						Alert.alert(
+							'Success!',
+							'Your comment has been successfully deleted.',
+							[
+								{
+									text: 'Yes',
+									onPress: async () => {
+										await handlePostInfoAction(post.id, 3);
+									}
+								}
+							],
+							{ cancelable: false }
+						);
+
+						setIsSubmitting(false);
+					}
+				},
+				{
+					text: 'No'
+				}
+			],
+			{ cancelable: false }
+		);
+	};
 
 	const handleDeletePost = async () => {
 		if (isSubmitting) {
@@ -159,11 +197,7 @@ const PostInfo = (props) => {
 					onPress: async () => {
 						setIsSubmitting(true);
 						await deletePost(post.id, postType);
-						setTimeout(() => {
-							setIsSubmitting(false);
-						}, 2000);
 
-						// TODO: FINISHI THIS!
 						Alert.alert(
 							'Success!',
 							'Your post has been successfully deleted.',
@@ -171,17 +205,15 @@ const PostInfo = (props) => {
 								{
 									text: 'Yes',
 									onPress: async () => {
-										setIsSubmitting(true);
-										await deletePost(post.id, postType);
-										setTimeout(() => {
-											setIsSubmitting(false);
-										}, 2000);
+										await handlePostInfoAction(post.id, 4);
+										props.navigation.navigate('Board');
 									}
 								}
 							],
 							{ cancelable: false }
 						);
-						////////////////////////////////////////////
+
+						setIsSubmitting(false);
 					}
 				},
 				{
@@ -190,8 +222,6 @@ const PostInfo = (props) => {
 			],
 			{ cancelable: false }
 		);
-
-		await deletePost(post.id, postType);
 	};
 
 	return (
@@ -359,9 +389,22 @@ const PostInfo = (props) => {
 												}}
 											>
 												<Text style={{ fontSize: 16, fontWeight: 'bold' }}>{c.userName}</Text>
-												<Text>
-													{dateTime.toLocaleDateString()}, {dateTime.toLocaleTimeString()}
-												</Text>
+
+												<View>
+													<View style={{ flex: 1, flexDirection: 'row' }}>
+														{c.userId === props.currentDBUser.id && (
+															<TouchableOpacity onPress={() => handleDeleteComment(c.id)}>
+																<View style={{ marginRight: 10, marginTop: 2 }}>
+																	{vectorIcon('AntDesign', 'delete', 16)}
+																</View>
+															</TouchableOpacity>
+														)}
+														<Text>
+															{dateTime.toLocaleDateString()},{' '}
+															{dateTime.toLocaleTimeString()}
+														</Text>
+													</View>
+												</View>
 											</View>
 											<View>
 												<Text>
@@ -382,23 +425,13 @@ const PostInfo = (props) => {
 	);
 };
 
-// const HeaderRightComp = (props) => {
-// 	console.log(props);
-
-// 	return <Text>Right</Text>;
-// };
-
 PostInfo.navigationOptions = (props) => {
-	console.log(props);
 	return {
 		title: 'Post Info',
-		// headerRight: <HeaderRightComp {...props} />,
 		headerStyle: { backgroundColor: 'brown' },
 		headerTitleStyle: { color: 'blue' }
 	};
 };
-
-const styles = StyleSheet.create({});
 
 const mapStateToProps = ({ auth }) => ({
 	currentDBUser: auth.currentDBUser

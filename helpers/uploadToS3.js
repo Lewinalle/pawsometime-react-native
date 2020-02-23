@@ -16,7 +16,7 @@ export const uploadToS3 = async (fileUri, fileType, fileName) => {
 				if (xhr.status === 200) {
 					console.log('Successfully uploaded a file to S3.');
 				} else {
-					console.error('Something went wrong while uploading to S3.');
+					console.log('Something went wrong while uploading to S3.');
 					alert('Sorry, something went wrong while uploading the image. Please try again.');
 				}
 			}
@@ -28,7 +28,7 @@ export const uploadToS3 = async (fileUri, fileType, fileName) => {
 		// IF YOU WANT TO MAKE S3 BUCKET PRIVATE, THEN YOU HAVE TO CALL ENDPOINT FOR:
 		// s3.getSignedUrl('getObject', ...) TO GET PRE_SIGNED URL FOR DOWNLOAD
 	} catch (err) {
-		console.error(err);
+		console.log(err);
 		alert('Sorry, something went wrong while uploading the image. Please try again.');
 	}
 };

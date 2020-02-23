@@ -61,6 +61,8 @@ export const deleteComment = async (resourceId, commentId, data) => {
 		data
 	};
 
+	console.log(options);
+
 	const res = await axios(options);
 
 	return res.data;

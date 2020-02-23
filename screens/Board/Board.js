@@ -56,15 +56,15 @@ class Board extends Component {
 		navigation.navigate('PostInfo', {
 			post: clickedPost,
 			postType: boardTypes[this.state.currentTab],
-			handleLikeComment: (postId) => this.handleLikeComment(postId, actionType)
+			handlePostInfoAction: (postId) => this.handlePostInfoAction(postId, actionType)
 		});
 	}
 
 	// replace/update spcific comment from current props (without fetching themm all again)
 	// OR RE-FETCH WHEN UPDATE SOMETHING?
-	handleLikeComment(postId, actionType) {
-		// 0: like, 1: cancel like, 2: add comment, 3: remove comment
-		if (actionType < 0 || actionType > 3) {
+	handlePostInfoAction(postId, actionType) {
+		// 0: like, 1: cancel like, 2: add comment, 3: remove comment, 4: remove post
+		if (actionType < 0 || actionType > 4) {
 			return;
 		}
 
@@ -73,6 +73,7 @@ class Board extends Component {
 			case 1:
 			case 2:
 			case 3:
+			case 4:
 		}
 	}
 

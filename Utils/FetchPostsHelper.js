@@ -10,7 +10,7 @@ export const fetchPostsHelper = async (fetcher, params) => {
 		query.type = postTypes[query.type];
 	} else if (typeof query.type === 'string' && _.includes(postTypes, query.type)) {
 	} else {
-		console.error('post type is invalid');
+		console.log('post type is invalid');
 		return null;
 	}
 
@@ -25,7 +25,7 @@ export const fetchUserPostsHelper = async (fetcher, userId, params) => {
 		query.type = postTypes[query.type];
 	} else if (typeof query.type === 'string' && _.includes(postTypes, query.type)) {
 	} else {
-		console.error('post type is invalid');
+		console.log('post type is invalid');
 		return null;
 	}
 

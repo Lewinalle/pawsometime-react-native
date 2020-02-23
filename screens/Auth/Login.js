@@ -75,14 +75,14 @@ const Login = (props) => {
 					props.navigation.navigate('Main');
 				}
 			} catch (err) {
-				console.error(err);
+				console.log(err);
 			}
 		} catch (error) {
 			let err = null;
 			!error.message ? (err = { message: error }) : (err = error);
 			setIsLoggingin(false);
 
-			console.error(error);
+			console.log(error);
 
 			const isBlank = !email || !password;
 			setErrors({ ...errors, cognito: isBlank ? null : err, blankfield: isBlank });
