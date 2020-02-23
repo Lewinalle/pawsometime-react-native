@@ -128,8 +128,8 @@ const CreatePost = (props) => {
 	};
 
 	const handleAfterSubmit = async () => {
-		await props.fetchPosts({ type });
-
+		const handleBack = props.navigation.getParam('onCreateBack');
+		await handleBack(type);
 		props.navigation.navigate('Board');
 	};
 
@@ -191,7 +191,6 @@ const CreatePost = (props) => {
 								value={description}
 								label="DESCRIPTION"
 								labelStyle={{ fontSize: 12, marginBottom: 10 }}
-								onSubmitEditing={() => console.log('QWEQWEQWEQWE11111')}
 								multiline
 								returnKeyType="none"
 								numberOfLines={10}

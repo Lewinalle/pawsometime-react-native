@@ -35,7 +35,7 @@ const Login = (props) => {
 		clearErrorState();
 
 		if (!email || !password) {
-			setErrors({ ...errors, blankfield: true });
+			setErrors({ ...errors, cognito: null, blankfield: true });
 			return;
 		}
 
@@ -75,14 +75,17 @@ const Login = (props) => {
 					props.navigation.navigate('Main');
 				}
 			} catch (err) {
-				console.log(err);
+				console.error(err);
 			}
 		} catch (error) {
 			let err = null;
 			!error.message ? (err = { message: error }) : (err = error);
-			console.log(err);
 			setIsLoggingin(false);
-			setErrors({ ...errors, cognito: err });
+
+			console.error(error);
+
+			const isBlank = !email || !password;
+			setErrors({ ...errors, cognito: isBlank ? null : err, blankfield: isBlank });
 		}
 	};
 
@@ -114,20 +117,41 @@ const Login = (props) => {
 						autoCompleteType="password"
 						secureTextEntry
 						onChangeText={(text) => onInputChange('password', text)}
-						containerStyle={{ marginBottom: 20 }}
+						containerStyle={{ marginBottom: 6 }}
 					/>
-					<ScrollView keyboardShouldPersistTaps="always">
-						<Button title="Sign In" onPress={handleSubmit} disabled={isLoggingin} />
-					</ScrollView>
-					{/* <Button title="Sign In" onPress={handleSubmit} disabled={isLoggingin} /> */}
-					<Text>{errors.blankfield ? 'Email and Password must be provided' : ''}</Text>
-					<Text>{errors.cognito && errors.cognito.message ? errors.cognito.message : ''}</Text>
 
-					<Button title="Register" onPress={() => props.navigation.navigate('Register')} />
-					<Button title="Forgot Password" onPress={() => props.navigation.navigate('ForgotPassword')} />
+					{errors.blankfield && (
+						<Text style={{ marginBottom: 15, paddingHorizontal: 10, color: '#f73325' }}>
+							Email and Password must be provided
+						</Text>
+					)}
+					{errors.cognito &&
+					errors.cognito.message && (
+						<Text style={{ marginBottom: 15, paddingHorizontal: 10, color: '#f73325' }}>
+							{errors.cognito.message}
+						</Text>
+					)}
+					<Button
+						title="Sign In"
+						onPress={handleSubmit}
+						disabled={isLoggingin}
+						containerStyle={{ marginBottom: 15 }}
+					/>
+
+					<Button
+						title="Register"
+						onPress={() => props.navigation.navigate('Register')}
+						containerStyle={{ marginBottom: 15 }}
+					/>
+					<Button
+						title="Forgot Password"
+						onPress={() => props.navigation.navigate('ForgotPassword')}
+						containerStyle={{ marginBottom: 15 }}
+					/>
 					<Button
 						title="Resend Verification"
 						onPress={() => props.navigation.navigate('ResendVerification')}
+						containerStyle={{ marginBottom: 15 }}
 					/>
 				</View>
 			</View>

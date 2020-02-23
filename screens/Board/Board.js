@@ -41,7 +41,39 @@ class Board extends Component {
 			searchTerm: ''
 		});
 
-		this.props.navigation.setParams({ refresh: this.handleRefreshBtn });
+		this.props.navigation.setParams({
+			refresh: this.handleRefreshBtn,
+			onCreateBack: (type) => this.onCreateBack(type)
+		});
+	}
+
+	onCreateBack(type) {
+		this.handleTabPress(boardTypes.findIndex((val) => val === type));
+	}
+
+	toPostInfo(clickedPost) {
+		const { navigation } = this.props;
+		navigation.navigate('PostInfo', {
+			post: clickedPost,
+			postType: boardTypes[this.state.currentTab],
+			handleLikeComment: (postId) => this.handleLikeComment(postId, actionType)
+		});
+	}
+
+	// replace/update spcific comment from current props (without fetching themm all again)
+	// OR RE-FETCH WHEN UPDATE SOMETHING?
+	handleLikeComment(postId, actionType) {
+		// 0: like, 1: cancel like, 2: add comment, 3: remove comment
+		if (actionType < 0 || actionType > 3) {
+			return;
+		}
+
+		switch (actionType) {
+			case 0:
+			case 1:
+			case 2:
+			case 3:
+		}
 	}
 
 	async handleTabPress(i) {
@@ -169,7 +201,9 @@ class Board extends Component {
 			<HeaderRightComponent
 				//TODO: UPDATE BELOW (onRefresh: reset data displayed size && refetchData(reset search) && scroll to top)
 				handleRefreshBtn={navigation.getParam('refresh')}
-				handleCreateBtn={() => navigation.navigate('CreatePost')}
+				handleCreateBtn={() => {
+					navigation.navigate('CreatePost', { onCreateBack: navigation.getParam('onCreateBack') });
+				}}
 			/>
 		),
 		headerStyle: { backgroundColor: 'brown' },
@@ -223,7 +257,13 @@ class Board extends Component {
 						return `key-${item.id}`;
 					}}
 					renderItem={(item) => {
-						return <BoardListItem post={item.item} isFirst={item.index === 0} />;
+						return (
+							<BoardListItem
+								post={item.item}
+								isFirst={item.index === 0}
+								handlePostClick={(post) => this.toPostInfo(post)}
+							/>
+						);
 					}}
 					// renderItem={(item) => {
 					// 	console.log(item);
@@ -264,8 +304,10 @@ const HeaderRightComponent = (props) => {
 		<View style={{ flex: 1, flexDirection: 'row' }}>
 			<TouchableOpacity
 				onPress={async () => {
-					setIsDisabled(true);
-					await props.handleRefreshBtn();
+					if (!isDisabled) {
+						setIsDisabled(true);
+						await props.handleRefreshBtn();
+					}
 					setTimeout(() => {
 						setIsDisabled(false);
 					}, 3500);

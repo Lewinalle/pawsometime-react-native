@@ -16,6 +16,8 @@ import ChangePassword from '../screens/Settings/ChangePassword';
 import Meetup from '../screens/Meetup/Meetup';
 import Board from '../screens/Board/Board';
 import CreatePost from '../screens/Board/CreatePost';
+import PostInfo from '../screens/Board/PostInfo';
+
 import Shopping from '../screens/Shopping/Shopping';
 
 const config = Platform.select({
@@ -75,7 +77,8 @@ MeetupStack.path = '';
 const BoardStack = createStackNavigator(
 	{
 		Board,
-		CreatePost
+		CreatePost,
+		PostInfo
 	},
 	config
 );

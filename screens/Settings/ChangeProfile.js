@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ScrollView, StyleSheet, View, KeyboardAvoidingView, Alert } from 'react-native';
 import { Text, Button, Image, Input } from 'react-native-elements';
 import { Header } from 'react-navigation-stack';
@@ -19,6 +19,9 @@ const ChangeProfile = (props) => {
 	const [ imageType, setImageType ] = useState(null);
 	const [ newDescription, setNewDescription ] = useState(props.currentDBUser ? props.currentDBUser.description : '');
 	const [ isUpdating, setIsUpdating ] = useState(false);
+	const [ containerWidth, setContainerWidth ] = useState(340);
+
+	const containerRef = useRef(null);
 
 	const pickImage = async () => {
 		getPermissionAsync();
@@ -97,7 +100,7 @@ const ChangeProfile = (props) => {
 	return (
 		<View
 			style={{
-				padding: 20,
+				padding: 6,
 				flex: 1,
 				flexDirection: 'column',
 				alignItems: 'center',
@@ -106,16 +109,32 @@ const ChangeProfile = (props) => {
 		>
 			<KeyboardAvoidingView style={{ flex: 1 }} behavior="height" keyboardVerticalOffset={Header.HEIGHT + 50}>
 				<ScrollView contentContainerStyle={{ padding: 20 }}>
-					<View style={{ alignSelf: 'stretch' }}>
+					<View
+						ref={containerRef}
+						style={{ alignSelf: 'stretch' }}
+						onLayout={() => {
+							if (containerRef.current) {
+								containerRef.current.measure((x, y, width, height, pageX, pageY) => {
+									setContainerWidth(width);
+								});
+							}
+						}}
+					>
 						<View style={{ flex: 1, alignItems: 'center', justifyContent: 'center' }}>
 							{imageUri ? (
-								<Image source={{ uri: imageUri }} style={{ width: 300, height: 300 }} />
+								<Image
+									source={{ uri: imageUri }}
+									style={{ width: containerWidth, height: containerWidth }}
+								/>
 							) : props.currentDBUser && props.currentDBUser.avatar ? (
-								<CacheImage style={{ width: 300, height: 300 }} uri={props.currentDBUser.avatar} />
+								<CacheImage
+									style={{ width: containerWidth, height: containerWidth }}
+									uri={props.currentDBUser.avatar}
+								/>
 							) : (
 								<Image
 									source={require('../../assets/images/profile-default.png')}
-									style={{ width: 300, height: 300 }}
+									style={{ width: containerWidth, height: containerWidth }}
 								/>
 							)}
 						</View>
