@@ -5,7 +5,7 @@ import { connect } from 'react-redux';
 import { signOut } from '../../redux/actions/auth.actions';
 import { Auth } from 'aws-amplify';
 
-const profileSettings = [
+const settingItems = [
 	{
 		title: 'Change Profile',
 		description: 'Update your picture and greetings',
@@ -21,6 +21,13 @@ const profileSettings = [
 		to: 'Friends'
 	},
 	{
+		title: 'Search Users',
+		description: 'Search users to add friends',
+		icon: 'MaterialCommunityIcons.account-search',
+		iconSize: 25,
+		to: 'SearchUsers'
+	},
+	{
 		title: 'My Meetups',
 		description: 'View and manage my meetups',
 		icon: 'FontAwesome.meetup',
@@ -33,10 +40,14 @@ const profileSettings = [
 		icon: 'Entypo.news',
 		iconSize: 26,
 		to: 'MyPosts'
-	}
-];
-
-const appSettings = [
+	},
+	{
+		title: 'Change Password',
+		description: 'Change my password',
+		icon: 'SimpleLineIcons.lock-open',
+		iconSize: 26,
+		to: 'ChangePassword'
+	},
 	{
 		title: 'About',
 		description: 'View details and description of application',
@@ -49,7 +60,17 @@ const appSettings = [
 const Settings = (props) => {
 	return (
 		<View>
-			{profileSettings.map((item, index) => (
+			{settingItems.map((item, index) => (
+				<SettingsListItem
+					key={index}
+					title={item.title}
+					description={item.description}
+					icon={item.icon}
+					iconSize={item.iconSize}
+					onPress={() => props.navigation.navigate(item.to)}
+				/>
+			))}
+			{/* {profileSettings.map((item, index) => (
 				<SettingsListItem
 					key={index}
 					title={item.title}
@@ -68,7 +89,7 @@ const Settings = (props) => {
 					iconSize={item.iconSize}
 					onPress={() => props.navigation.navigate(item.to)}
 				/>
-			))}
+			))} */}
 			<SettingsListItem
 				key="sign-out"
 				title="Sign Out"

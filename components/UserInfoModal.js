@@ -8,62 +8,79 @@ import { setAuthStatus, setCognitoUser, setDBUser } from '../redux/actions/auth.
 import { fetchUserInfo, updateUser, acceptFriend, requestFriend } from '../Services/users';
 //TODO DELETE THIS AFTER AND CLEAN UP CODE
 
-const UserInfoModal = memo((props) => {
-	const { user, showModal, triggerModal } = props;
+const UserInfoModal = (props) => {
+	const { user, showModal, closeModal } = props;
 	const modalRef = useRef(null);
 	const [ imageWidth, setImageWidth ] = useState(0);
 	const [ imageHeight, setimageHeight ] = useState(0);
-	const [ relationStatus, setRelationStatus ] = useState(null);
+	const [ isSubmitting, setIsSubmitting ] = useState(false);
+	const [ globalUser, setGlobalUser ] = useState(props.currentDBUser);
 
-	useEffect(() => {
-		if (props.currentDBUser.friends.pending.includes(user.id)) {
-			setRelationStatus('pending');
-		} else if (props.currentDBUser.friends.sent.includes(user.id)) {
-			setRelationStatus('sent');
-		} else if (props.currentDBUser.friends.friends.includes(user.id)) {
-			setRelationStatus('friends');
+	const getRelationStatus = () => {
+		if (globalUser.friends.pending.includes(user.id)) {
+			return 'pending';
+		} else if (globalUser.friends.sent.includes(user.id)) {
+			return 'sent';
+		} else if (globalUser.friends.friends.includes(user.id)) {
+			return 'friends';
 		} else {
-			setRelationStatus('none');
+			return 'none';
 		}
-	}, []);
-
-	const handleMessageUser = () => {
-		// TODO: handleMessageUser
-		console.log('Go To Message!');
 	};
 
 	const handleFriendRequest = async () => {
-		if (relationStatus === 'pending') {
-			// TODO: UNCOMMENT TO TEST
-			// const res = await acceptFriend({
-			// 	userId: props.currentDBUser.id,
-			// 	friendId: user.id
-			// });
-
-			// await setDBUser(res);
-
-			console.log('Accept Friend!');
-		} else if (relationStatus === 'none') {
-			// TODO: UNCOMMENT TO TEST
-			// const res = await requestFriend({
-			// 	userId: props.currentDBUser.id,
-			// 	friendId: user.id
-			// });
-
-			// await setDBUser(res);
-
-			console.log('Request Friend!');
+		if (isSubmitting) {
+			console.log('already sending, wait!');
+			return;
 		}
+
+		setIsSubmitting(true);
+
+		if (getRelationStatus() === 'pending') {
+			const res = await acceptFriend({
+				userId: globalUser.id,
+				friendId: user.id
+			});
+
+			await props.setDBUser(res.user);
+			await setGlobalUser(res.user);
+
+			if (typeof props.updateAction === 'function') {
+				await props.updateAction(user, 1);
+			}
+
+			Alert.alert('Accepted!', 'You have accpeted and become friend with the user.', [ { text: 'OK' } ], {
+				cancelable: false
+			});
+		} else if (getRelationStatus() === 'none') {
+			const res = await requestFriend({
+				userId: globalUser.id,
+				friendId: user.id
+			});
+
+			await props.setDBUser(res.user);
+			await setGlobalUser(res.user);
+
+			if (typeof props.updateAction === 'function') {
+				await props.updateAction(user, 0);
+			}
+
+			Alert.alert('Sent!', 'You have sent a friend request.', [ { text: 'OK' } ], { cancelable: false });
+		}
+
+		setIsSubmitting(false);
+
+		// await closeModal();
 	};
 
 	const renderFriendIcon = () => {
-		if (relationStatus === 'pending' || relationStatus === 'none') {
+		if (getRelationStatus() === 'pending' || getRelationStatus() === 'none') {
 			return (
 				<TouchableOpacity onPress={handleFriendRequest}>
 					{vectorIcon('Ionicons', 'md-person-add', 30)}
 				</TouchableOpacity>
 			);
-		} else if (relationStatus === 'sent') {
+		} else if (getRelationStatus() === 'sent') {
 			return (
 				<TouchableOpacity>
 					<Tooltip popover={<Text>Already Sent!</Text>}>
@@ -71,7 +88,7 @@ const UserInfoModal = memo((props) => {
 					</Tooltip>
 				</TouchableOpacity>
 			);
-		} else if (relationStatus === 'friends') {
+		} else if (getRelationStatus() === 'friends') {
 			return (
 				<TouchableOpacity>
 					<Tooltip popover={<Text>Already Friend!</Text>}>
@@ -90,10 +107,10 @@ const UserInfoModal = memo((props) => {
 			transparent={true}
 			isVisible={showModal}
 			onRequestClose={() => {
-				triggerModal(false);
+				closeModal();
 			}}
 			onBackdropPress={() => {
-				triggerModal(false);
+				closeModal();
 			}}
 			overlayStyle={{ padding: 0, borderRadius: 4 }}
 		>
@@ -116,7 +133,7 @@ const UserInfoModal = memo((props) => {
 				}}
 			>
 				<View style={{ marginBottom: 10 }}>
-					<Text h3 numberOfLines={1}>
+					<Text style={{ fontSize: 26, fontWeight: 'bold', textAlign: 'center' }} numberOfLines={2}>
 						{user.username}
 					</Text>
 				</View>
@@ -141,18 +158,28 @@ const UserInfoModal = memo((props) => {
 						paddingHorizontal: 10
 					}}
 				>
-					<TouchableOpacity onPress={handleMessageUser}>
+					{/* <TouchableOpacity onPress={handleMessageUser}>
 						{vectorIcon('AntDesign', 'message1', 30)}
-					</TouchableOpacity>
-					{renderFriendIcon()}
-					<TouchableOpacity onPress={() => triggerModal(false)}>
+					</TouchableOpacity> */}
+					{globalUser.id !== user.id ? (
+						renderFriendIcon()
+					) : (
+						<TouchableOpacity
+							onPress={() => {
+								props.toChangeProfile();
+							}}
+						>
+							{vectorIcon('AntDesign', 'edit', 30)}
+						</TouchableOpacity>
+					)}
+					<TouchableOpacity onPress={() => closeModal()}>
 						{vectorIcon('MaterialIcons', 'cancel', 30)}
 					</TouchableOpacity>
 				</View>
 			</View>
 		</Overlay>
 	);
-});
+};
 
 const style = StyleSheet.create({});
 

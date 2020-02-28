@@ -12,6 +12,7 @@ import ChangeProfile from '../screens/Settings/ChangeProfile';
 import MyMeetups from '../screens/Settings/MyMeetups';
 import MyPosts from '../screens/Settings/MyPosts';
 import Friends from '../screens/Settings/Friends';
+import SearchUsers from '../screens/Settings/SearchUsers';
 import ChangePassword from '../screens/Settings/ChangePassword';
 import Meetup from '../screens/Meetup/Meetup';
 import Board from '../screens/Board/Board';
@@ -127,6 +128,7 @@ const SettingsStack = createStackNavigator(
 		Settings,
 		ChangeProfile,
 		Friends,
+		SearchUsers,
 		MyMeetups,
 		MyPosts,
 		ChangePassword,

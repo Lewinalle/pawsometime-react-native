@@ -10,28 +10,21 @@ import _ from 'lodash';
 
 const Friends = (props) => {
 	const [ searchTerm, setSearchTerm ] = useState('');
-	// // REMOVE BELOW TO TEST
-	// const [ pendingUsers, setPendingUsers ] = useState(pendingUsersTest);
-	// const [ sentUsers, setSentUsers ] = useState(sentUsersTest);
-	// const [ friendsUsers, setFriendsUsers ] = useState(friendsUsersTest);
-
-	// let allPendingUsers = pendingUsersTest;
-	// let allSentUsers = sentUsersTest;
-	// let allFriendsUsers = friendsUsersTest;
-
-	// TODO: UNCOMMENT BELOW TO TEST
 	const { currentDBUser } = props;
-	const [ isFetching, setIsFetching ] = useState(true);
-	const [ pendingUsers, setPendingUsers ] = useState([]);
-	const [ sentUsers, setSentUsers ] = useState([]);
-	const [ friendsUsers, setFriendsUsers ] = useState([]);
+	const [ isFetching, setIsFetching ] = useState(false);
 
-	let allPendingUsers;
-	let allSentUsers;
-	let allFriendsUsers;
+	const [ pendingUsers, setPendingUsers ] = useState(null);
+	const [ sentUsers, setSentUsers ] = useState(null);
+	const [ friendsUsers, setFriendsUsers ] = useState(null);
+
+	const [ allPendingUsers, setAllPendingUsers ] = useState(null);
+	const [ allSentUsers, setAllSentUsers ] = useState(null);
+	const [ allFriendsUsers, setAllFriendsUsers ] = useState(null);
 
 	useEffect(() => {
 		const fetchFriends = async () => {
+			setIsFetching(true);
+
 			const concatArr = _.concat(
 				currentDBUser.friends.pending,
 				currentDBUser.friends.sent,
@@ -45,63 +38,142 @@ const Friends = (props) => {
 
 				const fetchedUsers = await getUsers(params);
 
-				const allPendingUsers = _.filter(fetchedUsers, (user) => _.includes(user.friends.pending, user.id));
-				await setPendingUsers(allPendingUsers);
+				const pendings = _.filter(fetchedUsers, (user) => _.includes(currentDBUser.friends.pending, user.id));
+				await setPendingUsers(pendings);
+				await setAllPendingUsers(pendings);
 
-				const allSentUsers = _.filter(fetchedUsers, (user) => _.includes(user.friends.sent, user.id));
-				await setSentUsers(allSentUsers);
+				const sents = _.filter(fetchedUsers, (user) => _.includes(currentDBUser.friends.sent, user.id));
+				await setSentUsers(sents);
+				await setAllSentUsers(sents);
 
-				const allFriendsUsers = _.filter(fetchedUsers, (user) => _.includes(user.friends.friends, user.id));
-				await setFriendsUsers(allFriendsUsers);
+				const friends = _.filter(fetchedUsers, (user) => _.includes(currentDBUser.friends.friends, user.id));
+				await setFriendsUsers(friends);
+				await setAllFriendsUsers(friends);
+			} else {
+				setPendingUsers([]);
+				setAllPendingUsers([]);
+
+				setSentUsers([]);
+				setAllSentUsers([]);
+
+				setFriendsUsers([]);
+				setAllFriendsUsers([]);
 			}
 
 			setIsFetching(false);
 		};
+
 		fetchFriends();
 	}, []);
 
 	const handleSearch = (search) => {
 		setSearchTerm(search);
 
-		const pendings = _.filter(
-			allPendingUsers,
-			(user) =>
-				_.includes(user.username.toLowerCase(), search.toLowerCase()) ||
-				_.includes(user.description.toLowerCase(), search.toLowerCase())
-		);
+		const compareFn = (user) =>
+			(user.username && _.includes(user.username.toLowerCase(), search.toLowerCase())) ||
+			(user.description && _.includes(user.description.toLowerCase(), search.toLowerCase()));
+
+		const pendings = _.filter(allPendingUsers, compareFn);
 		setPendingUsers(pendings);
 
-		const sents = _.filter(allSentUsers, (user) => (user) =>
-			_.includes(user.username.toLowerCase(), search.toLowerCase()) ||
-			_.includes(user.description.toLowerCase(), search.toLowerCase())
-		);
+		const sents = _.filter(allSentUsers, compareFn);
 		setSentUsers(sents);
 
-		const friends = _.filter(
-			allFriendsUsers,
-			(user) =>
-				_.includes(user.username.toLowerCase(), search.toLowerCase()) ||
-				_.includes(user.description.toLowerCase(), search.toLowerCase())
-		);
+		const friends = _.filter(allFriendsUsers, compareFn);
 		setFriendsUsers(friends);
 	};
 
-	const renderNoFriends = () => {
-		return (
-			<Card
-				title="No Firends Yet"
-				image={require('../../assets/images/profile-default.png')}
-				imageStyle={{ height: 350 }}
-				containerStyle={{ margin: 0, borderRadius: 8 }}
-			>
-				<View style={{ flex: 1, flexDirection: 'column', alignItems: 'center' }}>
-					<Text style={{ fontSize: 14 }}>Try connect with others!</Text>
-				</View>
-			</Card>
-		);
+	const updateAction = async (friend, actionType) => {
+		// 0: request, 1: accept, 2: reject, 3: cancel, 4: remove
+		if (actionType < 0 || actionType > 4) {
+			return;
+		}
+
+		let newSents;
+		let newPendings;
+		let newFriends;
+
+		switch (actionType) {
+			case 0:
+				newSents = allSentUsers;
+				let targetIndex = _.findIndex(newSents, { id: friend.id });
+				if (targetIndex === -1) {
+					newSents.push(friend);
+				} else {
+					newSents.splice(targetIndex, 1, friend);
+				}
+				setAllSentUsers(newSents);
+				break;
+
+			case 1:
+				newPendings = allPendingUsers;
+				_.remove(newPendings, (u) => u.id === friend.id);
+				setAllPendingUsers(newPendings);
+
+				newFriends = allFriendsUsers;
+				let targetFriendIndex = _.findIndex(newFriends, { id: friend.id });
+				if (targetFriendIndex === -1) {
+					newFriends.push(friend);
+				} else {
+					newFriends.splice(targetFriendIndex, 1, friend);
+				}
+				setAllFriendsUsers(newFriends);
+				break;
+
+			case 2:
+				newPendings = allPendingUsers;
+				_.remove(newPendings, (u) => u.id === friend.id);
+				setAllPendingUsers(newPendings);
+				break;
+
+			case 3:
+				newSents = allSentUsers;
+				_.remove(newSents, (u) => u.id === friend.id);
+				setAllSentUsers(newSents);
+				break;
+
+			case 4:
+				newFriends = allFriendsUsers;
+				_.remove(newFriends, (u) => u.id === friend.id);
+				setAllFriendsUsers(newFriends);
+				break;
+		}
+
+		handleSearch(searchTerm);
 	};
 
-	if (isFetching) {
+	const renderEmpty = () => {
+		if (pendingUsers.length === 0 && sentUsers.length === 0 && friendsUsers.length === 0) {
+			if (searchTerm) {
+				return (
+					<View style={{ marginBottom: 8 }}>
+						<UserCardList
+							users={[]}
+							title="No Friends Found"
+							userType="empty"
+							updateAction={(friend, actionType) => updateAction(friend, actionType)}
+						/>
+					</View>
+				);
+			} else {
+				return (
+					<Card
+						title="No Firends Yet"
+						image={require('../../assets/images/profile-default.png')}
+						imageStyle={{ height: 350 }}
+						containerStyle={{ margin: 0, borderRadius: 8 }}
+					>
+						<View style={{ flex: 1, flexDirection: 'column', alignItems: 'center' }}>
+							<Text style={{ fontSize: 14 }}>Try connect with others!</Text>
+						</View>
+					</Card>
+				);
+			}
+		}
+		return null;
+	};
+
+	if (!pendingUsers || !sentUsers || !friendsUsers) {
 		return null;
 	}
 
@@ -120,20 +192,35 @@ const Friends = (props) => {
 				style={{ alignSelf: 'stretch', paddingTop: 0 }}
 				contentContainerStyle={{ padding: 8, backgroundColor: 'grey' }}
 			>
-				{pendingUsers.length === 0 && sentUsers.length === 0 && friendsUsers.length === 0 && renderNoFriends()}
+				{renderEmpty()}
 				{pendingUsers.length > 0 && (
 					<View style={{ marginBottom: 8 }}>
-						<UserCardList users={pendingUsers} title="Received requests" userType="pending" />
+						<UserCardList
+							users={pendingUsers}
+							title="Requests Received"
+							userType="pending"
+							updateAction={(friend, actionType) => updateAction(friend, actionType)}
+						/>
 					</View>
 				)}
 				{sentUsers.length > 0 && (
 					<View style={{ marginBottom: 8 }}>
-						<UserCardList users={sentUsers} title="Pending requests" userType="sent" />
+						<UserCardList
+							users={sentUsers}
+							title="Pending Requests"
+							userType="sent"
+							updateAction={(friend, actionType) => updateAction(friend, actionType)}
+						/>
 					</View>
 				)}
 				{friendsUsers.length > 0 && (
 					<View style={{}}>
-						<UserCardList users={friendsUsers} title="Friends" userType="friends" />
+						<UserCardList
+							users={friendsUsers}
+							title="Friends"
+							userType="friends"
+							updateAction={(friend, actionType) => updateAction(friend, actionType)}
+						/>
 					</View>
 				)}
 			</ScrollView>
@@ -160,59 +247,3 @@ const mapDispatchToProps = {
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Friends);
-
-//TODO DELETE BELOW AFTER AND CLEAN UP CODE
-const pendingUsersTest = [
-	{
-		avatar: 'https://pawsometime-serverless-s3.s3-us-west-2.amazonaws.com/bb3eba54-20ba-4177-a331-91399d096cfe.jpg',
-		createdAt: 1581384629928,
-		description: 'description one',
-		email: 'email one',
-		friends: {
-			friends: [],
-			pending: [],
-			sent: []
-		},
-		id: '11111',
-		neverLoggedIn: false,
-		updatedAt: 1581455320366,
-		username: 'name one'
-	}
-];
-
-const sentUsersTest = [
-	{
-		avatar: null,
-		createdAt: 1581384629928,
-		description: 'description two',
-		email: 'email two',
-		friends: {
-			friends: [],
-			pending: [],
-			sent: []
-		},
-		id: '22222',
-		neverLoggedIn: false,
-		updatedAt: 1581455320366,
-		username: 'name two'
-	}
-];
-
-const friendsUsersTest = [
-	{
-		avatar: null,
-		createdAt: 1581384629928,
-		description:
-			'description modifieddescription modifieddescription modifieddescription modifieddescription modifieddescription modified',
-		email: 'email three',
-		friends: {
-			friends: [],
-			pending: [],
-			sent: []
-		},
-		id: '33333',
-		neverLoggedIn: false,
-		updatedAt: 1581455320366,
-		username: 'Lewis one'
-	}
-];

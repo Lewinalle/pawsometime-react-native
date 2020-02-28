@@ -53,15 +53,13 @@ export const deleteComment = async (resourceId, commentId, data) => {
 	const token = await (await Auth.currentSession()).getIdToken().getJwtToken();
 	const options = {
 		method: 'POST',
-		url: `${Config.OTHERS_API_URL}/resourceId/${resourceId}/comment/${commentId}`,
+		url: `${Config.OTHERS_API_URL}/resource/${resourceId}/comment/${commentId}`,
 		headers: {
 			Authorization: `Bearer ${token}`,
 			'Content-Type': 'application/json'
 		},
 		data
 	};
-
-	console.log(options);
 
 	const res = await axios(options);
 

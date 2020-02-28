@@ -17,16 +17,15 @@ import {
 } from '../Services/users';
 //TODO DELETE THIS AFTER AND CLEAN UP CODE
 
-const UserCardList = memo((props) => {
+const UserCardList = (props) => {
 	const { users, title, userType } = props;
+	const [ modalOpenId, setModalOpenId ] = useState(null);
 
-	const [ showModal, setShowModal ] = useState(false);
-
-	const triggerModal = (bool) => {
-		setShowModal(bool);
+	const closeModal = () => {
+		setModalOpenId(null);
 	};
 
-	const handleBtnAction = (userId, bool) => {
+	const handleBtnAction = async (userId, bool) => {
 		const body = {
 			userId: props.currentDBUser.id,
 			friendId: userId
@@ -34,19 +33,23 @@ const UserCardList = memo((props) => {
 		// TODO: UNCOMMENT BELOW TO TEST
 		if (userType === 'pending') {
 			if (bool === true) {
-				// acceptFriend(body);
-				console.log('Accpet');
+				const res = await acceptFriend(body);
+				await props.updateAction(res.friend, 1);
+				await props.setDBUser(res.user);
 			}
 			if (bool === false) {
-				// rejectFriend(body);
-				console.log('Reject');
+				const res = await rejectFriend(body);
+				await props.updateAction(res.friend, 2);
+				await props.setDBUser(res.user);
 			}
 		} else if (userType === 'sent') {
-			// cancelFriend(body);
-			console.log('Cancel');
+			const res = await cancelFriend(body);
+			await props.updateAction(res.friend, 3);
+			await props.setDBUser(res.user);
 		} else if (userType === 'friends') {
-			// removeFriend(body);
-			console.log('Remove');
+			const res = await removeFriend(body);
+			await props.updateAction(res.friend, 4);
+			await props.setDBUser(res.user);
 		}
 	};
 
@@ -112,7 +115,7 @@ const UserCardList = memo((props) => {
 							);
 						}}
 					>
-						{vectorIcon('MaterialIcons', 'check-circle', 30, 'green')}
+						{vectorIcon('MaterialIcons', 'cancel', 30, 'red')}
 					</TouchableOpacity>
 				</View>
 			);
@@ -156,8 +159,7 @@ const UserCardList = memo((props) => {
 						<TouchableOpacity
 							key={i}
 							onPress={() => {
-								console.log('Open Modal!');
-								setShowModal(true);
+								setModalOpenId(user.id);
 							}}
 						>
 							<View
@@ -187,7 +189,12 @@ const UserCardList = memo((props) => {
 									</Text>
 								</View>
 								<View>{renderButton(user.id)}</View>
-								<UserInfoModal showModal={showModal} user={user} triggerModal={triggerModal} />
+								<UserInfoModal
+									showModal={modalOpenId === user.id}
+									user={user}
+									closeModal={closeModal}
+									updateAction={props.updateAction}
+								/>
 							</View>
 							{i < users.length - 1 && <Divider />}
 						</TouchableOpacity>
@@ -196,7 +203,7 @@ const UserCardList = memo((props) => {
 			</Card>
 		</View>
 	);
-});
+};
 
 const style = StyleSheet.create({});
 

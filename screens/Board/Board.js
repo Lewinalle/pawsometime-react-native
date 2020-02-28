@@ -56,25 +56,35 @@ class Board extends Component {
 		navigation.navigate('PostInfo', {
 			post: clickedPost,
 			postType: boardTypes[this.state.currentTab],
-			handlePostInfoAction: (postId) => this.handlePostInfoAction(postId, actionType)
+			handlePostInfoAction: (postId, actionType, reference) =>
+				this.handlePostInfoAction(postId, actionType, reference)
 		});
 	}
 
-	// replace/update spcific comment from current props (without fetching themm all again)
-	// OR RE-FETCH WHEN UPDATE SOMETHING?
-	handlePostInfoAction(postId, actionType) {
+	handlePostInfoAction(postId, actionType, reference) {
 		// 0: like, 1: cancel like, 2: add comment, 3: remove comment, 4: remove post
+		const { posts } = this.state;
+
 		if (actionType < 0 || actionType > 4) {
 			return;
 		}
+
+		let newPosts = posts;
+		let targetIndex = _.findIndex(newPosts, { id: postId });
 
 		switch (actionType) {
 			case 0:
 			case 1:
 			case 2:
 			case 3:
+				newPosts.splice(targetIndex, 1, reference);
+				break;
 			case 4:
+				_.remove(newPosts, (p) => p.id === postId);
+				break;
 		}
+
+		this.setState({ posts: newPosts });
 	}
 
 	async handleTabPress(i) {
@@ -112,7 +122,6 @@ class Board extends Component {
 		this.setState({ searchTerm: text });
 	};
 
-	//TODO: HANDLE SEARCH!!
 	handleSearchSubmit = (searchObj) => {
 		const { generalPosts = [], questionPosts = [], tipPosts = [], tradePosts = [] } = this.props;
 		const { currentTab } = this.state;
@@ -349,281 +358,3 @@ const styles = StyleSheet.create({
 		marginHorizontal: 10
 	}
 });
-
-let posts = [
-	{
-		id: 33333,
-		user: {
-			id: 1,
-			name: 'lewis',
-			description: "Hi I'm Lewis"
-		},
-		title: 'Post 1 Post 1 Post 1 Post 1 Post 1 Post 1 Post 1 Post 1 Post 1 Post 1 Post 1 ',
-		content:
-			'Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content ',
-		createdAt: '2020-01-20',
-		views: 132,
-		likes: 10,
-		comments: [
-			{
-				id: 1,
-				user: {
-					id: 2,
-					name: 'May',
-					description: "Hi I'm May"
-				},
-				content: 'Comment One'
-			}
-		]
-	},
-	{
-		id: 2,
-		user: {
-			id: 1,
-			name: 'lewis',
-			description: "Hi I'm Lewis"
-		},
-		title: 'Post 1 Post 1 Post 1 Post 1 Post 1 Post 1 Post 1 Post 1 Post 1 Post 1 Post 1 ',
-		content:
-			'Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content ',
-		createdAt: '2020-01-20',
-		views: 132,
-		likes: 10,
-		comments: [
-			{
-				id: 1,
-				user: {
-					id: 2,
-					name: 'May',
-					description: "Hi I'm May"
-				},
-				content: 'Comment One'
-			}
-		]
-	},
-	{
-		id: 3,
-		user: {
-			id: 1,
-			name: 'lewis',
-			description: "Hi I'm Lewis"
-		},
-		title: 'Post 1 Post 1 Post 1 Post 1 Post 1 Post 1 Post 1 Post 1 Post 1 Post 1 Post 1 ',
-		content:
-			'Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content ',
-		createdAt: '2020-01-20',
-		views: 132,
-		likes: 10,
-		comments: [
-			{
-				id: 1,
-				user: {
-					id: 2,
-					name: 'May',
-					description: "Hi I'm May"
-				},
-				content: 'Comment One'
-			}
-		]
-	},
-	{
-		id: 4,
-		user: {
-			id: 1,
-			name: 'lewis',
-			description: "Hi I'm Lewis"
-		},
-		title: 'Post 1 Post 1 Post 1 Post 1 Post 1 Post 1 Post 1 Post 1 Post 1 Post 1 Post 1 ',
-		content:
-			'Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content ',
-		createdAt: '2020-01-20',
-		views: 132,
-		likes: 10,
-		comments: [
-			{
-				id: 1,
-				user: {
-					id: 2,
-					name: 'May',
-					description: "Hi I'm May"
-				},
-				content: 'Comment One'
-			}
-		]
-	},
-	{
-		id: 5,
-		user: {
-			id: 1,
-			name: 'lewis',
-			description: "Hi I'm Lewis"
-		},
-		title: 'Post 1 Post 1 Post 1 Post 1 Post 1 Post 1 Post 1 Post 1 Post 1 Post 1 Post 1 ',
-		content:
-			'Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content ',
-		createdAt: '2020-01-20',
-		views: 132,
-		likes: 10,
-		comments: [
-			{
-				id: 1,
-				user: {
-					id: 2,
-					name: 'May',
-					description: "Hi I'm May"
-				},
-				content: 'Comment One'
-			}
-		]
-	},
-	{
-		id: 6,
-		user: {
-			id: 1,
-			name: 'lewis',
-			description: "Hi I'm Lewis"
-		},
-		title: 'Post 1 Post 1 Post 1 Post 1 Post 1 Post 1 Post 1 Post 1 Post 1 Post 1 Post 1 ',
-		content:
-			'Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content ',
-		createdAt: '2020-01-20',
-		views: 132,
-		likes: 10,
-		comments: [
-			{
-				id: 1,
-				user: {
-					id: 2,
-					name: 'May',
-					description: "Hi I'm May"
-				},
-				content: 'Comment One'
-			}
-		]
-	},
-	{
-		id: 7,
-		user: {
-			id: 1,
-			name: 'lewis',
-			description: "Hi I'm Lewis"
-		},
-		title: 'Post 1 Post 1 Post 1 Post 1 Post 1 Post 1 Post 1 Post 1 Post 1 Post 1 Post 1 ',
-		content:
-			'Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content ',
-		createdAt: '2020-01-20',
-		views: 132,
-		likes: 10,
-		comments: [
-			{
-				id: 1,
-				user: {
-					id: 2,
-					name: 'May',
-					description: "Hi I'm May"
-				},
-				content: 'Comment One'
-			}
-		]
-	},
-	{
-		id: 8,
-		user: {
-			id: 1,
-			name: 'lewis',
-			description: "Hi I'm Lewis"
-		},
-		title: 'Post 1 Post 1 Post 1 Post 1 Post 1 Post 1 Post 1 Post 1 Post 1 Post 1 Post 1 ',
-		content:
-			'Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content ',
-		createdAt: '2020-01-20',
-		views: 132,
-		likes: 10,
-		comments: [
-			{
-				id: 1,
-				user: {
-					id: 2,
-					name: 'May',
-					description: "Hi I'm May"
-				},
-				content: 'Comment One'
-			}
-		]
-	},
-	{
-		id: 11,
-		user: {
-			id: 1,
-			name: 'lewis',
-			description: "Hi I'm Lewis"
-		},
-		title: 'Post 1 Post 1 Post 1 Post 1 Post 1 Post 1 Post 1 Post 1 Post 1 Post 1 Post 1 ',
-		content:
-			'Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content ',
-		createdAt: '2020-01-20',
-		views: 132,
-		likes: 10,
-		comments: [
-			{
-				id: 1,
-				user: {
-					id: 2,
-					name: 'May',
-					description: "Hi I'm May"
-				},
-				content: 'Comment One'
-			}
-		]
-	},
-	{
-		id: 12,
-		user: {
-			id: 1,
-			name: 'lewis',
-			description: "Hi I'm Lewis"
-		},
-		title: 'Post 1 Post 1 Post 1 Post 1 Post 1 Post 1 Post 1 Post 1 Post 1 Post 1 Post 1 ',
-		content:
-			'Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content ',
-		createdAt: '2020-01-20',
-		views: 132,
-		likes: 10,
-		comments: [
-			{
-				id: 1,
-				user: {
-					id: 2,
-					name: 'May',
-					description: "Hi I'm May"
-				},
-				content: 'Comment One'
-			}
-		]
-	},
-	{
-		id: 311,
-		user: {
-			id: 1,
-			name: 'lewis',
-			description: "Hi I'm Lewis"
-		},
-		title: 'Post 1 Post 1 Post 1 Post 1 Post 1 Post 1 Post 1 Post 1 Post 1 Post 1 Post 1 ',
-		content:
-			'Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content Post 1 Content ',
-		createdAt: '2020-01-20',
-		views: 132,
-		likes: 10,
-		comments: [
-			{
-				id: 1,
-				user: {
-					id: 2,
-					name: 'May',
-					description: "Hi I'm May"
-				},
-				content: 'Comment One'
-			}
-		]
-	}
-];

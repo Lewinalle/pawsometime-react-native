@@ -76,7 +76,7 @@ export const requestFriend = async (data) => {
 
 		const res = await axios(options);
 
-		return res.data.user;
+		return res.data;
 	} catch (err) {
 		console.log(err);
 	}
@@ -97,7 +97,7 @@ export const acceptFriend = async (data) => {
 
 		const res = await axios(options);
 
-		return res.data.user;
+		return res.data;
 	} catch (err) {
 		console.log(err);
 	}
@@ -118,7 +118,7 @@ export const rejectFriend = async (data) => {
 
 		const res = await axios(options);
 
-		return res.data.user;
+		return res.data;
 	} catch (err) {
 		console.log(err);
 	}
@@ -139,7 +139,7 @@ export const cancelFriend = async (data) => {
 
 		const res = await axios(options);
 
-		return res.data.user;
+		return res.data;
 	} catch (err) {
 		console.log(err);
 	}
@@ -160,7 +160,7 @@ export const removeFriend = async (data) => {
 
 		const res = await axios(options);
 
-		return res.data.user;
+		return res.data;
 	} catch (err) {
 		console.log(err);
 	}

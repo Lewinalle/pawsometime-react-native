@@ -5,6 +5,8 @@ import { vectorIcon } from '../Utils/Icon';
 export function BoardListItemRenderer(props) {
 	const { post, isFirst } = props;
 
+	const dateTime = new Date(post.createdAt);
+
 	return (
 		<TouchableHighlight
 			onPress={() => props.handlePostClick(post)}
@@ -20,13 +22,12 @@ export function BoardListItemRenderer(props) {
 					</Text>
 					<View style={style.infoRow}>
 						<View style={style.createdAtIcon}>{vectorIcon('AntDesign', 'calendar', 14)}</View>
-						<Text style={style.createdAtText}>{post.createdAt}</Text>
-
-						<View style={style.viewsIcon}>{vectorIcon('Entypo', 'magnifying-glass', 12)}</View>
-						<Text style={style.viewsText}>{post.views}</Text>
+						<Text style={style.createdAtText}>
+							{dateTime.toLocaleDateString()}, {dateTime.toLocaleTimeString()}
+						</Text>
 
 						<View style={style.likesIcon}>{vectorIcon('EvilIcons', 'like', 18)}</View>
-						<Text style={style.likesText}>{post.likes}</Text>
+						<Text style={style.likesText}>{post.likes.length}</Text>
 
 						<View style={style.commentsIcon}>
 							{vectorIcon('MaterialCommunityIcons', 'comment-multiple-outline', 10)}
@@ -90,7 +91,8 @@ const style = StyleSheet.create({
 		marginBottom: -3
 	},
 	likesText: {
-		marginRight: 12
+		marginRight: 12,
+		marginLeft: 2
 	},
 	commentsIcon: {
 		alignSelf: 'center',

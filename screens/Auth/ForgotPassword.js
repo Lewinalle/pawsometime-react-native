@@ -42,7 +42,7 @@ const ForgotPassword = (props) => {
 		try {
 			setIsSending(true);
 
-			await Auth.forgotPassword(email);
+			const res = await Auth.forgotPassword(email);
 
 			setIsSending(false);
 
@@ -82,7 +82,7 @@ const ForgotPassword = (props) => {
 			<View>
 				<Text>
 					Please enter the email address associated with your account and we'll email you a password reset
-					link.
+					link. If you have not registered or verified your email, you won't get this email.
 				</Text>
 				<Input
 					label="EMAIL"

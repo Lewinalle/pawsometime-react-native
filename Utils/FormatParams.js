@@ -4,7 +4,7 @@ export const formatUsersIdsParams = (userIds) => {
 		if (userIdsParam !== '') {
 			userIdsParam += ',';
 		}
-		userIdsParam += id;
+		userIdsParam += `"${id}"`;
 	});
 	userIdsParam = `[${userIdsParam}]`;
 

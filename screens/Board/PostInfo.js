@@ -81,8 +81,9 @@ const PostInfo = (props) => {
 			userId: props.currentDBUser.id
 		};
 
-		await likeResource(post.id, body);
-		await handlePostInfoAction(post.id, hasUserLiked ? 1 : 0);
+		const resItem = await likeResource(post.id, body);
+
+		await handlePostInfoAction(post.id, hasUserLiked ? 1 : 0, resItem);
 
 		setIsSubmitting(false);
 	};
@@ -101,7 +102,7 @@ const PostInfo = (props) => {
 				userAvatar: props.currentDBUser.avatar ? props.currentDBUser.avatar : null
 			};
 
-			await addComment(post.id, body);
+			const resItem = await addComment(post.id, body);
 
 			setComment('');
 
@@ -114,7 +115,7 @@ const PostInfo = (props) => {
 					{
 						text: 'OK',
 						onPress: async () => {
-							await handlePostInfoAction(post.id, 2);
+							await handlePostInfoAction(post.id, 2, resItem);
 
 							setTimeout(() => {
 								setIsSubmitting(false);
@@ -150,7 +151,7 @@ const PostInfo = (props) => {
 							resource: `posts_${postType}`
 						};
 
-						await deleteComment(post.id, commentId, body);
+						const resItem = await deleteComment(post.id, commentId, body);
 
 						// update frontend without refreshing
 						let newPost = post;
@@ -164,7 +165,7 @@ const PostInfo = (props) => {
 								{
 									text: 'Yes',
 									onPress: async () => {
-										await handlePostInfoAction(post.id, 3);
+										await handlePostInfoAction(post.id, 3, resItem);
 									}
 								}
 							],
@@ -205,7 +206,7 @@ const PostInfo = (props) => {
 								{
 									text: 'Yes',
 									onPress: async () => {
-										await handlePostInfoAction(post.id, 4);
+										await handlePostInfoAction(post.id, 4, null);
 										props.navigation.navigate('Board');
 									}
 								}
@@ -279,18 +280,8 @@ const PostInfo = (props) => {
 								</View>
 							</View>
 						</View>
-						<View style={{ paddingHorizontal: 10, paddingVertical: 8 }}>
-							<Text style={{ marginBottom: 10 }}>
-								{post.description}
-								{post.description}
-								{post.description}
-								{post.description}
-								{post.description}
-								{post.description}
-								{post.description}
-								{post.description}
-								{post.description}
-							</Text>
+						<View style={{ paddingHorizontal: 10, paddingVertical: 8, backgroundColor: '#a2a0a3' }}>
+							<Text style={{ marginBottom: 10 }}>{post.description}</Text>
 							<View
 								style={{
 									flex: 1,
@@ -407,11 +398,7 @@ const PostInfo = (props) => {
 												</View>
 											</View>
 											<View>
-												<Text>
-													{c.description}
-													{c.description}
-													{c.description}
-												</Text>
+												<Text>{c.description}</Text>
 											</View>
 										</View>
 									</View>
