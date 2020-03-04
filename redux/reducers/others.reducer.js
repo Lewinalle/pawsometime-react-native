@@ -2,7 +2,7 @@ import { FETCH_NEWS, SET_CURRENT_LOCATION } from '../actions/index.actions';
 import Config from '../../config';
 
 const initialState = {
-	news: [],
+	news: null,
 	currentLocation: {
 		lat: Config.DEFAULT_LAT,
 		lon: Config.DEFAULT_LON

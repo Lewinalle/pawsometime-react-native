@@ -31,7 +31,7 @@ class Board extends Component {
 			currentPage: 1,
 			currentTab: 0,
 			isFetching: false,
-			posts: this.props.generalPosts ? this.props.generalPosts : [],
+			posts: this.props.generalPosts,
 			types: {
 				general: 1,
 				qna: 1,
@@ -209,7 +209,6 @@ class Board extends Component {
 		title: 'test',
 		headerRight: (
 			<HeaderRightComponent
-				//TODO: UPDATE BELOW (onRefresh: reset data displayed size && refetchData(reset search) && scroll to top)
 				handleRefreshBtn={navigation.getParam('refresh')}
 				handleCreateBtn={() => {
 					navigation.navigate('CreatePost', { onCreateBack: navigation.getParam('onCreateBack') });
@@ -250,14 +249,6 @@ class Board extends Component {
 						value={searchTerm}
 					/>
 				</View>
-				{/* <ScrollView style={styles.container} contentContainerStyle={{}}>
-					<View>
-						<BoardSearch />
-					</View>
-					<View>
-						{posts.map((item, index) => <BoardListItem key={index} post={item} isFirst={index === 0} />)}
-					</View>
-				</ScrollView> */}
 				<FlatList
 					ref={(ref) => (this.flatListRef = ref)}
 					style={{ marginTop: 35 }}
@@ -275,20 +266,6 @@ class Board extends Component {
 							/>
 						);
 					}}
-					// renderItem={(item) => {
-					// 	console.log(item);
-					// 	return (
-					// 		<View>
-					// 			<Text>asdasdasd</Text>
-					// 			<Text>asdasdasd</Text>
-					// 			<Text>asdasdasd</Text>
-					// 			<Text>asdasdasd</Text>
-					// 			<Text>asdasdasd</Text>
-					// 			<Text>asdasdasd</Text>
-					// 			<Text>asdasdasd</Text>
-					// 		</View>
-					// 	);
-					// }}
 					onEndReached={({ distanceFromEnd }) => {
 						console.log('end reached! loading more!');
 						if (posts.length > this.state.currentPage * PAGE_SIZE) {

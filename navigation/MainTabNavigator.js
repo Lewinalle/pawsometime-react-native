@@ -15,6 +15,8 @@ import Friends from '../screens/Settings/Friends';
 import SearchUsers from '../screens/Settings/SearchUsers';
 import ChangePassword from '../screens/Settings/ChangePassword';
 import Meetup from '../screens/Meetup/Meetup';
+import CreateMeetup from '../screens/Meetup/CreateMeetup';
+import MeetupInfo from '../screens/Meetup/MeetupInfo';
 import Board from '../screens/Board/Board';
 import CreatePost from '../screens/Board/CreatePost';
 import PostInfo from '../screens/Board/PostInfo';
@@ -54,7 +56,9 @@ HomeStack.path = '';
 
 const MeetupStack = createStackNavigator(
 	{
-		Meetup
+		Meetup,
+		CreateMeetup,
+		MeetupInfo
 	},
 	config
 );

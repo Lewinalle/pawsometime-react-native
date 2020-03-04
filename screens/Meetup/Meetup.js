@@ -1,10 +1,14 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { ScrollView, StyleSheet, Text, View, TouchableHighlight } from 'react-native';
+import React, { Component, useState, useEffect, useRef } from 'react';
+import { ScrollView, StyleSheet, Text, View, TouchableHighlight, TouchableOpacity } from 'react-native';
 import MeetupListCard from '../../components/MeetupListCard';
 import MapView, { Marker, Callout } from 'react-native-maps';
 import dimensions from '../../constants/Layout';
 import { CitySearch } from '../../components/CitySearch';
 import { connect } from 'react-redux';
+import { vectorIcon } from '../../Utils/Icon';
+import Config from '../../config';
+import _ from 'lodash';
+import { fetchMeetups } from '../../redux/actions/meetups.actions';
 
 const MAX_TITLE_LENGTH = 30;
 const MAP_WIDTH = dimensions.window.width - 32;
@@ -13,123 +17,202 @@ const DEFAULT_SCROLLVIEW_POSITION = 30;
 const LAT_DELTA = 0.07;
 const LON_DELTA = 0.07;
 
-const Meetup = (props) => {
-	const [ selected, setSelected ] = useState();
-	const [ scrollPos, setScrollPos ] = useState(0);
-	const [ scrollViewPos, setScrollViewPos ] = useState(DEFAULT_SCROLLVIEW_POSITION);
-	const scrollviewRef = useRef(null);
-	const viewRef = useRef(null);
-	const mapRef = useRef(null);
-	let markerRefs = {};
+class Meetup extends Component {
+	state = {
+		meetups: this.props.meetups,
+		selected: null,
+		scrollPos: 0,
+		scrollViewPos: DEFAULT_SCROLLVIEW_POSITION,
+		showModal: false,
+		lat_offset: LAT_DELTA,
+		lon_offset: LON_DELTA,
+		isFetching: false
+	};
+	markerRefs = {};
+	scrollviewRef = null;
+	viewRef = null;
+	mapRef = null;
 
-	const handleCardSelect = (item) => {
-		markerRefs[item.id].showCallout();
-		mapRef.current.animateToRegion({
-			latitude: item.location.lat,
-			longitude: item.location.lon,
-			latitudeDelta: LAT_DELTA,
-			longitudeDelta: LON_DELTA
+	async componentDidMount() {
+		const { navigation } = this.props;
+
+		navigation.setParams({
+			refresh: this.handleRefreshBtn,
+			onCreateBack: this.onCreateBack
 		});
+	}
 
-		setSelected(item.id);
+	static navigationOptions = ({ navigation, screenProps }) => ({
+		title: 'Meetup',
+		headerRight: (
+			<HeaderRightComponent
+				handleRefreshBtn={navigation.getParam('refresh')}
+				handleCreateBtn={() => {
+					navigation.navigate('CreateMeetup', { onCreateBack: navigation.getParam('onCreateBack') });
+				}}
+			/>
+		),
+		headerStyle: { backgroundColor: 'brown' },
+		headerTitleStyle: { color: 'blue' }
+	});
+
+	handleRefreshBtn = () => {
+		console.log('refreshing!');
 	};
 
-	const handleMarkerSelect = (item) => {
-		setSelected(item.id);
+	onCreateBack = () => {
+		console.log('to Create!');
 	};
 
-	const scrollToCard = (pageY) => {
-		scrollviewRef.current.scrollTo({
+	handleCardSelect = (item) => {
+		// this.markerRefs[item.id].showCallout();
+		// this.mapRef.animateToRegion({
+		// 	latitude: item.location.lat,
+		// 	longitude: item.location.lon,
+		// 	latitudeDelta: LAT_DELTA,
+		// 	longitudeDelta: LON_DELTA
+		// });
+
+		// this.setState({ selected: item.id });
+
+		this.props.navigation.navigate('MeetupInfo', { meetup: item });
+	};
+
+	handleMarkerSelect = (item) => {
+		this.setState({ selected: item.id });
+	};
+
+	scrollToCard = (pageY) => {
+		const { scrollPos, scrollViewPos } = this.state;
+
+		this.scrollviewRef.scrollTo({
 			x: 0,
 			y: pageY + scrollPos - scrollViewPos,
 			animated: true
 		});
 	};
 
-	const [ showModal, setShowModal ] = useState(false);
-	const triggerModal = (bool) => {
-		setShowModal(bool);
+	triggerModal = (bool) => {
+		this.setState({ showModal: bool });
 	};
 
-	return (
-		<View style={styles.container}>
-			<CitySearch showModal={showModal} triggerModal={triggerModal} />
-			<MapView
-				ref={mapRef}
-				style={styles.map}
-				initialRegion={{
-					latitude: props.currentLocation.lat,
-					longitude: props.currentLocation.lon,
-					latitudeDelta: LAT_DELTA,
-					longitudeDelta: LON_DELTA
-				}}
-			>
-				{meetups.map((item, index) => {
-					let titleTruncated =
-						item.title.length > MAX_TITLE_LENGTH + 5
-							? item.title.substring(0, MAX_TITLE_LENGTH) + '...'
-							: item.title;
-					return (
-						<Marker
-							key={index}
-							ref={(el) => (markerRefs[item.id] = el)}
-							coordinate={{
-								latitude: item.location.lat,
-								longitude: item.location.lon
-							}}
-							title={titleTruncated}
-							onPress={() => handleMarkerSelect(item)}
-						>
-							<Callout>
-								<Text>{titleTruncated}</Text>
-							</Callout>
-						</Marker>
-					);
-				})}
-			</MapView>
-			<TouchableHighlight onPress={() => triggerModal(true)}>
-				<Text>Touch item or marker twice to go to the meetup page</Text>
-			</TouchableHighlight>
-			<ScrollView
-				ref={scrollviewRef}
-				style={styles.container}
-				contentContainerStyle={styles.contentContainer}
-				onScroll={({ nativeEvent }) => setScrollPos(nativeEvent.contentOffset.y)}
-			>
-				<View
-					ref={viewRef}
-					onLayout={() => {
-						if (viewRef) {
-							viewRef.current.measure((x, y, width, height, pageX, pageY) => {
-								setScrollViewPos(pageY);
-							});
-						}
+	render() {
+		const { selected, showModal, lat_offset, lon_offset, meetups } = this.state;
+		// TODO: add meetups to state
+		// TODO: clear marker refs when refreshing/searching
+
+		if (!meetups) {
+			return null;
+		}
+
+		return (
+			<View style={styles.container}>
+				<CitySearch showModal={showModal} triggerModal={this.triggerModal} />
+				<MapView
+					ref={(el) => (this.mapRef = el)}
+					style={styles.map}
+					initialRegion={{
+						latitude: this.props.currentLocation.lat,
+						longitude: this.props.currentLocation.lon,
+						latitudeDelta: lat_offset,
+						longitudeDelta: lon_offset
 					}}
 				>
-					{meetups.map((item, index) => (
-						<MeetupListCard
-							key={index}
-							meetup={item}
-							selected={item.id === selected}
-							handleCardSelect={handleCardSelect}
-							scrollToCard={scrollToCard}
-						/>
-					))}
-				</View>
-			</ScrollView>
+					{meetups.map((item, index) => {
+						let titleTruncated =
+							item.title.length > MAX_TITLE_LENGTH + 5
+								? item.title.substring(0, MAX_TITLE_LENGTH) + '...'
+								: item.title;
+						return (
+							<Marker
+								key={index}
+								ref={(el) => (this.markerRefs[item.id] = el)}
+								coordinate={{
+									latitude: item.latlon.lat,
+									longitude: item.latlon.lon
+								}}
+								title={titleTruncated}
+								onPress={() => this.handleMarkerSelect(item)}
+							>
+								<Callout>
+									<Text>{titleTruncated}</Text>
+								</Callout>
+							</Marker>
+						);
+					})}
+				</MapView>
+				<TouchableHighlight onPress={() => this.triggerModal(true)}>
+					<Text>Touch item or marker twice to go to the meetup page</Text>
+				</TouchableHighlight>
+				<ScrollView
+					ref={(el) => (this.scrollviewRef = el)}
+					style={styles.container}
+					contentContainerStyle={styles.contentContainer}
+					onScroll={({ nativeEvent }) => this.setState({ scrollPos: nativeEvent.contentOffset.y })}
+				>
+					<View
+						ref={(el) => (this.viewRef = el)}
+						onLayout={() => {
+							if (this.viewRef) {
+								this.viewRef.measure((x, y, width, height, pageX, pageY) => {
+									this.setState({ scrollViewPos: pageY });
+									// setScrollViewPos(pageY);
+								});
+							}
+						}}
+					>
+						{meetups.map((item, index) => (
+							<MeetupListCard
+								key={index}
+								meetup={item}
+								selected={item.id === selected}
+								handleCardSelect={this.handleCardSelect}
+								scrollToCard={this.scrollToCard}
+							/>
+						))}
+					</View>
+				</ScrollView>
+			</View>
+		);
+	}
+}
+
+const HeaderRightComponent = (props) => {
+	const [ isDisabled, setIsDisabled ] = useState(false);
+	return (
+		<View style={{ flex: 1, flexDirection: 'row' }}>
+			<TouchableOpacity
+				onPress={async () => {
+					if (!isDisabled) {
+						setIsDisabled(true);
+						await props.handleRefreshBtn();
+					}
+					setTimeout(() => {
+						setIsDisabled(false);
+					}, 3000);
+				}}
+				disabled={isDisabled}
+				style={{ opacity: isDisabled ? 0.2 : 1 }}
+			>
+				<View style={{ marginRight: 20 }}>{vectorIcon('FrontAwesome', 'refresh', 26)}</View>
+			</TouchableOpacity>
+			<TouchableOpacity onPress={props.handleCreateBtn}>
+				<View style={{ marginRight: 25 }}>{vectorIcon('Feather', 'plus-circle', 26)}</View>
+			</TouchableOpacity>
 		</View>
 	);
 };
 
-Meetup.navigationOptions = {
-	title: 'Meetup'
-};
-
-const mapStateToProps = ({ others }) => ({
-	currentLocation: others.currentLocation
+const mapStateToProps = ({ others, meetups }) => ({
+	currentLocation: others.currentLocation,
+	meetups: meetups.meetups
 });
 
-export default connect(mapStateToProps)(Meetup);
+const mapDispatchToProps = {
+	fetchMeetups
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(Meetup);
 
 const styles = StyleSheet.create({
 	map: {
@@ -156,11 +239,9 @@ const meetups = [
 			lat: 40.74061,
 			lon: -73.945242
 		},
-		host: {
-			id: 1,
-			name: 'Lewis',
-			description: "Hi I'm Lewis"
-		},
+		isPrivate: true,
+		userId: 12345,
+		userName: 'Lewis Main',
 		pending: [
 			{
 				id: 2,
@@ -168,11 +249,22 @@ const meetups = [
 				description: "Hi I'm May"
 			}
 		],
-		users: [
+		joined: [
 			{
 				id: 3,
 				name: 'Lewis Two',
 				description: "Hi I'm Lewis Two"
+			}
+		],
+		likes: [ 12345, 54321 ],
+		comments: [
+			{
+				id: 11111,
+				description: 'comment one',
+				userId: 54321,
+				userName: 'Lewis main',
+				userAvatar: null,
+				createdAt: 154325223
 			}
 		]
 	},
@@ -183,42 +275,11 @@ const meetups = [
 			'meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk ',
 		location: {
 			lat: 40.73061,
-			lon: -73.945242
-		},
-		host: {
-			id: 1,
-			name: 'Lewis',
-			description: "Hi I'm Lewis"
-		},
-		pending: [
-			{
-				id: 2,
-				name: 'May',
-				description: "Hi I'm May"
-			}
-		],
-		users: [
-			{
-				id: 3,
-				name: 'Lewis Two',
-				description: "Hi I'm Lewis Two"
-			}
-		]
-	},
-	{
-		id: 3,
-		title: '33 Lets Party Lets Party Lets Party Lets Party Lets Party Lets Party Lets Party Lets Party ',
-		description:
-			'meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk ',
-		location: {
-			lat: 40.74061,
 			lon: -73.935242
 		},
-		host: {
-			id: 1,
-			name: 'Lewis',
-			description: "Hi I'm Lewis"
-		},
+		isPrivate: false,
+		userId: 12345,
+		userName: 'Lewis Main',
 		pending: [
 			{
 				id: 2,
@@ -226,243 +287,22 @@ const meetups = [
 				description: "Hi I'm May"
 			}
 		],
-		users: [
+		joined: [
 			{
 				id: 3,
 				name: 'Lewis Two',
 				description: "Hi I'm Lewis Two"
-			}
-		]
-	},
-	{
-		id: 4,
-		title: '44 Lets Party Lets Party Lets Party Lets Party Lets Party Lets Party Lets Party Lets Party ',
-		description:
-			'meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk ',
-		location: {
-			lat: 40.72061,
-			lon: -73.925242
-		},
-		host: {
-			id: 1,
-			name: 'Lewis',
-			description: "Hi I'm Lewis"
-		},
-		pending: [
-			{
-				id: 2,
-				name: 'May',
-				description: "Hi I'm May"
 			}
 		],
-		users: [
+		likes: [ 12345, 54321 ],
+		comments: [
 			{
-				id: 3,
-				name: 'Lewis Two',
-				description: "Hi I'm Lewis Two"
-			}
-		]
-	},
-	{
-		id: 5,
-		title: '55 Lets Party Lets Party Lets Party Lets Party Lets Party Lets Party Lets Party Lets Party ',
-		description:
-			'meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk ',
-		location: {
-			lat: 40.72061,
-			lon: -73.935242
-		},
-		host: {
-			id: 1,
-			name: 'Lewis',
-			description: "Hi I'm Lewis"
-		},
-		pending: [
-			{
-				id: 2,
-				name: 'May',
-				description: "Hi I'm May"
-			}
-		],
-		users: [
-			{
-				id: 3,
-				name: 'Lewis Two',
-				description: "Hi I'm Lewis Two"
-			}
-		]
-	},
-	{
-		id: 6,
-		title: '66Lets Party Lets Party Lets Party Lets Party Lets Party Lets Party Lets Party Lets Party ',
-		description:
-			'meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk ',
-		location: {
-			lat: 40.73061,
-			lon: -73.925242
-		},
-		host: {
-			id: 1,
-			name: 'Lewis',
-			description: "Hi I'm Lewis"
-		},
-		pending: [
-			{
-				id: 2,
-				name: 'May',
-				description: "Hi I'm May"
-			}
-		],
-		users: [
-			{
-				id: 3,
-				name: 'Lewis Two',
-				description: "Hi I'm Lewis Two"
-			}
-		]
-	},
-	{
-		id: 7,
-		title: '77 Lets Party Lets Party Lets Party Lets Party Lets Party Lets Party Lets Party Lets Party ',
-		description:
-			'meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk ',
-		location: {
-			lat: 40.71061,
-			lon: -73.915242
-		},
-		host: {
-			id: 1,
-			name: 'Lewis',
-			description: "Hi I'm Lewis"
-		},
-		pending: [
-			{
-				id: 2,
-				name: 'May',
-				description: "Hi I'm May"
-			}
-		],
-		users: [
-			{
-				id: 3,
-				name: 'Lewis Two',
-				description: "Hi I'm Lewis Two"
-			}
-		]
-	},
-	{
-		id: 8,
-		title: '88 Lets Party Lets Party Lets Party Lets Party Lets Party Lets Party Lets Party Lets Party ',
-		description:
-			'meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk ',
-		location: {
-			lat: 40.71061,
-			lon: -73.935242
-		},
-		host: {
-			id: 1,
-			name: 'Lewis',
-			description: "Hi I'm Lewis"
-		},
-		pending: [
-			{
-				id: 2,
-				name: 'May',
-				description: "Hi I'm May"
-			}
-		],
-		users: [
-			{
-				id: 3,
-				name: 'Lewis Two',
-				description: "Hi I'm Lewis Two"
-			}
-		]
-	},
-	{
-		id: 9,
-		title: '99 Lets Party Lets Party Lets Party Lets Party Lets Party Lets Party Lets Party Lets Party ',
-		description:
-			'meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk ',
-		location: {
-			lat: 40.71061,
-			lon: -73.925242
-		},
-		host: {
-			id: 1,
-			name: 'Lewis',
-			description: "Hi I'm Lewis"
-		},
-		pending: [
-			{
-				id: 2,
-				name: 'May',
-				description: "Hi I'm May"
-			}
-		],
-		users: [
-			{
-				id: 3,
-				name: 'Lewis Two',
-				description: "Hi I'm Lewis Two"
-			}
-		]
-	},
-	{
-		id: 10,
-		title: '100 Lets Party Lets Party Lets Party Lets Party Lets Party Lets Party Lets Party Lets Party ',
-		description:
-			'meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk ',
-		location: {
-			lat: 40.73061,
-			lon: -73.915242
-		},
-		host: {
-			id: 1,
-			name: 'Lewis',
-			description: "Hi I'm Lewis"
-		},
-		pending: [
-			{
-				id: 2,
-				name: 'May',
-				description: "Hi I'm May"
-			}
-		],
-		users: [
-			{
-				id: 3,
-				name: 'Lewis Two',
-				description: "Hi I'm Lewis Two"
-			}
-		]
-	},
-	{
-		id: 11,
-		title: '111 Lets Party Lets Party Lets Party Lets Party Lets Party Lets Party Lets Party Lets Party ',
-		description:
-			'meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk ',
-		location: {
-			lat: 40.73061,
-			lon: -73.925242
-		},
-		host: {
-			id: 1,
-			name: 'Lewis',
-			description: "Hi I'm Lewis"
-		},
-		pending: [
-			{
-				id: 2,
-				name: 'May',
-				description: "Hi I'm May"
-			}
-		],
-		users: [
-			{
-				id: 3,
-				name: 'Lewis Two',
-				description: "Hi I'm Lewis Two"
+				id: 11111,
+				description: 'comment one',
+				userId: 54321,
+				userName: 'Lewis main',
+				userAvatar: null,
+				createdAt: 154325223
 			}
 		]
 	}

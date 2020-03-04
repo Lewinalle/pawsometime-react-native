@@ -10,11 +10,11 @@ import {
 } from '../actions/index.actions';
 
 const initialState = {
-	generalPosts: [],
+	generalPosts: null,
 	questionPosts: [],
 	tipPosts: [],
 	tradePosts: [],
-	userGeneralPosts: [],
+	userGeneralPosts: null,
 	userQuestionPosts: [],
 	userTipPosts: [],
 	userTradePosts: []

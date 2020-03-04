@@ -13,6 +13,8 @@ import { setCurrentLocation } from './redux/actions/others.actions';
 const postTypes = [ 'general', 'qna', 'tips', 'trade' ];
 
 const AppManager = (props) => {
+	const [ isSplashOpen, setisSplashOpen ] = useState(true);
+
 	Amplify.configure({
 		Auth: {
 			mandatorySignId: true,
@@ -40,45 +42,56 @@ const AppManager = (props) => {
 				// console.log('Current DB User in AppManager.js: ');
 				// console.log(DBUser);
 				await AsyncStorage.setItem('user_id', user.attributes.sub);
-				// if (user) {
-				// 	let currentLocation;
-				// 	await navigator.geolocation.getCurrentPosition(
-				// 		async (position) => {
-				// 			currentLocation = {
-				// 				lat: position.coords.latitude,
-				// 				lon: position.coords.longitude
-				// 			};
-				// 			await props.setCurrentLocation(currentLocation);
-				// 			await props.fetchMeetups({
-				// 				lat: currentLocation.lat,
-				// 				lon: currentLocation.lon
-				// 			});
-				// 		},
-				// 		async (error) => {
-				// 			await props.fetchMeetups();
-				// 			// Alert.alert(error.message);
-				// 		},
-				// 		{ enableHighAccuracy: true, timeout: 10000, maximumAge: 1000 }
-				// 	);
-				// 	// TODO: UNCOMMENT BELOW
-				// 	await props.fetchUserMeetups(user.attributes.sub);
-				// 	await postTypes.map(async (type) => {
-				// 		await fetchPosts({ type });
-				// 		await fetchUserPosts(user.attributes.sub, { type });
-				// 	});
-				// }
+				if (user) {
+					let currentLocation;
+					await navigator.geolocation.getCurrentPosition(
+						async (position) => {
+							currentLocation = {
+								lat: position.coords.latitude,
+								lon: position.coords.longitude
+							};
+							await props.setCurrentLocation(currentLocation);
+							await props.fetchMeetups({
+								lat: currentLocation.lat,
+								lon: currentLocation.lon
+							});
+						},
+						async (error) => {
+							await props.fetchMeetups();
+						},
+						{ enableHighAccuracy: true, timeout: 10000, maximumAge: 1000 }
+					);
+					// TODO: UNCOMMENT BELOW
+					// await props.fetchUserMeetups(user.attributes.sub);
+					// await props.fetchPosts({ type: 'general' });
+					// await props.fetchUserPosts(user.attributes.sub, { type: 'general' });
+				}
 			} catch (err) {
 				console.log(err);
 			}
 		};
 		persistUserAuth();
-		props.hideSplash();
 	}, []);
+
+	// if (isSplashOpen && props.meetups && props.userMeetups && props.generalPosts && props.userGeneralPosts) {
+	if (isSplashOpen && props.meetups) {
+		setisSplashOpen(false);
+		setTimeout(() => {
+			props.hideSplash();
+		}, 350);
+	}
 
 	return <AppNavigator />;
 };
 
 const styles = StyleSheet.create({});
+
+const mapStateToProps = ({ others, meetups, posts }) => ({
+	currentLocation: others.currentLocation,
+	meetups: meetups.meetups,
+	generalPosts: posts.generalPosts,
+	userGeneralPosts: posts.userGeneralPosts
+});
 
 const mapDispatchToProps = {
 	setAuthStatus,
@@ -91,4 +104,4 @@ const mapDispatchToProps = {
 	setCurrentLocation
 };
 
-export default connect(null, mapDispatchToProps)(AppManager);
+export default connect(mapStateToProps, mapDispatchToProps)(AppManager);

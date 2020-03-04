@@ -1,8 +1,8 @@
 import { FETCH_MEETUPS, FETCH_USER_MEETUPS } from '../actions/index.actions';
 
 const initialState = {
-	meetups: [],
-	userMeetups: []
+	meetups: null,
+	userMeetups: null
 };
 
 const meetupsReducer = (state = initialState, action = {}) => {

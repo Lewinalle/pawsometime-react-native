@@ -16,28 +16,25 @@ import { uploadToS3 } from '../../helpers/uploadToS3';
 import * as ImagePicker from 'expo-image-picker';
 import Constants from '../../constants/Layout';
 import * as Permissions from 'expo-permissions';
-import { createPost } from '../../Services/posts';
 import { connect } from 'react-redux';
 import Config from '../../config';
-import { fetchPosts } from '../../redux/actions/posts.actions';
 import CacheImage from '../../components/CacheImage';
 import { vectorIcon } from '../../Utils/Icon';
 import { likeResource, addComment, deleteComment } from '../../Services/general';
-import { fetchPostInfo, deletePost } from '../../Services/posts';
+import { fetchMeetupInfo, deleteMeetup } from '../../Services/meetups';
 
-const PostInfo = (props) => {
-	const [ post, setPost ] = useState(props.navigation.getParam('post') ? props.navigation.getParam('post') : {});
+const MeetupInfo = (props) => {
+	const [ meetup, setMeetup ] = useState(props.navigation.getParam('meetup'));
 	const [ comment, setComment ] = useState('');
 	const [ isSubmitting, setIsSubmitting ] = useState(false);
 	const [ containerWidth, setContainerWidth ] = useState(350);
 
 	const containerRef = useRef(null);
 
-	const postType = props.navigation.getParam('postType');
-	const handlePostInfoAction = props.navigation.getParam('handlePostInfoAction');
+	const handleMeetupInfoAction = props.navigation.getParam('handleMeetupInfoAction');
 
-	const dateTime = new Date(post.updatedAt);
-	const hasUserLiked = post.likes.includes(props.currentDBUser.id);
+	const dateTime = new Date(meetup.updatedAt);
+	const hasUserLiked = meetup.likes.includes(props.currentDBUser.id);
 
 	const refresh = async () => {
 		if (isSubmitting) {
@@ -47,9 +44,9 @@ const PostInfo = (props) => {
 
 		setIsSubmitting(true);
 
-		const newPost = await fetchPostInfo(post.id, postType);
+		const newMeetup = await fetchMeetupInfo(meetup.id);
 
-		setPost(newPost);
+		setMeetup(newMeetup);
 
 		setTimeout(() => {
 			setIsSubmitting(false);
@@ -65,25 +62,25 @@ const PostInfo = (props) => {
 		setIsSubmitting(true);
 
 		// update frontend first for better UX
-		let newPost = post;
+		let newMeetup = meetup;
 
 		if (hasUserLiked) {
-			newPost.likes = newPost.likes.filter((item) => item !== props.currentDBUser.id);
+			newMeetup.likes = newMeetup.likes.filter((item) => item !== props.currentDBUser.id);
 		} else {
-			newPost.likes.push(props.currentDBUser.id);
+			newMeetup.likes.push(props.currentDBUser.id);
 		}
 
-		setPost(newPost);
+		setMeetup(newMeetup);
 
 		// send request
 		let body = {
-			resource: `posts_${postType}`,
+			resource: 'meetups',
 			userId: props.currentDBUser.id
 		};
 
-		const resItem = await likeResource(post.id, body);
+		const resItem = await likeResource(meetup.id, body);
 
-		await handlePostInfoAction(post.id, hasUserLiked ? 1 : 0, resItem);
+		// await handleMeetupInfoAction(meetup.id, hasUserLiked ? 1 : 0, resItem);
 
 		setIsSubmitting(false);
 	};
@@ -95,14 +92,14 @@ const PostInfo = (props) => {
 			console.log('Not Submitting, adding a comment.');
 
 			const body = {
-				resource: `posts_${postType}`,
+				resource: 'meetups',
 				description: comment,
 				userId: props.currentDBUser.id,
 				userName: props.currentDBUser.username,
 				userAvatar: props.currentDBUser.avatar ? props.currentDBUser.avatar : null
 			};
 
-			const resItem = await addComment(post.id, body);
+			const resItem = await addComment(meetup.id, body);
 
 			setComment('');
 
@@ -115,7 +112,7 @@ const PostInfo = (props) => {
 					{
 						text: 'OK',
 						onPress: async () => {
-							await handlePostInfoAction(post.id, 2, resItem);
+							// await handleMeetupInfoAction(meetup.id, 2, resItem);
 
 							setTimeout(() => {
 								setIsSubmitting(false);
@@ -136,8 +133,6 @@ const PostInfo = (props) => {
 			return;
 		}
 
-		console.log('delete!');
-
 		Alert.alert(
 			'Warning!',
 			'Are you sure you want to delete this comment?',
@@ -148,15 +143,15 @@ const PostInfo = (props) => {
 						setIsSubmitting(true);
 
 						const body = {
-							resource: `posts_${postType}`
+							resource: 'meetups'
 						};
 
-						const resItem = await deleteComment(post.id, commentId, body);
+						const resItem = await deleteComment(meetup.id, commentId, body);
 
 						// update frontend without refreshing
-						let newPost = post;
-						newPost.comments = newPost.comments.filter((item) => item.id !== commentId);
-						setPost(newPost);
+						let newMeetup = meetup;
+						newMeetup.comments = newMeetup.comments.filter((item) => item.id !== commentId);
+						setMeetup(newMeetup);
 
 						Alert.alert(
 							'Success!',
@@ -165,7 +160,7 @@ const PostInfo = (props) => {
 								{
 									text: 'Yes',
 									onPress: async () => {
-										await handlePostInfoAction(post.id, 3, resItem);
+										// await handleMeetupInfoAction(meetup.id, 3, resItem);
 									}
 								}
 							],
@@ -183,47 +178,47 @@ const PostInfo = (props) => {
 		);
 	};
 
-	const handleDeletePost = async () => {
-		if (isSubmitting) {
-			console.log('already submitting, wait!');
-			return;
-		}
+	// const handleDeleteMeetup = async () => {
+	// 	if (isSubmitting) {
+	// 		console.log('already submitting, wait!');
+	// 		return;
+	// 	}
 
-		Alert.alert(
-			'Warning!',
-			'Are you sure you want to delete this post?',
-			[
-				{
-					text: 'Yes',
-					onPress: async () => {
-						setIsSubmitting(true);
-						await deletePost(post.id, postType);
+	// 	Alert.alert(
+	// 		'Warning!',
+	// 		'Are you sure you want to delete this meetup?',
+	// 		[
+	// 			{
+	// 				text: 'Yes',
+	// 				onPress: async () => {
+	// 					setIsSubmitting(true);
+	// 					await deleteMeetup(meetup.id);
 
-						Alert.alert(
-							'Success!',
-							'Your post has been successfully deleted.',
-							[
-								{
-									text: 'Yes',
-									onPress: async () => {
-										await handlePostInfoAction(post.id, 4, null);
-										props.navigation.navigate('Board');
-									}
-								}
-							],
-							{ cancelable: false }
-						);
+	// 					Alert.alert(
+	// 						'Success!',
+	// 						'Your meetup has been successfully deleted.',
+	// 						[
+	// 							{
+	// 								text: 'Yes',
+	// 								onPress: async () => {
+	// 									await handleMeetupInfoAction(meetup.id, 4, null);
+	// 									props.navigation.navigate('Board');
+	// 								}
+	// 							}
+	// 						],
+	// 						{ cancelable: false }
+	// 					);
 
-						setIsSubmitting(false);
-					}
-				},
-				{
-					text: 'No'
-				}
-			],
-			{ cancelable: false }
-		);
-	};
+	// 					setIsSubmitting(false);
+	// 				}
+	// 			},
+	// 			{
+	// 				text: 'No'
+	// 			}
+	// 		],
+	// 		{ cancelable: false }
+	// 	);
+	// };
 
 	return (
 		<View
@@ -248,7 +243,7 @@ const PostInfo = (props) => {
 						style={{ backgroundColor: '#8a8483' }}
 					>
 						<View style={{ backgroundColor: '#75706f', paddingHorizontal: 10, paddingVertical: 4 }}>
-							<Text style={{ fontSize: 24, fontWeight: 'bold' }}>{post.title}</Text>
+							<Text style={{ fontSize: 24, fontWeight: 'bold' }}>{meetup.title}</Text>
 							<View
 								style={{
 									flex: 1,
@@ -258,7 +253,7 @@ const PostInfo = (props) => {
 									marginRight: 'auto'
 								}}
 							>
-								<Text>{post.userName}</Text>
+								<Text>{meetup.userName}</Text>
 								<View>
 									<View style={{ flex: 1, flexDirection: 'row' }}>
 										<TouchableOpacity onPress={refresh}>
@@ -266,8 +261,8 @@ const PostInfo = (props) => {
 												{vectorIcon('FrontAwesome', 'refresh', 22)}
 											</View>
 										</TouchableOpacity>
-										{post.userId === props.currentDBUser.id && (
-											<TouchableOpacity onPress={handleDeletePost}>
+										{meetup.userId === props.currentDBUser.id && (
+											<TouchableOpacity onPress={handleDeleteMeetup}>
 												<View style={{ marginRight: 10 }}>
 													{vectorIcon('AntDesign', 'delete', 22)}
 												</View>
@@ -281,7 +276,7 @@ const PostInfo = (props) => {
 							</View>
 						</View>
 						<View style={{ paddingHorizontal: 10, paddingVertical: 8, backgroundColor: '#a2a0a3' }}>
-							<Text style={{ marginBottom: 10 }}>{post.description}</Text>
+							<Text style={{ marginBottom: 10 }}>{meetup.description}</Text>
 							<View
 								style={{
 									flex: 1,
@@ -295,15 +290,15 @@ const PostInfo = (props) => {
 										{vectorIcon('AntDesign', hasUserLiked ? 'like1' : 'like2', 24)}
 									</View>
 								</TouchableOpacity>
-								<Text style={{ marginRight: 26 }}>{post.likes.length}</Text>
+								<Text style={{ marginRight: 26 }}>{meetup.likes.length}</Text>
 
 								<View style={{ marginRight: 10 }}>
 									{vectorIcon('MaterialCommunityIcons', 'comment-multiple-outline', 22)}
 								</View>
-								<Text style={{ marginRight: 10 }}>{post.comments.length}</Text>
+								<Text style={{ marginRight: 10 }}>{meetup.comments.length}</Text>
 							</View>
 						</View>
-						{post.attachment && (
+						{meetup.attachment && (
 							<View>
 								<CacheImage
 									style={{ width: containerWidth, height: containerWidth }}
@@ -340,7 +335,7 @@ const PostInfo = (props) => {
 								<View style={{ marginRight: 10 }}>{vectorIcon('Feather', 'plus-circle', 34)}</View>
 							</TouchableOpacity>
 						</View>
-						{post.comments.map((c, i) => {
+						{meetup.comments.map((c, i) => {
 							const dateTime = new Date(c.createdAt);
 							return (
 								<View key={i}>
@@ -412,9 +407,9 @@ const PostInfo = (props) => {
 	);
 };
 
-PostInfo.navigationOptions = (props) => {
+MeetupInfo.navigationOptions = (props) => {
 	return {
-		title: 'Post Info',
+		title: 'Meetup Info',
 		headerStyle: { backgroundColor: 'brown' },
 		headerTitleStyle: { color: 'blue' }
 	};
@@ -426,4 +421,4 @@ const mapStateToProps = ({ auth }) => ({
 
 const mapDispatchToProps = {};
 
-export default connect(mapStateToProps, mapDispatchToProps)(PostInfo);
+export default connect(mapStateToProps, mapDispatchToProps)(MeetupInfo);
