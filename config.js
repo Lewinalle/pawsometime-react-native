@@ -8,6 +8,9 @@ const GEO_DB_API_URL = 'https://wft-geo-db.p.rapidapi.com/v1';
 const GEO_DB_HOST = 'wft-geo-db.p.rapidapi.com';
 const GEO_DB_KEY = '8b08bd8b49msh966e69d97071211p1283c7jsnceee81261b1d';
 
+const HERE_GEO_API_URL = 'https://geocode.search.hereapi.com/v1';
+const HERE_GEO_API_KEY = 't_T9mZn9rNnM9NTdG536ErbNjsUMjcW1lwa8t-wZVP8';
+
 const COGNITO_REGION = 'us-west-2';
 const COGNITO_POOL_ID = 'us-west-2_blgzK1ffC';
 const COGNITO_APP_CLIENT_ID = '44aio715mck1toj4v1ju41vio5';
@@ -30,6 +33,9 @@ const GEO_DB_API_URL = 'https://wft-geo-db.p.rapidapi.com/v1';
 const GEO_DB_HOST = 'wft-geo-db.p.rapidapi.com';
 const GEO_DB_KEY = '8b08bd8b49msh966e69d97071211p1283c7jsnceee81261b1d';
 
+const HERE_GEO_API_URL = 'https://geocode.search.hereapi.com/v1/geocode';
+const HERE_GEO_API_KEY = 't_T9mZn9rNnM9NTdG536ErbNjsUMjcW1lwa8t-wZVP8';
+
 const COGNITO_REGION = 'us-west-2';
 const COGNITO_POOL_ID = 'us-west-2_blgzK1ffC';
 const COGNITO_APP_CLIENT_ID = '44aio715mck1toj4v1ju41vio5';
@@ -50,6 +56,8 @@ export default {
 	GEO_DB_API_URL,
 	GEO_DB_HOST,
 	GEO_DB_KEY,
+	HERE_GEO_API_URL,
+	HERE_GEO_API_KEY,
 	COGNITO_REGION,
 	COGNITO_POOL_ID,
 	COGNITO_APP_CLIENT_ID,

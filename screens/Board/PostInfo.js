@@ -412,9 +412,11 @@ const PostInfo = (props) => {
 	);
 };
 
-PostInfo.navigationOptions = (props) => {
+PostInfo.navigationOptions = ({ navigation }) => {
+	const post = navigation.getParam('post');
+
 	return {
-		title: 'Post Info',
+		title: post.title,
 		headerStyle: { backgroundColor: 'brown' },
 		headerTitleStyle: { color: 'blue' }
 	};

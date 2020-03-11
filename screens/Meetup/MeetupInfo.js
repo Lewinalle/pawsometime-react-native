@@ -36,6 +36,10 @@ const MeetupInfo = (props) => {
 	const dateTime = new Date(meetup.updatedAt);
 	const hasUserLiked = meetup.likes.includes(props.currentDBUser.id);
 
+	const handleJoin = async () => {
+		console.log('handle join!!');
+	};
+
 	const refresh = async () => {
 		if (isSubmitting) {
 			console.log('already submitting, wait!');
@@ -276,7 +280,9 @@ const MeetupInfo = (props) => {
 							</View>
 						</View>
 						<View style={{ paddingHorizontal: 10, paddingVertical: 8, backgroundColor: '#a2a0a3' }}>
-							<Text style={{ marginBottom: 10 }}>{meetup.description}</Text>
+							<View>
+								<Text style={{ marginBottom: 10 }}>{meetup.description}</Text>
+							</View>
 							<View
 								style={{
 									flex: 1,
@@ -285,6 +291,11 @@ const MeetupInfo = (props) => {
 									alignItems: 'center'
 								}}
 							>
+								<TouchableOpacity onPress={handleJoin}>
+									<View style={{ marginRight: 10 }}>
+										<Button title="Joined" />
+									</View>
+								</TouchableOpacity>
 								<TouchableOpacity onPress={handleLike}>
 									<View style={{ marginRight: 10 }}>
 										{vectorIcon('AntDesign', hasUserLiked ? 'like1' : 'like2', 24)}
@@ -407,9 +418,10 @@ const MeetupInfo = (props) => {
 	);
 };
 
-MeetupInfo.navigationOptions = (props) => {
+MeetupInfo.navigationOptions = ({ navigation }) => {
+	const meetup = navigation.getParam('meetup');
 	return {
-		title: 'Meetup Info',
+		title: meetup.title,
 		headerStyle: { backgroundColor: 'brown' },
 		headerTitleStyle: { color: 'blue' }
 	};

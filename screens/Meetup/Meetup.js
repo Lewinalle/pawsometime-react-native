@@ -1,9 +1,10 @@
 import React, { Component, useState, useEffect, useRef } from 'react';
 import { ScrollView, StyleSheet, Text, View, TouchableHighlight, TouchableOpacity } from 'react-native';
+import { Button } from 'react-native-elements';
 import MeetupListCard from '../../components/MeetupListCard';
 import MapView, { Marker, Callout } from 'react-native-maps';
 import dimensions from '../../constants/Layout';
-import { CitySearch } from '../../components/CitySearch';
+import { CitySearchModal } from '../../components/CitySearchModal';
 import { connect } from 'react-redux';
 import { vectorIcon } from '../../Utils/Icon';
 import Config from '../../config';
@@ -14,8 +15,8 @@ const MAX_TITLE_LENGTH = 30;
 const MAP_WIDTH = dimensions.window.width - 32;
 const MAP_HEIGHT = 200;
 const DEFAULT_SCROLLVIEW_POSITION = 30;
-const LAT_DELTA = 0.07;
-const LON_DELTA = 0.07;
+const LAT_DELTA = 0.08;
+const LON_DELTA = 0.08;
 
 class Meetup extends Component {
 	state = {
@@ -24,6 +25,8 @@ class Meetup extends Component {
 		scrollPos: 0,
 		scrollViewPos: DEFAULT_SCROLLVIEW_POSITION,
 		showModal: false,
+		centerLat: this.props.currentLocation.lat,
+		centerLon: this.props.currentLocation.lon,
 		lat_offset: LAT_DELTA,
 		lon_offset: LON_DELTA,
 		isFetching: false
@@ -31,7 +34,6 @@ class Meetup extends Component {
 	markerRefs = {};
 	scrollviewRef = null;
 	viewRef = null;
-	mapRef = null;
 
 	async componentDidMount() {
 		const { navigation } = this.props;
@@ -48,7 +50,9 @@ class Meetup extends Component {
 			<HeaderRightComponent
 				handleRefreshBtn={navigation.getParam('refresh')}
 				handleCreateBtn={() => {
-					navigation.navigate('CreateMeetup', { onCreateBack: navigation.getParam('onCreateBack') });
+					navigation.navigate('CreateMeetup', {
+						onCreateBack: navigation.getParam('onCreateBack')
+					});
 				}}
 			/>
 		),
@@ -65,16 +69,6 @@ class Meetup extends Component {
 	};
 
 	handleCardSelect = (item) => {
-		// this.markerRefs[item.id].showCallout();
-		// this.mapRef.animateToRegion({
-		// 	latitude: item.location.lat,
-		// 	longitude: item.location.lon,
-		// 	latitudeDelta: LAT_DELTA,
-		// 	longitudeDelta: LON_DELTA
-		// });
-
-		// this.setState({ selected: item.id });
-
 		this.props.navigation.navigate('MeetupInfo', { meetup: item });
 	};
 
@@ -92,12 +86,12 @@ class Meetup extends Component {
 		});
 	};
 
-	triggerModal = (bool) => {
-		this.setState({ showModal: bool });
+	closeModal = () => {
+		this.setState({ showModal: false });
 	};
 
 	render() {
-		const { selected, showModal, lat_offset, lon_offset, meetups } = this.state;
+		const { selected, showModal, lat_offset, lon_offset, meetups, isFetching } = this.state;
 		// TODO: add meetups to state
 		// TODO: clear marker refs when refreshing/searching
 
@@ -107,9 +101,8 @@ class Meetup extends Component {
 
 		return (
 			<View style={styles.container}>
-				<CitySearch showModal={showModal} triggerModal={this.triggerModal} />
+				<CitySearchModal showModal={showModal} closeModal={this.closeModal} />
 				<MapView
-					ref={(el) => (this.mapRef = el)}
 					style={styles.map}
 					initialRegion={{
 						latitude: this.props.currentLocation.lat,
@@ -117,6 +110,13 @@ class Meetup extends Component {
 						latitudeDelta: lat_offset,
 						longitudeDelta: lon_offset
 					}}
+					onRegionChange={(region) =>
+						this.setState({
+							centerLat: region.latitude,
+							centerLon: region.longitude,
+							lat_offset: region.latitudeDelta,
+							lon_offset: region.longitudeDelta
+						})}
 				>
 					{meetups.map((item, index) => {
 						let titleTruncated =
@@ -141,9 +141,40 @@ class Meetup extends Component {
 						);
 					})}
 				</MapView>
-				<TouchableHighlight onPress={() => this.triggerModal(true)}>
-					<Text>Touch item or marker twice to go to the meetup page</Text>
-				</TouchableHighlight>
+				<View
+					style={{
+						flex: 1,
+						flexDirection: 'row',
+						paddingHorizontal: 15,
+						maxHeight: 35
+					}}
+				>
+					<Button
+						onPress={() => this.setState({ showModal: true })}
+						title="Search City"
+						containerStyle={{
+							height: null,
+							width: null,
+							flex: 1,
+							alignSelf: 'center',
+							marginRight: 20
+						}}
+						buttonStyle={{ height: 30, backgroundColor: '#fcb444' }}
+					/>
+					<Button
+						onPress={() => this.setState({ showModal: true })}
+						title="Refresh Map"
+						containerStyle={{
+							height: null,
+							width: null,
+							flex: 1,
+							alignSelf: 'center'
+						}}
+						buttonStyle={{ height: 30, backgroundColor: '#fcb444' }}
+						disabled={isFetching}
+						disabledStyle={{ opacity: 0.5, backgroundColor: '#fcb444' }}
+					/>
+				</View>
 				<ScrollView
 					ref={(el) => (this.scrollviewRef = el)}
 					style={styles.container}

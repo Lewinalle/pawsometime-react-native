@@ -73,6 +73,7 @@ const AppManager = (props) => {
 		persistUserAuth();
 	}, []);
 
+	// TODO: UNCOMMENT AND REPLACE WITH BELOW
 	// if (isSplashOpen && props.meetups && props.userMeetups && props.generalPosts && props.userGeneralPosts) {
 	if (isSplashOpen && props.meetups) {
 		setisSplashOpen(false);
