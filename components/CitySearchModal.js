@@ -1,125 +1,80 @@
-import React, { useState, useEffect } from 'react';
-import { Text, Image, ScrollView, View, StyleSheet, Modal, TouchableHighlight } from 'react-native';
-import { Overlay, SearchBar } from 'react-native-elements';
-import axios from 'axios';
+import React, { Component, useState, useEffect } from 'react';
+import {
+	Text,
+	Image,
+	ScrollView,
+	View,
+	StyleSheet,
+	Modal,
+	TouchableHighlight,
+	KeyboardAvoidingView
+} from 'react-native';
+import { Overlay, Button } from 'react-native-elements';
+class CitySearchModal extends Component {
+	render() {
+		const { showModal, closeModal, searchResult = [], handleCitySelect } = this.props;
 
-export const CitySearchModal = (props) => {
-	const [ searchTerm, setSearchTerm ] = useState('');
-
-	const { showModal, closeModal } = props;
-	// useEffect(async () => {
-	//     let url = 'https://wft-geo-db.p.rapidapi.com/v1/geo/cities?limit=10&offset=0&namePrefix=chica';
-	//     let options = {
-	//                 method: 'GET',
-	//                 url: url,
-	//                 headers: {
-	//                     // 'Accept': 'application/json',
-	//                     // 'Content-Type': 'application/json;charset=UTF-8'
-	//                     "x-rapidapi-host": "wft-geo-db.p.rapidapi.com",
-	//                     "x-rapidapi-key": "8b08bd8b49msh966e69d97071211p1283c7jsnceee81261b1d"
-	//                 }
-	//             };
-	//     let response = await axios(options);
-	//     let responseOK = response && response.status === 200;
-	//     if (responseOK) {
-	//         let data = await response.data;
-	//         console.log(data);
-	//     }
-	// }, []);
-
-	return (
-		// <Modal
-		// 	animationType="fade"
-		// 	transparent={true}
-		// 	visible={showModal}
-		// 	onRequestClose={() => {
-		// 		console.log('modal closing!');
-		// 	}}
-		// >
-		// 	<View
-		// 		style={{
-		// 			flex: 1,
-		// 			flexDirection: 'column',
-		// 			justifyContent: 'center',
-		// 			alignItems: 'center',
-		// 			backgroundColor: 'rgba(52, 52, 52, 0.7)'
-		// 			// backgroundColor: 'rgba(80, 80, 80, 0.1)'
-		// 		}}
-		// 	>
-		// 		<View
-		// 			style={{
-		// 				width: 300,
-		// 				height: 300,
-		// 				backgroundColor: 'white'
-		// 			}}
-		// 		>
-		// 			<Text>Hello World!</Text>
-
-		// 			<TouchableHighlight
-		// 				onPress={() => {
-		// 					triggerModal(false);
-		// 				}}
-		// 			>
-		// 				<Text>Hide Modal</Text>
-		// 			</TouchableHighlight>
-		// 		</View>
-		// 	</View>
-		// </Modal>
-		<Overlay
-			animationType="fade"
-			transparent={true}
-			isVisible={showModal}
-			onRequestClose={() => {
-				closeModal();
-			}}
-			onBackdropPress={() => {
-				closeModal();
-			}}
-			overlayStyle={{ padding: 0, borderRadius: 4 }}
-		>
-			<View
-				style={{
-					flex: 1,
-					flexDirection: 'column',
-					alignItems: 'center',
-					alignSelf: 'stretch',
-					padding: 10
+		return (
+			<Overlay
+				animationType="fade"
+				transparent={true}
+				isVisible={showModal}
+				onRequestClose={() => {
+					closeModal();
 				}}
+				onBackdropPress={() => {
+					closeModal();
+				}}
+				overlayStyle={{ padding: 0, borderRadius: 4 }}
 			>
-				<View
-					style={{
-						marginBottom: 10,
-						alignSelf: 'stretch'
-					}}
-				>
-					<View style={{ marginBottom: 10 }}>
-						<Text style={{ fontSize: 26, fontWeight: 'bold', textAlign: 'center' }} numberOfLines={1}>
-							Search City
-						</Text>
-					</View>
-					<View>
-						<SearchBar
-							placeholder="Search Address..."
-							// onChangeText={(text) => setSearchTerm(text)}
-							value={searchTerm}
-							inputContainerStyle={{ alignSelf: 'stretch' }}
-							containerStyle={{
-								alignSelf: 'stretch',
-								flexGrow: 1,
-								backgroundColor: '#f2ead5',
-								padding: 0,
-								borderRadius: 1,
-								borderLeftWidth: 1,
-								borderRightWidth: 1
+				<KeyboardAvoidingView style={{ flex: 1 }} behavior="height" keyboardVerticalOffset={200}>
+					<View
+						style={{
+							flex: 1,
+							flexDirection: 'column',
+							alignItems: 'center',
+							alignSelf: 'stretch',
+							padding: 10
+						}}
+					>
+						<View
+							style={{
+								marginBottom: 10,
+								alignSelf: 'stretch'
 							}}
-							inputContainerStyle={{ backgroundColor: 'transparent' }}
-						/>
+						>
+							<View style={{ marginBottom: 10 }}>
+								<Text
+									style={{ fontSize: 16, fontWeight: 'bold', textAlign: 'center' }}
+									numberOfLines={2}
+								>
+									Search Result for {this.props.searchTerm}
+								</Text>
+							</View>
+							<View>
+								{searchResult.map((city, index) => {
+									return (
+										<Button
+											key={index}
+											title={`${city.name}, ${city.region}, ${city.country}`}
+											titleStyle={{ fontSize: 14 }}
+											containerStyle={{ padding: 0, marginBottom: 6 }}
+											buttonStyle={{ padding: 4 }}
+											type="outline"
+											onPress={() => handleCitySelect(city)}
+										/>
+									);
+								})}
+							</View>
+						</View>
 					</View>
-				</View>
-			</View>
-		</Overlay>
-	);
-};
+				</KeyboardAvoidingView>
+			</Overlay>
+		);
+	}
+}
+
+export default CitySearchModal;
 
 const style = StyleSheet.create({
 	itemStyle: {

@@ -4,20 +4,22 @@ import _ from 'lodash';
 import { AdMobBanner, AdMobInterstitial, PublisherBanner, AdMobRewarded, setTestDeviceIDAsync } from 'expo-ads-admob';
 import Config from '../config';
 
-const ID_UNIT = Platform.OS === 'ios' ? Config.ADMOB_UNIT_ID_IOS : Config.ADMOB_UNIT_ID_ANDROID;
+const UNIT_ID = Platform.OS === 'ios' ? Config.ADMOB_UNIT_ID_IOS : Config.ADMOB_UNIT_ID_ANDROID;
 
 class Meetup extends Component {
 	async componentDidMount() {
-		AdMobInterstitial.setAdUnitID('ca-app-pub-3940256099942544/1033173712');
+		AdMobInterstitial.setAdUnitID('ca-app-pub-3940256099942544/6300978111'); // replace to real one
 		await setTestDeviceIDAsync('EMULATOR');
 	}
 
 	render() {
+		const { bannerSize = 'smartBannerPortrait' } = this.props;
+
 		return (
 			<View>
 				<AdMobBanner
-					bannerSize="smartBannerPortrait"
-					adUnitID="ca-app-pub-3940256099942544/6300978111" // Test ID, Replace with your-admob-unit-id
+					bannerSize={bannerSize}
+					adUnitID="ca-app-pub-3940256099942544/6300978111" // replace to real one
 					servePersonalizedAds // true or false
 					onDidFailToReceiveAdWithError={this.bannerError}
 				/>

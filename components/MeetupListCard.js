@@ -59,7 +59,7 @@ const style = StyleSheet.create({
 	cardStyle: {
 		paddingVertical: 6,
 		paddingHorizontal: 9,
-		marginVertical: 6
+		marginVertical: 4
 	},
 	cardSelected: {
 		backgroundColor: '#EEEEEE'

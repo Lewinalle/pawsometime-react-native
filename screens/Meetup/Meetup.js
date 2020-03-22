@@ -1,17 +1,17 @@
 import React, { Component, useState, useEffect, useRef } from 'react';
 import { ScrollView, StyleSheet, Text, View, TouchableHighlight, TouchableOpacity } from 'react-native';
-import { Button } from 'react-native-elements';
+import { Button, SearchBar } from 'react-native-elements';
 import MeetupListCard from '../../components/MeetupListCard';
 import MapView, { Marker, Callout } from 'react-native-maps';
 import dimensions from '../../constants/Layout';
-import { CitySearchModal } from '../../components/CitySearchModal';
+import CitySearchModal from '../../components/CitySearchModal';
 import { connect } from 'react-redux';
 import { vectorIcon } from '../../Utils/Icon';
 import Config from '../../config';
 import _ from 'lodash';
 import { fetchMeetups } from '../../redux/actions/meetups.actions';
-
-import { AdMobBanner, AdMobInterstitial, PublisherBanner, AdMobRewarded, setTestDeviceIDAsync } from 'expo-ads-admob';
+import AdmobBanner from '../../components/AdmobBanner';
+import { searchCity } from '../../helpers/GeoDBHelper';
 
 const MAX_TITLE_LENGTH = 30;
 const MAP_WIDTH = dimensions.window.width - 32;
@@ -31,7 +31,10 @@ class Meetup extends Component {
 		centerLon: this.props.currentLocation.lon,
 		lat_offset: LAT_DELTA,
 		lon_offset: LON_DELTA,
-		isFetching: false
+		isFetching: false,
+		citySearchTerm: '',
+		citySearchResult: [],
+		isCitySearching: false
 	};
 	markerRefs = {};
 	scrollviewRef = null;
@@ -44,9 +47,6 @@ class Meetup extends Component {
 			refresh: this.handleRefreshBtn,
 			onCreateBack: this.onCreateBack
 		});
-
-		AdMobInterstitial.setAdUnitID('ca-app-pub-3940256099942544/1033173712');
-		await setTestDeviceIDAsync('EMULATOR');
 	}
 
 	static navigationOptions = ({ navigation, screenProps }) => ({
@@ -71,6 +71,16 @@ class Meetup extends Component {
 
 	onCreateBack = () => {
 		console.log('to Create!');
+	};
+
+	handleCitySearch = async () => {
+		this.setState({ isCitySearching: true });
+		const { citySearchTerm } = this.state;
+
+		const result = await searchCity(citySearchTerm);
+
+		this.setState({ showModal: true, citySearchResult: result });
+		this.setState({ isCitySearching: false });
 	};
 
 	handleMeetupInfoAction = (meetupId, actionType, reference) => {
@@ -106,7 +116,11 @@ class Meetup extends Component {
 	};
 
 	handleMarkerSelect = (item) => {
-		this.setState({ selected: item.id });
+		this.setState({
+			selected: item.id,
+			centerLat: item.latlon.lat,
+			centerLon: item.latlon.lon
+		});
 	};
 
 	scrollToCard = (pageY) => {
@@ -124,7 +138,17 @@ class Meetup extends Component {
 	};
 
 	render() {
-		const { selected, showModal, lat_offset, lon_offset, meetups, isFetching } = this.state;
+		const {
+			selected,
+			showModal,
+			lat_offset,
+			lon_offset,
+			meetups,
+			isFetching,
+			citySearchTerm,
+			citySearchResult,
+			isCitySearching
+		} = this.state;
 		// TODO: add meetups to state
 		// TODO: clear marker refs when refreshing/searching
 
@@ -134,8 +158,30 @@ class Meetup extends Component {
 
 		return (
 			<View style={styles.container}>
-				<CitySearchModal showModal={showModal} closeModal={this.closeModal} />
+				<CitySearchModal
+					showModal={showModal}
+					closeModal={this.closeModal}
+					searchTerm={citySearchTerm}
+					searchResult={citySearchResult}
+					handleCitySelect={(city) => {
+						this.mapRef.animateToRegion({
+							latitude: city.latitude,
+							longitude: city.longitude,
+							latitudeDelta: LAT_DELTA,
+							longitudeDelta: LON_DELTA
+						});
+
+						this.setState({
+							showModal: false,
+							centerLat: city.latitude,
+							centerLon: city.longitude,
+							lat_offset: LAT_DELTA,
+							lon_offset: LON_DELTA
+						});
+					}}
+				/>
 				<MapView
+					ref={(el) => (this.mapRef = el)}
 					style={styles.map}
 					initialRegion={{
 						latitude: this.props.currentLocation.lat,
@@ -182,25 +228,49 @@ class Meetup extends Component {
 						maxHeight: 35
 					}}
 				>
-					<Button
-						onPress={() => this.setState({ showModal: true })}
-						title="Search City"
+					<SearchBar
+						placeholder="Search City"
+						onChangeText={(text) => this.setState({ citySearchTerm: text })}
+						value={citySearchTerm}
 						containerStyle={{
-							height: null,
-							width: null,
+							alignSelf: 'stretch',
+							flexGrow: 1,
 							flex: 1,
-							alignSelf: 'center',
-							marginRight: 20
+							backgroundColor: '#f2ead5',
+							padding: 0,
+							borderRadius: 1,
+							borderLeftWidth: 0,
+							borderRightWidth: 0,
+							borderBottomWidth: 0,
+							borderTopWidth: 0,
+							marginRight: 4,
+							marginTop: 3,
+							marginBottom: 2
 						}}
-						buttonStyle={{ height: 30, backgroundColor: '#fcb444' }}
+						placeholderStyle={{ fontSize: 10 }}
+						inputContainerStyle={{ alignSelf: 'stretch', backgroundColor: 'transparent', height: 20 }}
+						inputStyle={{ fontSize: 14 }}
 					/>
 					<Button
-						onPress={() => this.setState({ showModal: true })}
-						title="Refresh Map"
+						onPress={this.handleCitySearch}
+						title="Search"
+						titleStyle={{ fontSize: 14 }}
 						containerStyle={{
 							height: null,
 							width: null,
-							flex: 1,
+							alignSelf: 'center',
+							marginRight: 4
+						}}
+						buttonStyle={{ height: 30, backgroundColor: '#fcb444' }}
+						disabled={isCitySearching}
+					/>
+					<Button
+						onPress={this.handleRefreshBtn}
+						title="Refresh"
+						titleStyle={{ fontSize: 14 }}
+						containerStyle={{
+							height: null,
+							width: null,
 							alignSelf: 'center'
 						}}
 						buttonStyle={{ height: 30, backgroundColor: '#fcb444' }}
@@ -210,8 +280,10 @@ class Meetup extends Component {
 				</View>
 				<ScrollView
 					ref={(el) => (this.scrollviewRef = el)}
-					style={styles.container}
-					contentContainerStyle={styles.contentContainer}
+					style={{
+						flex: 1,
+						backgroundColor: '#fff'
+					}}
 					onScroll={({ nativeEvent }) => this.setState({ scrollPos: nativeEvent.contentOffset.y })}
 				>
 					<View
@@ -224,6 +296,7 @@ class Meetup extends Component {
 								});
 							}
 						}}
+						style={{ paddingBottom: 2 }}
 					>
 						{meetups.map((item, index) => (
 							<MeetupListCard
@@ -236,12 +309,7 @@ class Meetup extends Component {
 						))}
 					</View>
 				</ScrollView>
-				<AdMobBanner
-					bannerSize="smartBannerPortrait"
-					adUnitID="ca-app-pub-3940256099942544/6300978111" // Test ID, Replace with your-admob-unit-id
-					servePersonalizedAds // true or false
-					onDidFailToReceiveAdWithError={this.bannerError}
-				/>
+				<AdmobBanner />
 			</View>
 		);
 	}
@@ -298,82 +366,3 @@ const styles = StyleSheet.create({
 	},
 	contentContainer: {}
 });
-
-const meetups = [
-	{
-		id: 1,
-		title: '11 Lets Party Lets Party Lets Party Lets Party Lets Party Lets Party Lets Party Lets Party ',
-		description:
-			'meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk ',
-		location: {
-			lat: 40.74061,
-			lon: -73.945242
-		},
-		isPrivate: true,
-		userId: 12345,
-		userName: 'Lewis Main',
-		pending: [
-			{
-				id: 2,
-				name: 'May',
-				description: "Hi I'm May"
-			}
-		],
-		joined: [
-			{
-				id: 3,
-				name: 'Lewis Two',
-				description: "Hi I'm Lewis Two"
-			}
-		],
-		likes: [ 12345, 54321 ],
-		comments: [
-			{
-				id: 11111,
-				description: 'comment one',
-				userId: 54321,
-				userName: 'Lewis main',
-				userAvatar: null,
-				createdAt: 154325223
-			}
-		]
-	},
-	{
-		id: 2,
-		title: '22 Lets Party Lets Party Lets Party Lets Party Lets Party Lets Party Lets Party Lets Party ',
-		description:
-			'meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk meeting at a partk ',
-		location: {
-			lat: 40.73061,
-			lon: -73.935242
-		},
-		isPrivate: false,
-		userId: 12345,
-		userName: 'Lewis Main',
-		pending: [
-			{
-				id: 2,
-				name: 'May',
-				description: "Hi I'm May"
-			}
-		],
-		joined: [
-			{
-				id: 3,
-				name: 'Lewis Two',
-				description: "Hi I'm Lewis Two"
-			}
-		],
-		likes: [ 12345, 54321 ],
-		comments: [
-			{
-				id: 11111,
-				description: 'comment one',
-				userId: 54321,
-				userName: 'Lewis main',
-				userAvatar: null,
-				createdAt: 154325223
-			}
-		]
-	}
-];
