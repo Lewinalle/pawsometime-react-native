@@ -11,6 +11,8 @@ import Config from '../../config';
 import _ from 'lodash';
 import { fetchMeetups } from '../../redux/actions/meetups.actions';
 
+import { AdMobBanner, AdMobInterstitial, PublisherBanner, AdMobRewarded, setTestDeviceIDAsync } from 'expo-ads-admob';
+
 const MAX_TITLE_LENGTH = 30;
 const MAP_WIDTH = dimensions.window.width - 32;
 const MAP_HEIGHT = 200;
@@ -42,6 +44,9 @@ class Meetup extends Component {
 			refresh: this.handleRefreshBtn,
 			onCreateBack: this.onCreateBack
 		});
+
+		AdMobInterstitial.setAdUnitID('ca-app-pub-3940256099942544/1033173712');
+		await setTestDeviceIDAsync('EMULATOR');
 	}
 
 	static navigationOptions = ({ navigation, screenProps }) => ({
@@ -68,8 +73,36 @@ class Meetup extends Component {
 		console.log('to Create!');
 	};
 
+	handleMeetupInfoAction = (meetupId, actionType, reference) => {
+		// 0: like, 1: cancel like, 2: add comment, 3: remove comment, 4: remove meetup
+		// 5: autojoin, 6: join request, 7: accept, 8: reject, 9: cancel/leave
+		const { meetups } = this.state;
+
+		if (actionType < 0 || actionType > 9) {
+			return;
+		}
+
+		let newMeetups = meetups;
+		let targetIndex = _.findIndex(newMeetups, { id: meetupId });
+
+		switch (actionType) {
+			case 4:
+				_.remove(newMeetups, (m) => m.id === meetupId);
+				break;
+			default:
+				newMeetups.splice(targetIndex, 1, reference);
+				break;
+		}
+
+		this.setState({ meetups: newMeetups });
+	};
+
 	handleCardSelect = (item) => {
-		this.props.navigation.navigate('MeetupInfo', { meetup: item });
+		this.props.navigation.navigate('MeetupInfo', {
+			meetup: item,
+			handleMeetupInfoAction: (meetupId, actionType, reference) =>
+				this.handleMeetupInfoAction(meetupId, actionType, reference)
+		});
 	};
 
 	handleMarkerSelect = (item) => {
@@ -203,6 +236,12 @@ class Meetup extends Component {
 						))}
 					</View>
 				</ScrollView>
+				<AdMobBanner
+					bannerSize="smartBannerPortrait"
+					adUnitID="ca-app-pub-3940256099942544/6300978111" // Test ID, Replace with your-admob-unit-id
+					servePersonalizedAds // true or false
+					onDidFailToReceiveAdWithError={this.bannerError}
+				/>
 			</View>
 		);
 	}
@@ -255,7 +294,7 @@ const styles = StyleSheet.create({
 	container: {
 		flex: 1,
 		backgroundColor: '#fff',
-		marginVertical: 6
+		marginTop: 6
 	},
 	contentContainer: {}
 });

@@ -3,6 +3,7 @@ const POSTS_API_URL = 'https://vivwds2271.execute-api.us-west-2.amazonaws.com/de
 const MEETUPS_API_URL = 'https://vjrqmrpvvk.execute-api.us-west-2.amazonaws.com/dev';
 const USERS_API_URL = 'https://cbqtcrgp5j.execute-api.us-west-2.amazonaws.com/dev';
 const OTHERS_API_URL = 'https://38hwhw3s37.execute-api.us-west-2.amazonaws.com/dev';
+const GALLERY_API_URL = 'https://pyavgabix2.execute-api.us-west-2.amazonaws.com/dev';
 
 const GEO_DB_API_URL = 'https://wft-geo-db.p.rapidapi.com/v1';
 const GEO_DB_HOST = 'wft-geo-db.p.rapidapi.com';
@@ -22,12 +23,16 @@ const DEFAULT_LON = -73.9877701;
 
 const DEFAULT_DATA_SIZE = 200;
 
+const ADMOB_UNIT_ID_ANDROID = 'ca-app-pub-4691745324255938/5396704591';
+const ADMOB_UNIT_ID_IOS = 'ca-app-pub-4691745324255938/3814113891';
+
 /**
 // PROD
 const POSTS_API_URL = 'https://vivwds2271.execute-api.us-west-2.amazonaws.com/dev';
 const MEETUPS_API_URL = 'https://vjrqmrpvvk.execute-api.us-west-2.amazonaws.com/dev';
 const USERS_API_URL = 'https://cbqtcrgp5j.execute-api.us-west-2.amazonaws.com/dev';
 const OTHERS_API_URL = 'https://38hwhw3s37.execute-api.us-west-2.amazonaws.com/dev';
+const GALLERY_API_URL = 'https://pyavgabix2.execute-api.us-west-2.amazonaws.com/dev';
 
 const GEO_DB_API_URL = 'https://wft-geo-db.p.rapidapi.com/v1';
 const GEO_DB_HOST = 'wft-geo-db.p.rapidapi.com';
@@ -46,6 +51,9 @@ const DEFAULT_LAT = 40.7425999;		// when location can't be found, it sets to New
 const DEFAULT_LON = -73.9877701;
 
 const DEFAULT_DATA_SIZE = 200;
+
+const ADMOB_UNIT_ID_ANDROID = 'ca-app-pub-4691745324255938/5396704591';
+const ADMOB_UNIT_ID_IOS = 'ca-app-pub-4691745324255938/3814113891';
 */
 
 export default {
@@ -53,6 +61,7 @@ export default {
 	MEETUPS_API_URL,
 	USERS_API_URL,
 	OTHERS_API_URL,
+	GALLERY_API_URL,
 	GEO_DB_API_URL,
 	GEO_DB_HOST,
 	GEO_DB_KEY,
@@ -64,5 +73,7 @@ export default {
 	S3_BASE_URL,
 	DEFAULT_LAT,
 	DEFAULT_LON,
-	DEFAULT_DATA_SIZE
+	DEFAULT_DATA_SIZE,
+	ADMOB_UNIT_ID_ANDROID,
+	ADMOB_UNIT_ID_IOS
 };

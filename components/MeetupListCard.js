@@ -39,6 +39,9 @@ const MeetupListCard = memo((props) => {
 						<View style={style.usersIcon}>{vectorIcon('MaterialIcons', 'people-outline', 14)}</View>
 						<Text style={style.usersText}>{meetup.joined.length}</Text>
 
+						<View style={style.likesIcon}>{vectorIcon('EvilIcons', 'like', 18)}</View>
+						<Text style={style.likesText}>{meetup.likes.length}</Text>
+
 						<View style={style.pendingIcon}>
 							{vectorIcon('MaterialCommunityIcons', 'dots-horizontal-circle-outline', 14)}
 						</View>
@@ -92,5 +95,13 @@ const style = StyleSheet.create({
 	},
 	pendingText: {
 		marginLeft: 3
+	},
+	likesIcon: {
+		alignSelf: 'center',
+		marginBottom: -3
+	},
+	likesText: {
+		marginRight: 12,
+		marginLeft: 2
 	}
 });

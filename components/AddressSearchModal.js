@@ -33,7 +33,7 @@ export const AddressSearchModal = (props) => {
 			>
 				<View style={{ marginBottom: 10 }}>
 					<Text style={{ fontSize: 26, fontWeight: 'bold', textAlign: 'center' }} numberOfLines={2}>
-						Testing!!!!!!!!!!!!!!!!!
+						Pick address
 					</Text>
 					{searchResult.map((item, index) => {
 						return (

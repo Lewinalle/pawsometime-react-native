@@ -18,7 +18,15 @@
 		},
 		"assetBundlePatterns": [ "**/*" ],
 		"ios": {
-			"supportsTablet": true
+			"supportsTablet": true,
+			"config": {
+				"googleMobileAdsAppId": "ca-app-pub-4691745324255938~6440277238"
+			}
+		},
+		"android": {
+			"config": {
+				"googleMobileAdsAppId": "ca-app-pub-4691745324255938~6443312516"
+			}
 		}
 	}
 }

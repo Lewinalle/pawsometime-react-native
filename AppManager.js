@@ -41,6 +41,7 @@ const AppManager = (props) => {
 				await props.setDBUser(DBUser);
 				// console.log('Current DB User in AppManager.js: ');
 				// console.log(DBUser);
+				console.log(await (await Auth.currentSession()).getIdToken().getJwtToken());
 				await AsyncStorage.setItem('user_id', user.attributes.sub);
 				if (user) {
 					let currentLocation;

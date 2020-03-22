@@ -21,7 +21,7 @@ import Board from '../screens/Board/Board';
 import CreatePost from '../screens/Board/CreatePost';
 import PostInfo from '../screens/Board/PostInfo';
 
-import Shopping from '../screens/Shopping/Shopping';
+import Gallery from '../screens/Gallery/Gallery';
 
 const config = Platform.select({
 	web: { headerMode: 'screen' },
@@ -102,20 +102,20 @@ BoardStack.navigationOptions = {
 
 BoardStack.path = '';
 
-/** Shoppings Tab */
+/** Gallery Tab */
 
-const ShoppingStack = createStackNavigator(
+const GalleryStack = createStackNavigator(
 	{
-		Shopping
+		Gallery
 	},
 	config
 );
 
-ShoppingStack.navigationOptions = {
-	tabBarLabel: 'Shopping',
+GalleryStack.navigationOptions = {
+	tabBarLabel: 'Gallery',
 	tabBarIcon: ({ focused }) => (
-		<FontAwesome
-			name="shopping-bag"
+		<Ionicons
+			name="md-photos"
 			size={22}
 			style={{ marginBottom: -4 }}
 			color={focused ? Colors.tabIconSelected : Colors.tabIconDefault}
@@ -123,7 +123,7 @@ ShoppingStack.navigationOptions = {
 	)
 };
 
-ShoppingStack.path = '';
+GalleryStack.path = '';
 
 /** Settings Tab */
 
@@ -161,7 +161,7 @@ const tabNavigator = createBottomTabNavigator({
 	HomeStack,
 	MeetupStack,
 	BoardStack,
-	ShoppingStack,
+	GalleryStack,
 	SettingsStack
 });
 

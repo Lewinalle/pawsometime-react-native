@@ -45,7 +45,8 @@
     "redux-promise": "^0.6.0",
     "redux-thunk": "^2.3.0",
     "shorthash": "0.0.2",
-    "timsort": "^0.3.0"
+    "timsort": "^0.3.0",
+    "expo-ads-admob": "~8.0.0"
   },
   "devDependencies": {
     "@babel/core": "^7.0.0",

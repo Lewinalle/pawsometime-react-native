@@ -14,7 +14,7 @@ import * as FileSystem from 'expo-file-system';
 import axios from 'axios';
 import CacheImage from '../../components/CacheImage';
 
-export default function Shopping() {
+export default function Gallery() {
 	const [ imageUri, setImageUri ] = useState(null);
 	const [ imageName, setImageName ] = useState(null);
 	const [ imageType, setImageType ] = useState(null);
@@ -71,8 +71,8 @@ export default function Shopping() {
 	);
 }
 
-Shopping.navigationOptions = {
-	title: 'Shopping'
+Gallery.navigationOptions = {
+	title: 'Gallery'
 };
 
 const styles = StyleSheet.create({

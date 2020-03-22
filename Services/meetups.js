@@ -149,3 +149,20 @@ export const rejectJoin = async (id, data) => {
 
 	return res.data;
 };
+
+export const cancelJoin = async (id, data) => {
+	const token = await (await Auth.currentSession()).getIdToken().getJwtToken();
+	const options = {
+		method: 'POST',
+		url: `${Config.MEETUPS_API_URL}/meetups/${id}/cancel`,
+		headers: {
+			Authorization: `Bearer ${token}`,
+			'Content-Type': 'application/json'
+		},
+		data
+	};
+
+	const res = await axios(options);
+
+	return res.data;
+};

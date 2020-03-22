@@ -21,7 +21,8 @@ import Config from '../../config';
 import CacheImage from '../../components/CacheImage';
 import { vectorIcon } from '../../Utils/Icon';
 import { likeResource, addComment, deleteComment } from '../../Services/general';
-import { fetchMeetupInfo, deleteMeetup } from '../../Services/meetups';
+import { fetchMeetupInfo, deleteMeetup, autoJoin, requestJoin, cancelJoin } from '../../Services/meetups';
+import _ from 'lodash';
 
 const MeetupInfo = (props) => {
 	const [ meetup, setMeetup ] = useState(props.navigation.getParam('meetup'));
@@ -36,13 +37,125 @@ const MeetupInfo = (props) => {
 	const dateTime = new Date(meetup.updatedAt);
 	const hasUserLiked = meetup.likes.includes(props.currentDBUser.id);
 
+	// joinStatus - none: 0, pending: 1, joined: 2
+	let joinStatus;
+
+	if (meetup && props.currentDBUser) {
+		if (_.some(meetup.joined, { userId: props.currentDBUser.id })) {
+			joinStatus = 2;
+		} else if (_.some(meetup.pending, { userId: props.currentDBUser.id })) {
+			joinStatus = 1;
+		} else {
+			joinStatus = 0;
+		}
+	}
+
 	const handleJoin = async () => {
 		console.log('handle join!!');
+
+		if (isSubmitting) {
+			return;
+		}
+
+		setIsSubmitting(true);
+
+		switch (joinStatus) {
+			case 0:
+				Alert.alert(
+					'Requesting...',
+					'Are you sure you want to request to join this meetup?',
+					[
+						{
+							text: 'Yes',
+							onPress: async () => {
+								let res;
+								let actionType;
+								let alertTitle;
+								let alertMessage;
+								if (meetup.isPrivate) {
+									res = await requestJoin(meetup.id, {
+										userId: props.currentDBUser.id,
+										userName: props.currentDBUser.username
+									});
+									actionType = 5;
+									alertTitle = 'Requested';
+									alertMessage = 'Successfully requested to join this meetup.';
+								} else {
+									res = await autoJoin(meetup.id, {
+										userId: props.currentDBUser.id,
+										userName: props.currentDBUser.username
+									});
+									actionType = 6;
+									alertTitle = 'Joined';
+									alertMessage = 'Successfully joined this meetup.';
+								}
+								Alert.alert(
+									alertTitle,
+									alertMessage,
+									[
+										{
+											text: 'OK'
+										}
+									],
+									{ cancelable: false }
+								);
+								setMeetup(res);
+								handleMeetupInfoAction(res.id, actionType, res);
+							}
+						},
+						{
+							text: 'No'
+						}
+					],
+					{ cancelable: false }
+				);
+				break;
+			case 1:
+			case 2:
+				Alert.alert(
+					'Leaving...',
+					'Are you sure you want to cancel/leave this meetup?',
+					[
+						{
+							text: 'Yes',
+							onPress: async () => {
+								let res;
+								res = await cancelJoin(meetup.id, {
+									userId: props.currentDBUser.id,
+									userName: props.currentDBUser.username
+								});
+								setMeetup(res);
+								handleMeetupInfoAction(res.id, 9, res);
+								Alert.alert(
+									'Cancelled',
+									'Successfully left this meetup.',
+									[
+										{
+											text: 'OK'
+										}
+									],
+									{ cancelable: false }
+								);
+							}
+						},
+						{
+							text: 'No'
+						}
+					],
+					{ cancelable: false }
+				);
+				break;
+			default:
+				break;
+		}
+
+		setTimeout(() => {
+			setIsSubmitting(false);
+		}, 1000);
 	};
 
 	const refresh = async () => {
 		if (isSubmitting) {
-			console.log('already submitting, wait!');
 			return;
 		}
 
@@ -84,7 +197,7 @@ const MeetupInfo = (props) => {
 
 		const resItem = await likeResource(meetup.id, body);
 
-		// await handleMeetupInfoAction(meetup.id, hasUserLiked ? 1 : 0, resItem);
+		await handleMeetupInfoAction(meetup.id, hasUserLiked ? 1 : 0, resItem);
 
 		setIsSubmitting(false);
 	};
@@ -116,7 +229,7 @@ const MeetupInfo = (props) => {
 					{
 						text: 'OK',
 						onPress: async () => {
-							// await handleMeetupInfoAction(meetup.id, 2, resItem);
+							await handleMeetupInfoAction(meetup.id, 2, resItem);
 
 							setTimeout(() => {
 								setIsSubmitting(false);
@@ -164,7 +277,7 @@ const MeetupInfo = (props) => {
 								{
 									text: 'Yes',
 									onPress: async () => {
-										// await handleMeetupInfoAction(meetup.id, 3, resItem);
+										await handleMeetupInfoAction(meetup.id, 3, resItem);
 									}
 								}
 							],
@@ -182,47 +295,106 @@ const MeetupInfo = (props) => {
 		);
 	};
 
-	// const handleDeleteMeetup = async () => {
-	// 	if (isSubmitting) {
-	// 		console.log('already submitting, wait!');
-	// 		return;
-	// 	}
+	const handleDeleteMeetup = async () => {
+		if (isSubmitting) {
+			console.log('already submitting, wait!');
+			return;
+		}
 
-	// 	Alert.alert(
-	// 		'Warning!',
-	// 		'Are you sure you want to delete this meetup?',
-	// 		[
-	// 			{
-	// 				text: 'Yes',
-	// 				onPress: async () => {
-	// 					setIsSubmitting(true);
-	// 					await deleteMeetup(meetup.id);
+		Alert.alert(
+			'Warning!',
+			'Are you sure you want to delete this meetup?',
+			[
+				{
+					text: 'Yes',
+					onPress: async () => {
+						setIsSubmitting(true);
+						await deleteMeetup(meetup.id);
 
-	// 					Alert.alert(
-	// 						'Success!',
-	// 						'Your meetup has been successfully deleted.',
-	// 						[
-	// 							{
-	// 								text: 'Yes',
-	// 								onPress: async () => {
-	// 									await handleMeetupInfoAction(meetup.id, 4, null);
-	// 									props.navigation.navigate('Board');
-	// 								}
-	// 							}
-	// 						],
-	// 						{ cancelable: false }
-	// 					);
+						Alert.alert(
+							'Success!',
+							'Your meetup has been successfully deleted.',
+							[
+								{
+									text: 'Yes',
+									onPress: async () => {
+										await handleMeetupInfoAction(meetup.id, 4, null);
+										props.navigation.navigate('Meetup');
+									}
+								}
+							],
+							{ cancelable: false }
+						);
 
-	// 					setIsSubmitting(false);
-	// 				}
-	// 			},
-	// 			{
-	// 				text: 'No'
-	// 			}
-	// 		],
-	// 		{ cancelable: false }
-	// 	);
-	// };
+						setIsSubmitting(false);
+					}
+				},
+				{
+					text: 'No'
+				}
+			],
+			{ cancelable: false }
+		);
+	};
+
+	const renderJoinButton = () => {
+		let title = '';
+
+		switch (joinStatus) {
+			case 0:
+				title = 'Join';
+				break;
+			case 1:
+				title = 'Cancel';
+				break;
+			case 2:
+				title = 'Leave';
+				break;
+			default:
+				break;
+		}
+
+		return (
+			<View style={{ marginRight: 10 }}>
+				<Button
+					title={title}
+					buttonStyle={{ paddingVertical: 4, paddingHorizontal: 10 }}
+					onPress={handleJoin}
+				/>
+			</View>
+		);
+	};
+
+	const renderStatusText = () => {
+		let message = '';
+
+		switch (joinStatus) {
+			case 0:
+				message = 'You are not in this meetup';
+				break;
+			case 1:
+				message = "You've requested to join this meetup";
+				break;
+			case 2:
+				message = "You've joined this meetup";
+				break;
+			default:
+				break;
+		}
+
+		return (
+			<View
+				style={{
+					marginHorizontal: 6,
+					flex: 1
+				}}
+			>
+				<Text numberOfLines={2} style={{ flex: 1, textAlign: 'right', textAlignVertical: 'center' }}>
+					{message}
+				</Text>
+			</View>
+		);
+	};
 
 	return (
 		<View
@@ -291,11 +463,8 @@ const MeetupInfo = (props) => {
 									alignItems: 'center'
 								}}
 							>
-								<TouchableOpacity onPress={handleJoin}>
-									<View style={{ marginRight: 10 }}>
-										<Button title="Joined" />
-									</View>
-								</TouchableOpacity>
+								{renderStatusText()}
+								{renderJoinButton()}
 								<TouchableOpacity onPress={handleLike}>
 									<View style={{ marginRight: 10 }}>
 										{vectorIcon('AntDesign', hasUserLiked ? 'like1' : 'like2', 24)}

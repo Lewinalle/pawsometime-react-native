@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { Text, Image, ScrollView, View, StyleSheet, Modal, TouchableHighlight } from 'react-native';
-import { Overlay } from 'react-native-elements';
+import { Overlay, SearchBar } from 'react-native-elements';
 import axios from 'axios';
 
 export const CitySearchModal = (props) => {
+	const [ searchTerm, setSearchTerm ] = useState('');
+
 	const { showModal, closeModal } = props;
 	// useEffect(async () => {
 	//     let url = 'https://wft-geo-db.p.rapidapi.com/v1/geo/cities?limit=10&offset=0&namePrefix=chica';
@@ -84,10 +86,35 @@ export const CitySearchModal = (props) => {
 					padding: 10
 				}}
 			>
-				<View style={{ marginBottom: 10 }}>
-					<Text style={{ fontSize: 26, fontWeight: 'bold', textAlign: 'center' }} numberOfLines={2}>
-						Testing!!!!!!!!!!!!!!!!!
-					</Text>
+				<View
+					style={{
+						marginBottom: 10,
+						alignSelf: 'stretch'
+					}}
+				>
+					<View style={{ marginBottom: 10 }}>
+						<Text style={{ fontSize: 26, fontWeight: 'bold', textAlign: 'center' }} numberOfLines={1}>
+							Search City
+						</Text>
+					</View>
+					<View>
+						<SearchBar
+							placeholder="Search Address..."
+							// onChangeText={(text) => setSearchTerm(text)}
+							value={searchTerm}
+							inputContainerStyle={{ alignSelf: 'stretch' }}
+							containerStyle={{
+								alignSelf: 'stretch',
+								flexGrow: 1,
+								backgroundColor: '#f2ead5',
+								padding: 0,
+								borderRadius: 1,
+								borderLeftWidth: 1,
+								borderRightWidth: 1
+							}}
+							inputContainerStyle={{ backgroundColor: 'transparent' }}
+						/>
+					</View>
 				</View>
 			</View>
 		</Overlay>
