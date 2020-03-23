@@ -65,12 +65,23 @@ class Meetup extends Component {
 		headerTitleStyle: { color: 'blue' }
 	});
 
-	handleRefreshBtn = () => {
-		console.log('refreshing!');
+	handleRefreshBtn = async () => {
+		const { centerLat, centerLon, lat_offset } = this.state;
+		const { fetchMeetups, meetups } = this.props;
+
+		this.setState({ isFetching: true });
+
+		fetchMeetups({
+			lat: centerLat,
+			lon: centerLon,
+			offset: lat_offset
+		}).then(() => {
+			this.setState({ meetups: this.props.meetups, isFetching: false });
+		});
 	};
 
 	onCreateBack = () => {
-		console.log('to Create!');
+		this.handleRefreshBtn();
 	};
 
 	handleCitySearch = async () => {
@@ -81,6 +92,23 @@ class Meetup extends Component {
 
 		this.setState({ showModal: true, citySearchResult: result });
 		this.setState({ isCitySearching: false });
+	};
+
+	handleCitySelect = (city) => {
+		this.mapRef.animateToRegion({
+			latitude: city.latitude,
+			longitude: city.longitude,
+			latitudeDelta: LAT_DELTA,
+			longitudeDelta: LON_DELTA
+		});
+
+		this.setState({
+			showModal: false,
+			centerLat: city.latitude,
+			centerLon: city.longitude,
+			lat_offset: LAT_DELTA,
+			lon_offset: LON_DELTA
+		});
 	};
 
 	handleMeetupInfoAction = (meetupId, actionType, reference) => {
@@ -163,22 +191,7 @@ class Meetup extends Component {
 					closeModal={this.closeModal}
 					searchTerm={citySearchTerm}
 					searchResult={citySearchResult}
-					handleCitySelect={(city) => {
-						this.mapRef.animateToRegion({
-							latitude: city.latitude,
-							longitude: city.longitude,
-							latitudeDelta: LAT_DELTA,
-							longitudeDelta: LON_DELTA
-						});
-
-						this.setState({
-							showModal: false,
-							centerLat: city.latitude,
-							centerLon: city.longitude,
-							lat_offset: LAT_DELTA,
-							lon_offset: LON_DELTA
-						});
-					}}
+					handleCitySelect={(city) => this.handleCitySelect(city)}
 				/>
 				<MapView
 					ref={(el) => (this.mapRef = el)}
@@ -327,7 +340,7 @@ const HeaderRightComponent = (props) => {
 					}
 					setTimeout(() => {
 						setIsDisabled(false);
-					}, 3000);
+					}, 1500);
 				}}
 				disabled={isDisabled}
 				style={{ opacity: isDisabled ? 0.2 : 1 }}

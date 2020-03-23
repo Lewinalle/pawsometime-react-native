@@ -56,14 +56,18 @@ const AppManager = (props) => {
 								lat: currentLocation.lat,
 								lon: currentLocation.lon
 							});
+							// await props.fetchUserMeetups(user.attributes.sub, {
+							// 	lat: currentLocation.lat,
+							// 	lon: currentLocation.lon
+							// });
 						},
 						async (error) => {
 							await props.fetchMeetups();
+							// await props.fetchUserMeetups(user.attributes.sub);
 						},
 						{ enableHighAccuracy: true, timeout: 10000, maximumAge: 1000 }
 					);
 					// TODO: UNCOMMENT BELOW
-					// await props.fetchUserMeetups(user.attributes.sub);
 					// await props.fetchPosts({ type: 'general' });
 					// await props.fetchUserPosts(user.attributes.sub, { type: 'general' });
 				}

@@ -25,10 +25,14 @@ export const fetchUserMeetups = (userId, params = {}) => async (dispatch) => {
 		return;
 	}
 
-	const query = {
+	let query = {
 		...params,
 		userId
 	};
+	if (!_.has(params, 'lat') || !_.has(params, 'lon')) {
+		query.lat = Config.DEFAULT_LAT;
+		query.lon = Config.DEFAULT_LON;
+	}
 
 	const data = await getMeetups(query);
 

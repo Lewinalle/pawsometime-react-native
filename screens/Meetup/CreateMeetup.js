@@ -10,7 +10,7 @@ import {
 	Alert,
 	TouchableOpacity
 } from 'react-native';
-import { Input, Button, Text, Divider, Avatar, SearchBar } from 'react-native-elements';
+import { Input, Button, Text, Divider, Avatar, SearchBar, CheckBox } from 'react-native-elements';
 import { Header } from 'react-navigation-stack';
 import { uploadToS3 } from '../../helpers/uploadToS3';
 import * as ImagePicker from 'expo-image-picker';
@@ -20,10 +20,8 @@ import { createMeetup } from '../../Services/meetups';
 import { connect } from 'react-redux';
 import Config from '../../config';
 import { fetchMeetups } from '../../redux/actions/meetups.actions';
-import CacheImage from '../../components/CacheImage';
-import { vectorIcon } from '../../Utils/Icon';
 import { AddressSearchModal } from '../../components/AddressSearchModal';
-import MapView, { Marker, Callout } from 'react-native-maps';
+import MapView, { Marker } from 'react-native-maps';
 import { searchAddress } from '../../helpers/HereAPIHelper';
 
 const MAP_HEIGHT = 200;
@@ -46,6 +44,7 @@ const CreateMeetup = (props) => {
 	const [ showModal, setShowModal ] = useState(false);
 	const [ searchTerm, setSearchTerm ] = useState('');
 	const [ searchResult, setSearchResult ] = useState([]);
+	const [ isPrivate, setIsPrivate ] = useState(false);
 
 	const mapRef = useRef(null);
 	const containerRef = useRef(null);
@@ -66,7 +65,7 @@ const CreateMeetup = (props) => {
 			mediaTypes: ImagePicker.MediaTypeOptions.Images,
 			allowsEditing: true,
 			aspect: [ 1, 1 ],
-			quality: 0.5
+			quality: 0.6
 		});
 
 		if (!result.cancelled) {
@@ -90,14 +89,17 @@ const CreateMeetup = (props) => {
 			const body = {
 				title,
 				description,
-				type,
 				userId: props.currentDBUser.id,
 				userName: props.currentDBUser.username,
-				attachment: imageName ? `${Config.S3_BASE_URL}/${imageName}` : null
+				attachment: imageName ? `${Config.S3_BASE_URL}/${imageName}` : null,
+				isPrivate,
+				latlon: {
+					lat,
+					lon
+				}
 			};
 
-			console.log(body);
-			// await createMeetup(body);
+			await createMeetup(body);
 
 			Alert.alert(
 				'Successful!',
@@ -123,7 +125,8 @@ const CreateMeetup = (props) => {
 
 	const handleAfterSubmit = async () => {
 		const handleBack = props.navigation.getParam('onCreateBack');
-		props.navigation.navigate('Board');
+		handleBack();
+		props.navigation.navigate('Meetup');
 	};
 
 	const handleAddressSearch = async () => {
@@ -296,6 +299,32 @@ const CreateMeetup = (props) => {
 								<Image source={{ uri: imageUri }} style={{ width: '100%', height: containerWidth }} />
 							</View>
 						)}
+						<View
+							style={{
+								marginBottom: 10,
+								flex: 1,
+								flexDirection: 'row',
+								alignItems: 'center',
+								alignSelf: 'stretch'
+							}}
+						>
+							<CheckBox
+								iconLeft
+								left
+								title="Required host approval to join this meetup"
+								textStyle={{ fontSize: 14, fontWeight: 'bold' }}
+								containerStyle={{
+									flex: 1,
+									borderWidth: 0,
+									paddingVertical: 4,
+									paddingHorizontal: 0,
+									margin: 0,
+									backgroundColor: 'transparent'
+								}}
+								checked={isPrivate}
+								onPress={() => setIsPrivate(!isPrivate)}
+							/>
+						</View>
 						<View
 							style={{
 								flex: 1,

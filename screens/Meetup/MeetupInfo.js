@@ -1,23 +1,9 @@
-import React, { useEffect, useState, useRef } from 'react';
-import {
-	ScrollView,
-	StyleSheet,
-	View,
-	Image,
-	KeyboardAvoidingView,
-	TextInput,
-	Picker,
-	Alert,
-	TouchableOpacity
-} from 'react-native';
+import React, { useState, useRef } from 'react';
+import { ScrollView, View, KeyboardAvoidingView, Alert, TouchableOpacity } from 'react-native';
 import { Input, Button, Text, Divider, Avatar } from 'react-native-elements';
 import { Header } from 'react-navigation-stack';
-import { uploadToS3 } from '../../helpers/uploadToS3';
-import * as ImagePicker from 'expo-image-picker';
 import Constants from '../../constants/Layout';
-import * as Permissions from 'expo-permissions';
 import { connect } from 'react-redux';
-import Config from '../../config';
 import CacheImage from '../../components/CacheImage';
 import { vectorIcon } from '../../Utils/Icon';
 import { likeResource, addComment, deleteComment } from '../../Services/general';
@@ -482,7 +468,7 @@ const MeetupInfo = (props) => {
 							<View>
 								<CacheImage
 									style={{ width: containerWidth, height: containerWidth }}
-									uri={props.currentDBUser.avatar}
+									uri={meetup.attachment}
 								/>
 							</View>
 						)}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, TouchableHighlight } from 'react-native';
 import { Image, Text } from 'react-native-elements';
 
 import shorthash from 'shorthash';
@@ -28,6 +28,16 @@ export default (CacheImage = (props) => {
 		};
 		fetchImage();
 	}, []);
+
+	if (props.onPressHandler) {
+		return (
+			<TouchableHighlight onPress={props.onPressHandler}>
+				<View>
+					<Image style={style} source={source} />
+				</View>
+			</TouchableHighlight>
+		);
+	}
 
 	return (
 		<View>
