@@ -4,11 +4,13 @@ import auth from './auth.reducer';
 import meetups from './meetups.reducer';
 import posts from './posts.reducer';
 import others from './others.reducer';
+import gallery from './gallery.reducer';
 
 export default combineReducers({
 	test,
 	auth,
 	meetups,
 	posts,
-	others
+	others,
+	gallery
 });

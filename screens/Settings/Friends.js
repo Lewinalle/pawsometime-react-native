@@ -152,6 +152,7 @@ const Friends = (props) => {
 							title="No Friends Found"
 							userType="empty"
 							updateAction={(friend, actionType) => updateAction(friend, actionType)}
+							navigation={props.navigation}
 						/>
 					</View>
 				);
@@ -200,6 +201,7 @@ const Friends = (props) => {
 							title="Requests Received"
 							userType="pending"
 							updateAction={(friend, actionType) => updateAction(friend, actionType)}
+							navigation={props.navigation}
 						/>
 					</View>
 				)}
@@ -210,6 +212,7 @@ const Friends = (props) => {
 							title="Pending Requests"
 							userType="sent"
 							updateAction={(friend, actionType) => updateAction(friend, actionType)}
+							navigation={props.navigation}
 						/>
 					</View>
 				)}
@@ -220,6 +223,7 @@ const Friends = (props) => {
 							title="Friends"
 							userType="friends"
 							updateAction={(friend, actionType) => updateAction(friend, actionType)}
+							navigation={props.navigation}
 						/>
 					</View>
 				)}

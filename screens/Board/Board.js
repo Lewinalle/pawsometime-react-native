@@ -19,7 +19,7 @@ import { fetchPosts } from '../../redux/actions/posts.actions';
 import { fetchPostsHelper } from '../../Utils/FetchPostsHelper';
 import { test } from '../../redux/actions/test.actions';
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 20;
 const boardTabs = [ 'General', 'Questions', 'Tips', 'Trade' ];
 const boardTypes = [ 'general', 'qna', 'tips', 'trade' ];
 
@@ -56,6 +56,7 @@ class Board extends Component {
 		navigation.navigate('PostInfo', {
 			post: clickedPost,
 			postType: boardTypes[this.state.currentTab],
+			onCreateBack: (type) => this.onCreateBack(type),
 			handlePostInfoAction: (postId, actionType, reference) =>
 				this.handlePostInfoAction(postId, actionType, reference)
 		});
@@ -297,7 +298,7 @@ const HeaderRightComponent = (props) => {
 					}
 					setTimeout(() => {
 						setIsDisabled(false);
-					}, 3500);
+					}, 1500);
 				}}
 				disabled={isDisabled}
 				style={{ opacity: isDisabled ? 0.2 : 1 }}

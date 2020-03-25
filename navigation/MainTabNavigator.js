@@ -6,6 +6,7 @@ import { Ionicons, FontAwesome, Entypo, FontAwesome5, AntDesign } from '@expo/ve
 import Colors from '../constants/Colors';
 
 import Home from '../screens/Home/Home';
+
 import Settings from '../screens/Settings/Settings';
 import About from '../screens/Settings/About';
 import ChangeProfile from '../screens/Settings/ChangeProfile';
@@ -14,14 +15,18 @@ import MyPosts from '../screens/Settings/MyPosts';
 import Friends from '../screens/Settings/Friends';
 import SearchUsers from '../screens/Settings/SearchUsers';
 import ChangePassword from '../screens/Settings/ChangePassword';
+
 import Meetup from '../screens/Meetup/Meetup';
 import CreateMeetup from '../screens/Meetup/CreateMeetup';
 import MeetupInfo from '../screens/Meetup/MeetupInfo';
+
 import Board from '../screens/Board/Board';
 import CreatePost from '../screens/Board/CreatePost';
 import PostInfo from '../screens/Board/PostInfo';
 
 import Gallery from '../screens/Gallery/Gallery';
+import UserGallery from '../screens/Gallery/UserGallery';
+import CreateGallery from '../screens/Gallery/CreateGallery';
 
 const config = Platform.select({
 	web: { headerMode: 'screen' },
@@ -106,7 +111,9 @@ BoardStack.path = '';
 
 const GalleryStack = createStackNavigator(
 	{
-		Gallery
+		Gallery,
+		UserGallery,
+		CreateGallery
 	},
 	config
 );

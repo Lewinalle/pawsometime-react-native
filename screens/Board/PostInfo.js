@@ -209,6 +209,29 @@ const PostInfo = (props) => {
 		);
 	};
 
+	const toEditPage = () => {
+		Alert.alert(
+			'Edit',
+			'Are you sure you want to edit this post?',
+			[
+				{
+					text: 'Yes',
+					onPress: async () => {
+						props.navigation.navigate('CreatePost', {
+							originalPost: post,
+							postType,
+							onCreateBack: props.navigation.getParam('onCreateBack')
+						});
+					}
+				},
+				{
+					text: 'No'
+				}
+			],
+			{ cancelable: false }
+		);
+	};
+
 	return (
 		<View
 			style={{
@@ -250,6 +273,13 @@ const PostInfo = (props) => {
 												{vectorIcon('FrontAwesome', 'refresh', 22)}
 											</View>
 										</TouchableOpacity>
+										{post.userId === props.currentDBUser.id && (
+											<TouchableOpacity onPress={toEditPage}>
+												<View style={{ marginRight: 12 }}>
+													{vectorIcon('AntDesign', 'edit', 22)}
+												</View>
+											</TouchableOpacity>
+										)}
 										{post.userId === props.currentDBUser.id && (
 											<TouchableOpacity onPress={handleDeletePost}>
 												<View style={{ marginRight: 10 }}>

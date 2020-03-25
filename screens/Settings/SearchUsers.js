@@ -146,6 +146,7 @@ const SearchUsers = (props) => {
 													closeModal();
 													props.navigation.navigate('ChangeProfile');
 												}}
+												navigation={props.navigation}
 											/>
 										</View>
 										{i < users.length - 1 && <Divider />}

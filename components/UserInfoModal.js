@@ -6,6 +6,7 @@ import CacheImage from './CacheImage';
 import { connect } from 'react-redux';
 import { setAuthStatus, setCognitoUser, setDBUser } from '../redux/actions/auth.actions';
 import { fetchUserInfo, updateUser, acceptFriend, requestFriend } from '../Services/users';
+import { fetchUserGallery } from '../redux/actions/gallery.actions';
 //TODO DELETE THIS AFTER AND CLEAN UP CODE
 
 const UserInfoModal = (props) => {
@@ -14,14 +15,13 @@ const UserInfoModal = (props) => {
 	const [ imageWidth, setImageWidth ] = useState(0);
 	const [ imageHeight, setimageHeight ] = useState(0);
 	const [ isSubmitting, setIsSubmitting ] = useState(false);
-	const [ globalUser, setGlobalUser ] = useState(props.currentDBUser);
 
 	const getRelationStatus = () => {
-		if (globalUser.friends.pending.includes(user.id)) {
+		if (props.currentDBUser.friends.pending.includes(user.id)) {
 			return 'pending';
-		} else if (globalUser.friends.sent.includes(user.id)) {
+		} else if (props.currentDBUser.friends.sent.includes(user.id)) {
 			return 'sent';
-		} else if (globalUser.friends.friends.includes(user.id)) {
+		} else if (props.currentDBUser.friends.friends.includes(user.id)) {
 			return 'friends';
 		} else {
 			return 'none';
@@ -30,7 +30,6 @@ const UserInfoModal = (props) => {
 
 	const handleFriendRequest = async () => {
 		if (isSubmitting) {
-			console.log('already sending, wait!');
 			return;
 		}
 
@@ -38,12 +37,11 @@ const UserInfoModal = (props) => {
 
 		if (getRelationStatus() === 'pending') {
 			const res = await acceptFriend({
-				userId: globalUser.id,
+				userId: props.currentDBUser.id,
 				friendId: user.id
 			});
 
 			await props.setDBUser(res.user);
-			await setGlobalUser(res.user);
 
 			if (typeof props.updateAction === 'function') {
 				await props.updateAction(user, 1);
@@ -54,12 +52,11 @@ const UserInfoModal = (props) => {
 			});
 		} else if (getRelationStatus() === 'none') {
 			const res = await requestFriend({
-				userId: globalUser.id,
+				userId: props.currentDBUser.id,
 				friendId: user.id
 			});
 
 			await props.setDBUser(res.user);
-			await setGlobalUser(res.user);
 
 			if (typeof props.updateAction === 'function') {
 				await props.updateAction(user, 0);
@@ -99,6 +96,12 @@ const UserInfoModal = (props) => {
 		} else {
 			return null;
 		}
+	};
+
+	toUserGallery = async () => {
+		await props.fetchUserGallery(user.id, 1);
+		closeModal();
+		props.navigation.navigate('UserGallery', { galleryUser: user });
 	};
 
 	return (
@@ -161,7 +164,7 @@ const UserInfoModal = (props) => {
 					{/* <TouchableOpacity onPress={handleMessageUser}>
 						{vectorIcon('AntDesign', 'message1', 30)}
 					</TouchableOpacity> */}
-					{globalUser.id !== user.id ? (
+					{props.currentDBUser.id !== user.id ? (
 						renderFriendIcon()
 					) : (
 						<TouchableOpacity
@@ -172,6 +175,9 @@ const UserInfoModal = (props) => {
 							{vectorIcon('AntDesign', 'edit', 30)}
 						</TouchableOpacity>
 					)}
+					<TouchableOpacity onPress={toUserGallery} style={{ top: 2 }}>
+						{vectorIcon('Ionicons', 'md-photos', 29)}
+					</TouchableOpacity>
 					<TouchableOpacity onPress={() => closeModal()}>
 						{vectorIcon('MaterialIcons', 'cancel', 30)}
 					</TouchableOpacity>
@@ -192,7 +198,8 @@ const mapStateToProps = ({ auth }) => ({
 const mapDispatchToProps = {
 	setAuthStatus,
 	setCognitoUser,
-	setDBUser
+	setDBUser,
+	fetchUserGallery
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(UserInfoModal);

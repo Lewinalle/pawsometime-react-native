@@ -138,6 +138,7 @@ class Meetup extends Component {
 	handleCardSelect = (item) => {
 		this.props.navigation.navigate('MeetupInfo', {
 			meetup: item,
+			onCreateBack: this.onCreateBack,
 			handleMeetupInfoAction: (meetupId, actionType, reference) =>
 				this.handleMeetupInfoAction(meetupId, actionType, reference)
 		});

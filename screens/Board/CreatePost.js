@@ -16,7 +16,7 @@ import { uploadToS3 } from '../../helpers/uploadToS3';
 import * as ImagePicker from 'expo-image-picker';
 import Constants from 'expo-constants';
 import * as Permissions from 'expo-permissions';
-import { createPost } from '../../Services/posts';
+import { createPost, updatePost } from '../../Services/posts';
 import { connect } from 'react-redux';
 import Config from '../../config';
 import { fetchPosts } from '../../redux/actions/posts.actions';
@@ -41,12 +41,15 @@ const boardTypes = [
 ];
 
 const CreatePost = (props) => {
-	const [ imageUri, setImageUri ] = useState(null);
+	const original = props.navigation.getParam('originalPost');
+	const postType = props.navigation.getParam('postType');
+
+	const [ imageUri, setImageUri ] = useState(original ? original.attachment : null);
 	const [ imageName, setImageName ] = useState(null);
 	const [ imageType, setImageType ] = useState(null);
-	const [ title, setTitle ] = useState('');
-	const [ description, setDescription ] = useState('');
-	const [ type, setType ] = useState('general');
+	const [ title, setTitle ] = useState(original ? original.title : '');
+	const [ description, setDescription ] = useState(original ? original.description : '');
+	const [ type, setType ] = useState(postType ? postType : 'general');
 	const [ containerWidth, setContainerWidth ] = useState(350);
 	const [ isSubmitting, setIsSubmitting ] = useState(false);
 
@@ -99,15 +102,18 @@ const CreatePost = (props) => {
 				type,
 				userId: props.currentDBUser.id,
 				userName: props.currentDBUser.username,
-				attachment: imageName ? `${Config.S3_BASE_URL}/${imageName}` : null
+				attachment: imageName ? `${Config.S3_BASE_URL}/${imageName}` : original ? original.attachment : null
 			};
 
-			console.log(body);
-			await createPost(body);
+			if (original) {
+				await updatePost(original.id, body);
+			} else {
+				await createPost(body);
+			}
 
 			Alert.alert(
 				'Successful!',
-				'Your post has been created.',
+				`Your post has been ${original ? 'updated' : 'created'}.`,
 				[
 					{
 						text: 'OK',
@@ -156,7 +162,12 @@ const CreatePost = (props) => {
 						}}
 					>
 						<View>
-							<Picker selectedValue={type} style={{ height: 50, width: 150 }} onValueChange={pickType}>
+							<Picker
+								selectedValue={type}
+								style={{ height: 50, width: 150 }}
+								onValueChange={pickType}
+								enabled={original ? false : true}
+							>
 								{boardTypes.map((item, index) => (
 									<Picker.Item key={index} label={item.label} value={item.value} />
 								))}
@@ -243,8 +254,10 @@ const CreatePost = (props) => {
 	);
 };
 
-CreatePost.navigationOptions = {
-	title: 'Create'
+CreatePost.navigationOptions = (props) => {
+	return {
+		title: props.navigation.getParam('originalPost') ? 'Edit' : 'Create'
+	};
 };
 
 const styles = StyleSheet.create({});

@@ -194,6 +194,7 @@ const UserCardList = (props) => {
 									user={user}
 									closeModal={closeModal}
 									updateAction={props.updateAction}
+									navigation={props.navigation}
 								/>
 							</View>
 							{i < users.length - 1 && <Divider />}

@@ -16,7 +16,7 @@ import { uploadToS3 } from '../../helpers/uploadToS3';
 import * as ImagePicker from 'expo-image-picker';
 import Constants from '../../constants/Layout';
 import * as Permissions from 'expo-permissions';
-import { createMeetup } from '../../Services/meetups';
+import { createMeetup, updateMeetup } from '../../Services/meetups';
 import { connect } from 'react-redux';
 import Config from '../../config';
 import { fetchMeetups } from '../../redux/actions/meetups.actions';
@@ -30,21 +30,23 @@ const LAT_DELTA = 0.07;
 const LON_DELTA = 0.07;
 
 const CreateMeetup = (props) => {
-	const [ imageUri, setImageUri ] = useState(null);
+	const original = props.navigation.getParam('originalMeetup');
+
+	const [ imageUri, setImageUri ] = useState(original ? original.attachment : null);
 	const [ imageName, setImageName ] = useState(null);
 	const [ imageType, setImageType ] = useState(null);
-	const [ lat, setLat ] = useState(props.currentLocation.lat);
-	const [ lon, setLon ] = useState(props.currentLocation.lon);
+	const [ lat, setLat ] = useState(original ? original.latlon.lat : props.currentLocation.lat);
+	const [ lon, setLon ] = useState(original ? original.latlon.lon : props.currentLocation.lon);
 	const [ latDelta, setLatDelta ] = useState(LAT_DELTA);
 	const [ lonDelta, setLonDelta ] = useState(LON_DELTA);
-	const [ title, setTitle ] = useState('');
-	const [ description, setDescription ] = useState('');
+	const [ title, setTitle ] = useState(original ? original.title : '');
+	const [ description, setDescription ] = useState(original ? original.description : '');
 	const [ containerWidth, setContainerWidth ] = useState(350);
 	const [ isSubmitting, setIsSubmitting ] = useState(false);
 	const [ showModal, setShowModal ] = useState(false);
 	const [ searchTerm, setSearchTerm ] = useState('');
 	const [ searchResult, setSearchResult ] = useState([]);
-	const [ isPrivate, setIsPrivate ] = useState(false);
+	const [ isPrivate, setIsPrivate ] = useState(original ? original.isPrivate : false);
 
 	const mapRef = useRef(null);
 	const containerRef = useRef(null);
@@ -91,7 +93,7 @@ const CreateMeetup = (props) => {
 				description,
 				userId: props.currentDBUser.id,
 				userName: props.currentDBUser.username,
-				attachment: imageName ? `${Config.S3_BASE_URL}/${imageName}` : null,
+				attachment: imageName ? `${Config.S3_BASE_URL}/${imageName}` : original ? original.attachment : null,
 				isPrivate,
 				latlon: {
 					lat,
@@ -99,11 +101,15 @@ const CreateMeetup = (props) => {
 				}
 			};
 
-			await createMeetup(body);
+			if (original) {
+				await updateMeetup(original.id, body);
+			} else {
+				await createMeetup(body);
+			}
 
 			Alert.alert(
 				'Successful!',
-				'Your meetup has been created.',
+				`Your meetup has been ${original ? 'updated' : 'created'}.`,
 				[
 					{
 						text: 'OK',
@@ -275,8 +281,8 @@ const CreateMeetup = (props) => {
 								marginBottom: 10
 							}}
 							initialRegion={{
-								latitude: props.currentLocation.lat,
-								longitude: props.currentLocation.lon,
+								latitude: original ? original.latlon.lat : props.currentLocation.lat,
+								longitude: original ? original.latlon.lon : props.currentLocation.lon,
 								latitudeDelta: latDelta,
 								longitudeDelta: lonDelta
 							}}
@@ -355,7 +361,7 @@ const CreateMeetup = (props) => {
 
 CreateMeetup.navigationOptions = (props) => {
 	return {
-		title: 'Create',
+		title: props.navigation.getParam('originalMeetup') ? 'Edit' : 'Create',
 		headerStyle: { backgroundColor: 'brown' },
 		headerTitleStyle: { color: 'blue' }
 	};

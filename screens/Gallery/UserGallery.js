@@ -1,5 +1,5 @@
 import React, { Component, useEffect, useState } from 'react';
-import { View, TouchableOpacity, FlatList, ActivityIndicator, Alert } from 'react-native';
+import { View, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
 import { connect } from 'react-redux';
 import { fetchUserGallery } from '../../redux/actions/gallery.actions';
 import { vectorIcon } from '../../Utils/Icon';
@@ -8,29 +8,33 @@ import GalleryItem from '../../components/GalleryItem';
 
 const PAGE_SIZE = 10;
 
-class Gallery extends Component {
+class UserGallery extends Component {
 	state = {
-		photos: this.props.gallery,
+		photos: this.props.userGallery,
 		currentPage: 1,
 		fetchPage: 1,
 		isFetching: false,
-		isLoadingMore: false
+		isLoadingMore: false,
+		galleryUser: this.props.navigation.getParam('galleryUser')
 	};
 	flatListRef = null;
 
 	async componentDidMount() {
 		const { navigation, currentDBUser } = this.props;
 
+		const galleryUser = navigation.getParam('galleryUser');
+
 		navigation.setParams({
 			refresh: this.handleRefreshBtn,
 			onCreateBack: this.onCreateBack,
-			currentDBUser
+			currentDBUser,
+			galleryUser
 		});
 	}
 
 	static navigationOptions = ({ navigation, screenProps }) => {
 		return {
-			title: navigation.getParam('currentDBUser') ? navigation.getParam('currentDBUser').username : '',
+			title: navigation.getParam('galleryUser') ? navigation.getParam('galleryUser').username : '',
 			headerRight: (
 				<HeaderRightComponent
 					handleRefreshBtn={navigation.getParam('refresh')}
@@ -47,17 +51,18 @@ class Gallery extends Component {
 	};
 
 	handleRefreshBtn = async () => {
-		const { currentDBUser, fetchUserGallery } = this.props;
+		const { fetchUserGallery } = this.props;
+		const { galleryUser } = this.state;
 
 		this.setState({ isFetching: true });
 
-		await fetchUserGallery(currentDBUser.id, 0);
+		await fetchUserGallery(galleryUser.id, 1);
 
 		if (this.flatListRef) {
 			this.flatListRef.scrollToOffset({ animated: true, y: 0 });
 		}
 
-		this.setState({ photos: this.props.gallery });
+		this.setState({ photos: this.props.userGallery });
 
 		setTimeout(() => {
 			this.setState({ isFetching: false });
@@ -68,31 +73,9 @@ class Gallery extends Component {
 		this.handleRefreshBtn();
 	};
 
-	toEditPage = (item) => {
-		Alert.alert(
-			'Edit',
-			'Are you sure you want to edit this post?',
-			[
-				{
-					text: 'Yes',
-					onPress: async () => {
-						this.props.navigation.navigate('CreateGallery', {
-							originalGallery: item,
-							onCreateBack: this.onCreateBack
-						});
-					}
-				},
-				{
-					text: 'No'
-				}
-			],
-			{ cancelable: false }
-		);
-	};
-
 	handleOnEndReached = async () => {
-		const { fetchUserGallery, currentDBUser } = this.props;
-		const { currentPage, fetchPage } = this.state;
+		const { fetchUserGallery } = this.props;
+		const { currentPage, fetchPage, galleryUser } = this.state;
 
 		this.setState({ isLoadingMore: true });
 
@@ -100,7 +83,7 @@ class Gallery extends Component {
 			currentPage * PAGE_SIZE >= Config.DEFAULT_DATA_SIZE &&
 			(currentPage * PAGE_SIZE) % Config.DEFAULT_DATA_SIZE === 0
 		) {
-			await fetchUserGallery(currentDBUser.id, 0, { page: fetchPage + 1 });
+			await fetchUserGallery(galleryUser.id, 1, { page: fetchPage + 1 });
 
 			this.setState({ fetchPage: fetchPage + 1 });
 		}
@@ -113,8 +96,7 @@ class Gallery extends Component {
 	};
 
 	render() {
-		const { photos, isLoadingMore, currentPage } = this.state;
-		const { currentDBUser } = this.props;
+		const { photos, isLoadingMore, currentPage, galleryUser } = this.state;
 
 		return (
 			<View style={{ flex: 1 }}>
@@ -130,11 +112,9 @@ class Gallery extends Component {
 						return (
 							<GalleryItem
 								item={item.item}
-								itemUser={currentDBUser}
+								itemUser={galleryUser}
 								isFirst={item.index === 0}
 								refresh={this.handleRefreshBtn}
-								navigation={this.props.navigation}
-								toEditPage={this.toEditPage}
 							/>
 						);
 					}}
@@ -175,19 +155,16 @@ const HeaderRightComponent = (props) => {
 			>
 				<View style={{ marginRight: 20 }}>{vectorIcon('FrontAwesome', 'refresh', 26)}</View>
 			</TouchableOpacity>
-			<TouchableOpacity onPress={props.handleCreateBtn}>
-				<View style={{ marginRight: 25 }}>{vectorIcon('Feather', 'plus-circle', 26)}</View>
-			</TouchableOpacity>
 		</View>
 	);
 };
 const mapStateToProps = ({ auth, gallery }) => ({
 	currentDBUser: auth.currentDBUser,
-	gallery: gallery.gallery
+	userGallery: gallery.userGallery
 });
 
 const mapDispatchToProps = {
 	fetchUserGallery
 };
 
-export default connect(mapStateToProps, mapDispatchToProps)(Gallery);
+export default connect(mapStateToProps, mapDispatchToProps)(UserGallery);

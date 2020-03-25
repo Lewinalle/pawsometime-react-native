@@ -8,7 +8,8 @@ import { setAuthStatus, setCognitoUser, setDBUser } from './redux/actions/auth.a
 import { fetchUserInfo } from './Services/users';
 import { fetchMeetups, fetchUserMeetups } from './redux/actions/meetups.actions';
 import { fetchPosts, fetchUserPosts } from './redux/actions/posts.actions';
-import { setCurrentLocation } from './redux/actions/others.actions';
+import { fetchUserGallery } from './redux/actions/gallery.actions';
+import { setCurrentLocation, fetchNews } from './redux/actions/others.actions';
 
 const postTypes = [ 'general', 'qna', 'tips', 'trade' ];
 
@@ -52,24 +53,26 @@ const AppManager = (props) => {
 								lon: position.coords.longitude
 							};
 							await props.setCurrentLocation(currentLocation);
-							await props.fetchMeetups({
-								lat: currentLocation.lat,
-								lon: currentLocation.lon
-							});
+							// await props.fetchMeetups({
+							// 	lat: currentLocation.lat,
+							// 	lon: currentLocation.lon
+							// });
 							// await props.fetchUserMeetups(user.attributes.sub, {
 							// 	lat: currentLocation.lat,
 							// 	lon: currentLocation.lon
 							// });
 						},
 						async (error) => {
-							await props.fetchMeetups();
+							// await props.fetchMeetups();
 							// await props.fetchUserMeetups(user.attributes.sub);
 						},
 						{ enableHighAccuracy: true, timeout: 10000, maximumAge: 1000 }
 					);
+					await props.fetchUserGallery(user.attributes.sub, 0);
 					// TODO: UNCOMMENT BELOW
 					// await props.fetchPosts({ type: 'general' });
 					// await props.fetchUserPosts(user.attributes.sub, { type: 'general' });
+					await props.fetchNews();
 				}
 			} catch (err) {
 				console.log(err);
@@ -80,7 +83,7 @@ const AppManager = (props) => {
 
 	// TODO: UNCOMMENT AND REPLACE WITH BELOW
 	// if (isSplashOpen && props.meetups && props.userMeetups && props.generalPosts && props.userGeneralPosts) {
-	if (isSplashOpen && props.meetups) {
+	if (isSplashOpen) {
 		setisSplashOpen(false);
 		setTimeout(() => {
 			props.hideSplash();
@@ -107,7 +110,9 @@ const mapDispatchToProps = {
 	fetchPosts,
 	fetchUserPosts,
 	fetchUserMeetups,
-	setCurrentLocation
+	fetchUserGallery,
+	setCurrentLocation,
+	fetchNews
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(AppManager);

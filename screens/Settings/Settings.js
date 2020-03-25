@@ -122,6 +122,10 @@ const Settings = (props) => {
 	);
 };
 
+Settings.navigationOptions = {
+	title: 'Settings'
+};
+
 const mapDispatchToProps = {
 	signOut
 };

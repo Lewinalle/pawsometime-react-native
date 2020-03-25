@@ -9,6 +9,11 @@ import { vectorIcon } from '../../Utils/Icon';
 import { likeResource, addComment, deleteComment } from '../../Services/general';
 import { fetchMeetupInfo, deleteMeetup, autoJoin, requestJoin, cancelJoin } from '../../Services/meetups';
 import _ from 'lodash';
+import MapView, { Marker } from 'react-native-maps';
+
+const MAP_HEIGHT = 200;
+const LAT_DELTA = 0.07;
+const LON_DELTA = 0.07;
 
 const MeetupInfo = (props) => {
 	const [ meetup, setMeetup ] = useState(props.navigation.getParam('meetup'));
@@ -37,8 +42,6 @@ const MeetupInfo = (props) => {
 	}
 
 	const handleJoin = async () => {
-		console.log('handle join!!');
-
 		if (isSubmitting) {
 			return;
 		}
@@ -58,7 +61,7 @@ const MeetupInfo = (props) => {
 								let actionType;
 								let alertTitle;
 								let alertMessage;
-								if (meetup.isPrivate) {
+								if (meetup.isPrivate && props.currentDBUser.id !== meetup.userId) {
 									res = await requestJoin(meetup.id, {
 										userId: props.currentDBUser.id,
 										userName: props.currentDBUser.username
@@ -382,6 +385,28 @@ const MeetupInfo = (props) => {
 		);
 	};
 
+	const toEditPage = () => {
+		Alert.alert(
+			'Edit',
+			'Are you sure you want to edit this meetup?',
+			[
+				{
+					text: 'Yes',
+					onPress: async () => {
+						props.navigation.navigate('CreateMeetup', {
+							originalMeetup: meetup,
+							onCreateBack: props.navigation.getParam('onCreateBack')
+						});
+					}
+				},
+				{
+					text: 'No'
+				}
+			],
+			{ cancelable: false }
+		);
+	};
+
 	return (
 		<View
 			style={{
@@ -424,6 +449,13 @@ const MeetupInfo = (props) => {
 											</View>
 										</TouchableOpacity>
 										{meetup.userId === props.currentDBUser.id && (
+											<TouchableOpacity onPress={toEditPage}>
+												<View style={{ marginRight: 12 }}>
+													{vectorIcon('AntDesign', 'edit', 22)}
+												</View>
+											</TouchableOpacity>
+										)}
+										{meetup.userId === props.currentDBUser.id && (
 											<TouchableOpacity onPress={handleDeleteMeetup}>
 												<View style={{ marginRight: 10 }}>
 													{vectorIcon('AntDesign', 'delete', 22)}
@@ -464,6 +496,25 @@ const MeetupInfo = (props) => {
 								<Text style={{ marginRight: 10 }}>{meetup.comments.length}</Text>
 							</View>
 						</View>
+						<MapView
+							style={{
+								width: containerWidth,
+								height: MAP_HEIGHT
+							}}
+							initialRegion={{
+								latitude: meetup.latlon.lat,
+								longitude: meetup.latlon.lon,
+								latitudeDelta: LAT_DELTA,
+								longitudeDelta: LON_DELTA
+							}}
+						>
+							<Marker
+								coordinate={{
+									latitude: meetup.latlon.lat,
+									longitude: meetup.latlon.lon
+								}}
+							/>
+						</MapView>
 						{meetup.attachment && (
 							<View>
 								<CacheImage
