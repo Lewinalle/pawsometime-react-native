@@ -2,7 +2,7 @@ import { FETCH_GALLERY, FETCH_USER_GALLERY } from '../actions/index.actions';
 
 const initialState = {
 	gallery: null,
-	userGallery: []
+	userGallery: null
 };
 
 const galleryReducer = (state = initialState, action = {}) => {

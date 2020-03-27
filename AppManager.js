@@ -9,12 +9,14 @@ import { fetchUserInfo } from './Services/users';
 import { fetchMeetups, fetchUserMeetups } from './redux/actions/meetups.actions';
 import { fetchPosts, fetchUserPosts } from './redux/actions/posts.actions';
 import { fetchUserGallery } from './redux/actions/gallery.actions';
-import { setCurrentLocation, fetchNews } from './redux/actions/others.actions';
+import { setCurrentLocation, fetchNews, fetchFriendsActivity } from './redux/actions/others.actions';
+import { formatUsersIdsParams } from './Utils/FormatParams';
 
 const postTypes = [ 'general', 'qna', 'tips', 'trade' ];
 
 const AppManager = (props) => {
 	const [ isSplashOpen, setisSplashOpen ] = useState(true);
+	const [ authCheckingStatus, setAuthCheckingStatus ] = useState(0);
 
 	Amplify.configure({
 		Auth: {
@@ -28,20 +30,13 @@ const AppManager = (props) => {
 	useEffect(() => {
 		const persistUserAuth = async () => {
 			try {
-				// TODO: remove console logs!
 				const session = await Auth.currentSession();
 				await props.setAuthStatus(true);
-				// console.log('Current Session in AppManager.js: ');
-				// console.log(session);
 				const user = await Auth.currentAuthenticatedUser();
 				await props.setCognitoUser(user);
 				await props.setAuthStatus(true);
-				// console.log('Current Authenticated User in AppManager.js: ');
-				// console.log(user);
 				const DBUser = await fetchUserInfo(user.attributes.sub);
 				await props.setDBUser(DBUser);
-				// console.log('Current DB User in AppManager.js: ');
-				// console.log(DBUser);
 				console.log(await (await Auth.currentSession()).getIdToken().getJwtToken());
 				await AsyncStorage.setItem('user_id', user.attributes.sub);
 				if (user) {
@@ -53,53 +48,74 @@ const AppManager = (props) => {
 								lon: position.coords.longitude
 							};
 							await props.setCurrentLocation(currentLocation);
-							// await props.fetchMeetups({
-							// 	lat: currentLocation.lat,
-							// 	lon: currentLocation.lon
-							// });
-							// await props.fetchUserMeetups(user.attributes.sub, {
-							// 	lat: currentLocation.lat,
-							// 	lon: currentLocation.lon
-							// });
+							await props.fetchMeetups({
+								lat: currentLocation.lat,
+								lon: currentLocation.lon
+							});
+							await props.fetchUserMeetups(user.attributes.sub, {
+								lat: currentLocation.lat,
+								lon: currentLocation.lon
+							});
 						},
 						async (error) => {
-							// await props.fetchMeetups();
-							// await props.fetchUserMeetups(user.attributes.sub);
+							await props.fetchMeetups();
+							await props.fetchUserMeetups(user.attributes.sub);
 						},
 						{ enableHighAccuracy: true, timeout: 10000, maximumAge: 1000 }
 					);
 					await props.fetchUserGallery(user.attributes.sub, 0);
-					// TODO: UNCOMMENT BELOW
-					// await props.fetchPosts({ type: 'general' });
-					// await props.fetchUserPosts(user.attributes.sub, { type: 'general' });
+					await props.fetchPosts({ type: 'general' });
+					await props.fetchUserPosts(user.attributes.sub, { type: 'general' });
 					await props.fetchNews();
+					await props.fetchFriendsActivity(DBUser.id, {
+						friendsActivity: formatUsersIdsParams(DBUser.friends.friends)
+					});
+					setAuthCheckingStatus(1);
 				}
 			} catch (err) {
 				console.log(err);
+				setAuthCheckingStatus(2);
 			}
 		};
 		persistUserAuth();
 	}, []);
 
 	// TODO: UNCOMMENT AND REPLACE WITH BELOW
-	// if (isSplashOpen && props.meetups && props.userMeetups && props.generalPosts && props.userGeneralPosts) {
-	if (isSplashOpen) {
+	if (
+		authCheckingStatus === 1 &&
+		isSplashOpen &&
+		props.news.dogs.length > 0 &&
+		props.friendsActivity &&
+		props.meetups &&
+		props.userMeetups &&
+		props.generalPosts &&
+		props.userGeneralPosts &&
+		props.gallery
+	) {
 		setisSplashOpen(false);
 		setTimeout(() => {
 			props.hideSplash();
 		}, 350);
+		setAuthCheckingStatus(3);
+	} else if (authCheckingStatus === 2) {
+		setisSplashOpen(false);
+		props.hideSplash();
+		setAuthCheckingStatus(3);
 	}
 
 	return <AppNavigator />;
 };
 
-const styles = StyleSheet.create({});
-
-const mapStateToProps = ({ others, meetups, posts }) => ({
+const mapStateToProps = ({ others, meetups, posts, gallery }) => ({
 	currentLocation: others.currentLocation,
 	meetups: meetups.meetups,
+	userMeetups: meetups.userMeetups,
 	generalPosts: posts.generalPosts,
-	userGeneralPosts: posts.userGeneralPosts
+	userGeneralPosts: posts.userGeneralPosts,
+	gallery: gallery.gallery,
+	userGallery: gallery.userGallery,
+	news: others.news,
+	friendsActivity: others.friendsActivity
 });
 
 const mapDispatchToProps = {
@@ -112,7 +128,8 @@ const mapDispatchToProps = {
 	fetchUserMeetups,
 	fetchUserGallery,
 	setCurrentLocation,
-	fetchNews
+	fetchNews,
+	fetchFriendsActivity
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(AppManager);

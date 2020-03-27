@@ -1,5 +1,5 @@
 import React, { Component, useState, useEffect, useRef } from 'react';
-import { ScrollView, StyleSheet, Text, View, TouchableHighlight, TouchableOpacity } from 'react-native';
+import { ScrollView, StyleSheet, Text, View, TouchableHighlight, TouchableOpacity, RefreshControl } from 'react-native';
 import { Button, SearchBar } from 'react-native-elements';
 import MeetupListCard from '../../components/MeetupListCard';
 import MapView, { Marker, Callout } from 'react-native-maps';
@@ -9,7 +9,7 @@ import { connect } from 'react-redux';
 import { vectorIcon } from '../../Utils/Icon';
 import Config from '../../config';
 import _ from 'lodash';
-import { fetchMeetups } from '../../redux/actions/meetups.actions';
+import { fetchMeetups, fetchUserMeetups } from '../../redux/actions/meetups.actions';
 import AdmobBanner from '../../components/AdmobBanner';
 import { searchCity } from '../../helpers/GeoDBHelper';
 
@@ -17,8 +17,8 @@ const MAX_TITLE_LENGTH = 30;
 const MAP_WIDTH = dimensions.window.width - 32;
 const MAP_HEIGHT = 200;
 const DEFAULT_SCROLLVIEW_POSITION = 30;
-const LAT_DELTA = 0.08;
-const LON_DELTA = 0.08;
+const LAT_DELTA = 0.13;
+const LON_DELTA = 0.13;
 
 class Meetup extends Component {
 	state = {
@@ -45,7 +45,8 @@ class Meetup extends Component {
 
 		navigation.setParams({
 			refresh: this.handleRefreshBtn,
-			onCreateBack: this.onCreateBack
+			onCreateBack: this.onCreateBack,
+			myMeetupBtn: this.myMeetupBtn
 		});
 	}
 
@@ -59,15 +60,21 @@ class Meetup extends Component {
 						onCreateBack: navigation.getParam('onCreateBack')
 					});
 				}}
+				myMeetupBtn={navigation.getParam('myMeetupBtn')}
 			/>
 		),
 		headerStyle: { backgroundColor: 'brown' },
 		headerTitleStyle: { color: 'blue' }
 	});
 
+	myMeetupBtn = () => {
+		const { userMeetups } = this.props;
+		this.setState({ meetups: userMeetups });
+	};
+
 	handleRefreshBtn = async () => {
 		const { centerLat, centerLon, lat_offset } = this.state;
-		const { fetchMeetups, meetups } = this.props;
+		const { fetchMeetups, fetchUserMeetups, currentDBUser } = this.props;
 
 		this.setState({ isFetching: true });
 
@@ -75,9 +82,13 @@ class Meetup extends Component {
 			lat: centerLat,
 			lon: centerLon,
 			offset: lat_offset
-		}).then(() => {
-			this.setState({ meetups: this.props.meetups, isFetching: false });
-		});
+		})
+			.then(() => {
+				fetchUserMeetups(currentDBUser.id);
+			})
+			.then(() => {
+				this.setState({ meetups: this.props.meetups, isFetching: false });
+			});
 	};
 
 	onCreateBack = () => {
@@ -178,8 +189,6 @@ class Meetup extends Component {
 			citySearchResult,
 			isCitySearching
 		} = this.state;
-		// TODO: add meetups to state
-		// TODO: clear marker refs when refreshing/searching
 
 		if (!meetups) {
 			return null;
@@ -299,6 +308,7 @@ class Meetup extends Component {
 						backgroundColor: '#fff'
 					}}
 					onScroll={({ nativeEvent }) => this.setState({ scrollPos: nativeEvent.contentOffset.y })}
+					refreshControl={<RefreshControl refreshing={isFetching} onRefresh={this.handleRefreshBtn} />}
 				>
 					<View
 						ref={(el) => (this.viewRef = el)}
@@ -333,6 +343,16 @@ const HeaderRightComponent = (props) => {
 	const [ isDisabled, setIsDisabled ] = useState(false);
 	return (
 		<View style={{ flex: 1, flexDirection: 'row' }}>
+			<TouchableOpacity>
+				<Button
+					title="My Meetups"
+					onPress={props.myMeetupBtn}
+					type="outline"
+					titleStyle={{ fontSize: 14 }}
+					buttonStyle={{ paddingHorizontal: 10, paddingVertical: 4 }}
+					containerStyle={{ marginRight: 10 }}
+				/>
+			</TouchableOpacity>
 			<TouchableOpacity
 				onPress={async () => {
 					if (!isDisabled) {
@@ -355,13 +375,16 @@ const HeaderRightComponent = (props) => {
 	);
 };
 
-const mapStateToProps = ({ others, meetups }) => ({
+const mapStateToProps = ({ others, meetups, auth }) => ({
+	currentDBUser: auth.currentDBUser,
 	currentLocation: others.currentLocation,
-	meetups: meetups.meetups
+	meetups: meetups.meetups,
+	userMeetups: meetups.userMeetups
 });
 
 const mapDispatchToProps = {
-	fetchMeetups
+	fetchMeetups,
+	fetchUserMeetups
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Meetup);

@@ -22,25 +22,25 @@ export const getPosts = async (params) => {
 
 	const fromCache = await AsyncStorage.getItem(`getPosts-${params.type}`);
 	const cacheUpdated = await AsyncStorage.getItem(`getPosts-${params.type}-updated`);
-	if (!fromCache || !cacheUpdated || Number(+new Date()) - Number(cacheUpdated) > CACHE_SECONDS * 1000) {
-		try {
-			console.log('fetching new list!');
-			const res = await axios(options);
+	// if (!fromCache || !cacheUpdated || Number(+new Date()) - Number(cacheUpdated) > CACHE_SECONDS * 1000) {
+	try {
+		// console.log('fetching new list!');
+		const res = await axios(options);
 
-			const timestamp = new Date().getTime();
+		const timestamp = new Date().getTime();
 
-			await AsyncStorage.setItem(`getPosts-${params.type}`, JSON.stringify(res.data));
-			await AsyncStorage.setItem(`getPosts-${params.type}-updated`, timestamp.toString());
+		await AsyncStorage.setItem(`getPosts-${params.type}`, JSON.stringify(res.data));
+		await AsyncStorage.setItem(`getPosts-${params.type}-updated`, timestamp.toString());
 
-			return res.data;
-		} catch (error) {
-			console.log(error);
-			return [];
-		}
-	} else {
-		console.log('reading from cache!');
-		return JSON.parse(fromCache);
+		return res.data;
+	} catch (error) {
+		console.log(error);
+		return [];
 	}
+	// } else {
+	// 	console.log('reading from cache!');
+	// 	return JSON.parse(fromCache);
+	// }
 };
 
 export const fetchPostInfo = async (id, type) => {

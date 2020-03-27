@@ -5,8 +5,9 @@ import { fetchUserGallery } from '../../redux/actions/gallery.actions';
 import { vectorIcon } from '../../Utils/Icon';
 import Config from '../../config';
 import GalleryItem from '../../components/GalleryItem';
+import AdmobBanner from '../../components/AdmobBanner';
 
-const PAGE_SIZE = 10;
+const PAGE_SIZE = 2;
 
 class Gallery extends Component {
 	state = {
@@ -14,7 +15,8 @@ class Gallery extends Component {
 		currentPage: 1,
 		fetchPage: 1,
 		isFetching: false,
-		isLoadingMore: false
+		isLoadingMore: false,
+		refreshToggle: false
 	};
 	flatListRef = null;
 
@@ -48,20 +50,17 @@ class Gallery extends Component {
 
 	handleRefreshBtn = async () => {
 		const { currentDBUser, fetchUserGallery } = this.props;
+		const { refreshToggle } = this.state;
 
 		this.setState({ isFetching: true });
 
-		await fetchUserGallery(currentDBUser.id, 0);
+		fetchUserGallery(currentDBUser.id, 0).then(() =>
+			this.setState({ photos: this.props.gallery, isFetching: false, refreshToggle: !refreshToggle })
+		);
 
 		if (this.flatListRef) {
 			this.flatListRef.scrollToOffset({ animated: true, y: 0 });
 		}
-
-		this.setState({ photos: this.props.gallery });
-
-		setTimeout(() => {
-			this.setState({ isFetching: false });
-		}, 1500);
 	};
 
 	onCreateBack = async () => {
@@ -113,7 +112,7 @@ class Gallery extends Component {
 	};
 
 	render() {
-		const { photos, isLoadingMore, currentPage } = this.state;
+		const { photos, isLoadingMore, currentPage, refreshToggle, isFetching } = this.state;
 		const { currentDBUser } = this.props;
 
 		return (
@@ -122,6 +121,7 @@ class Gallery extends Component {
 					ref={(ref) => (this.flatListRef = ref)}
 					style={{}}
 					data={photos.slice(0, currentPage * PAGE_SIZE)}
+					extraData={refreshToggle}
 					numColumns={1}
 					keyExtrator={(item) => {
 						return `key-${item.id}`;
@@ -135,6 +135,7 @@ class Gallery extends Component {
 								refresh={this.handleRefreshBtn}
 								navigation={this.props.navigation}
 								toEditPage={this.toEditPage}
+								refreshToggle={refreshToggle}
 							/>
 						);
 					}}
@@ -145,12 +146,10 @@ class Gallery extends Component {
 					}}
 					onEndReachedThreshold={0.01}
 					scrollEventThrottle={700}
+					onRefresh={this.handleRefreshBtn}
+					refreshing={isFetching || isLoadingMore}
 				/>
-				{isLoadingMore && (
-					<View style={{ backgroundColor: '#a3a096' }}>
-						<ActivityIndicator size="large" color="#0000ff" />
-					</View>
-				)}
+				<AdmobBanner />
 			</View>
 		);
 	}

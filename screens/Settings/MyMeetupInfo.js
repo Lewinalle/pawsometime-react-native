@@ -1,20 +1,20 @@
-import React, { useEffect } from 'react';
+import React from 'react';
 import { ScrollView, StyleSheet, Text, View } from 'react-native';
 
-const MyPosts = () => {
+const MyMeetupInfo = () => {
 	return (
 		<View style={styles.container}>
 			<ScrollView style={styles.container} contentContainerStyle={styles.contentContainer}>
 				<View>
-					<Text>This is MyPosts Screen</Text>
+					<Text>This is MyMeetupInfo Screen</Text>
 				</View>
 			</ScrollView>
 		</View>
 	);
 };
 
-MyPosts.navigationOptions = {
-	title: 'My Posts'
+MyMeetupInfo.navigationOptions = {
+	title: 'My Meetups'
 };
 
 const styles = StyleSheet.create({
@@ -27,4 +27,4 @@ const styles = StyleSheet.create({
 	}
 });
 
-export default MyPosts;
+export default MyMeetupInfo;

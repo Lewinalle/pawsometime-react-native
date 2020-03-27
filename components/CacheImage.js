@@ -9,25 +9,26 @@ export default (CacheImage = (props) => {
 	const { uri, style } = props;
 	const [ source, setSource ] = useState(null);
 
-	useEffect(() => {
-		const fetchImage = async () => {
-			let imageSource;
-			const name = shorthash.unique(uri);
-			const path = `${FileSystem.cacheDirectory}${name}`;
-			const image = await FileSystem.getInfoAsync(path);
-			if (image.exists) {
-				console.log('Read image from cache');
-				imageSource = { uri: image.uri };
-				setSource(imageSource);
-			} else {
-				console.log('Downloading image from url to cache.');
-				const newImage = await FileSystem.downloadAsync(uri, path);
-				imageSource = { uri: newImage.uri };
-				setSource(imageSource);
-			}
-		};
-		fetchImage();
-	}, []);
+	useEffect(
+		() => {
+			const fetchImage = async () => {
+				let imageSource;
+				const name = shorthash.unique(uri);
+				const path = `${FileSystem.cacheDirectory}${name}`;
+				const image = await FileSystem.getInfoAsync(path);
+				if (image.exists) {
+					imageSource = { uri: image.uri };
+					setSource(imageSource);
+				} else {
+					const newImage = await FileSystem.downloadAsync(uri, path);
+					imageSource = { uri: newImage.uri };
+					setSource(imageSource);
+				}
+			};
+			fetchImage();
+		},
+		[ uri ]
+	);
 
 	if (props.onPressHandler) {
 		return (

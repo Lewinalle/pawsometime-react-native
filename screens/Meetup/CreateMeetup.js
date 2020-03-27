@@ -83,6 +83,26 @@ const CreateMeetup = (props) => {
 	};
 
 	const handleSubmit = async () => {
+		if (!title || !description) {
+			Alert.alert(
+				'Warning!',
+				`Title and Description cannot be empty.`,
+				[
+					{
+						text: 'OK',
+						onPress: () => {
+							return;
+						}
+					}
+				],
+				{
+					cancelable: false
+				}
+			);
+
+			return;
+		}
+
 		try {
 			setIsSubmitting(true);
 			if (imageName) {
@@ -317,7 +337,7 @@ const CreateMeetup = (props) => {
 							<CheckBox
 								iconLeft
 								left
-								title="Required host approval to join this meetup"
+								title="Require host approval to join this meetup"
 								textStyle={{ fontSize: 14, fontWeight: 'bold' }}
 								containerStyle={{
 									flex: 1,

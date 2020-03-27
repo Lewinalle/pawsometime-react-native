@@ -65,6 +65,26 @@ class CreateGallery extends Component {
 		const { imageUri, imageName, imageType, description } = this.state;
 		const { currentDBUser } = this.props;
 
+		if (!this.original && !imageName) {
+			Alert.alert(
+				'Warning!',
+				`Photo cannot be empty.`,
+				[
+					{
+						text: 'OK',
+						onPress: () => {
+							return;
+						}
+					}
+				],
+				{
+					cancelable: false
+				}
+			);
+
+			return;
+		}
+
 		try {
 			this.setState({ isSubmitting: true });
 			if (imageName) {
@@ -74,7 +94,7 @@ class CreateGallery extends Component {
 				description,
 				userId: currentDBUser.id,
 				userName: currentDBUser.username,
-				photo: imageName ? `${Config.S3_BASE_URL}/${imageName}` : null
+				photo: imageName ? `${Config.S3_BASE_URL}/${imageName}` : this.original ? this.original.photo : null
 			};
 
 			if (this.original) {
@@ -197,38 +217,19 @@ class CreateGallery extends Component {
 								/>
 							</View>
 						</View>
+						{this.props.navigation.getParam('originalGallery') && (
+							<View style={{ marginTop: 10 }}>
+								<Text style={{ fontSize: 11 }}>
+									** Please restart the app after if it is not updated.
+								</Text>
+							</View>
+						)}
 					</ScrollView>
 				</KeyboardAvoidingView>
 			</View>
 		);
 	}
 }
-
-const HeaderRightComponent = (props) => {
-	const [ isDisabled, setIsDisabled ] = useState(false);
-	return (
-		<View style={{ flex: 1, flexDirection: 'row' }}>
-			{/* <TouchableOpacity
-				onPress={async () => {
-					if (!isDisabled) {
-						setIsDisabled(true);
-						await props.handleRefreshBtn();
-					}
-					setTimeout(() => {
-						setIsDisabled(false);
-					}, 1500);
-				}}
-				disabled={isDisabled}
-				style={{ opacity: isDisabled ? 0.2 : 1 }}
-			>
-				<View style={{ marginRight: 20 }}>{vectorIcon('FrontAwesome', 'refresh', 26)}</View>
-			</TouchableOpacity>
-			<TouchableOpacity onPress={props.handleCreateBtn}>
-				<View style={{ marginRight: 25 }}>{vectorIcon('Feather', 'plus-circle', 26)}</View>
-			</TouchableOpacity> */}
-		</View>
-	);
-};
 
 const mapStateToProps = ({ auth }) => ({
 	currentDBUser: auth.currentDBUser

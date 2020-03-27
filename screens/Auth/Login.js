@@ -4,9 +4,14 @@ import { Button, Input } from 'react-native-elements';
 import { Auth } from 'aws-amplify';
 
 import { connect } from 'react-redux';
-import { setAuthStatus, setCognitoUser } from '../../redux/actions/auth.actions';
-import { setDBUser } from '../../redux/actions/auth.actions';
+import { setAuthStatus, setCognitoUser, setDBUser } from '../../redux/actions/auth.actions';
 import { fetchUserInfo, updateUser } from '../../Services/users';
+
+import { fetchMeetups, fetchUserMeetups } from '../../redux/actions/meetups.actions';
+import { fetchPosts, fetchUserPosts } from '../../redux/actions/posts.actions';
+import { fetchUserGallery } from '../../redux/actions/gallery.actions';
+import { setCurrentLocation, fetchNews, fetchFriendsActivity } from '../../redux/actions/others.actions';
+import { formatUsersIdsParams } from '../../Utils/FormatParams';
 
 import dimensions from '../../constants/Layout';
 import { validator } from '../../Utils/Validator';
@@ -61,6 +66,39 @@ const Login = (props) => {
 				}
 
 				await props.setDBUser(updatedUser ? updatedUser : DBUser);
+
+				if (user) {
+					let currentLocation;
+					await navigator.geolocation.getCurrentPosition(
+						async (position) => {
+							currentLocation = {
+								lat: position.coords.latitude,
+								lon: position.coords.longitude
+							};
+							await props.setCurrentLocation(currentLocation);
+							await props.fetchMeetups({
+								lat: currentLocation.lat,
+								lon: currentLocation.lon
+							});
+							await props.fetchUserMeetups(user.attributes.sub, {
+								lat: currentLocation.lat,
+								lon: currentLocation.lon
+							});
+						},
+						async (error) => {
+							await props.fetchMeetups();
+							await props.fetchUserMeetups(user.attributes.sub);
+						},
+						{ enableHighAccuracy: true, timeout: 10000, maximumAge: 1000 }
+					);
+					await props.fetchUserGallery(user.attributes.sub, 0);
+					await props.fetchPosts({ type: 'general' });
+					await props.fetchUserPosts(user.attributes.sub, { type: 'general' });
+					await props.fetchNews();
+					await props.fetchFriendsActivity(DBUser.id, {
+						friendsActivity: formatUsersIdsParams(DBUser.friends.friends)
+					});
+				}
 
 				setIsLoggingin(false);
 
@@ -176,16 +214,33 @@ const styles = StyleSheet.create({
 	}
 });
 
-const mapStateToProps = ({ auth }) => ({
+const mapStateToProps = ({ auth, others, meetups, posts, gallery }) => ({
 	isAuthenticated: auth.isAuthenticated,
 	currentDBUser: auth.currentDBUser,
-	currentCognitoUser: auth.currentCognitoUser
+	currentCognitoUser: auth.currentCognitoUser,
+	currentLocation: others.currentLocation,
+	meetups: meetups.meetups,
+	userMeetups: meetups.userMeetups,
+	generalPosts: posts.generalPosts,
+	userGeneralPosts: posts.userGeneralPosts,
+	gallery: gallery.gallery,
+	userGallery: gallery.userGallery,
+	news: others.news,
+	friendsActivity: others.friendsActivity
 });
 
 const mapDispatchToProps = {
 	setAuthStatus,
 	setCognitoUser,
-	setDBUser
+	setDBUser,
+	fetchMeetups,
+	fetchPosts,
+	fetchUserPosts,
+	fetchUserMeetups,
+	fetchUserGallery,
+	setCurrentLocation,
+	fetchNews,
+	fetchFriendsActivity
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Login);

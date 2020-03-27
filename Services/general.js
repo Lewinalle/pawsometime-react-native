@@ -83,6 +83,36 @@ export const S3UploadUrl = async (data) => {
 	return res.data;
 };
 
+export const getHistory = async (params) => {
+	let query = '';
+	_.forIn(params, function(value, key) {
+		if (query !== '') {
+			query += '&';
+		}
+		query += `${key}=${value}`;
+	});
+
+	const options = {
+		method: 'GET',
+		url: `${Config.OTHERS_API_URL}/history?${query ? query : ''}`
+	};
+
+	const res = await axios(options);
+
+	return res.data;
+};
+
+export const fetchHistoryInfo = async (id) => {
+	const options = {
+		method: 'GET',
+		url: `${Config.OTHERS_API_URL}/history/${id}`
+	};
+
+	const res = await axios(options);
+
+	return res.data;
+};
+
 export const testGet = async () => {
 	const options = {
 		method: 'GET',

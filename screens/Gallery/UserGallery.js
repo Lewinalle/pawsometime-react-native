@@ -96,7 +96,7 @@ class UserGallery extends Component {
 	};
 
 	render() {
-		const { photos, isLoadingMore, currentPage, galleryUser } = this.state;
+		const { photos, isLoadingMore, currentPage, galleryUser, isFetching } = this.state;
 
 		return (
 			<View style={{ flex: 1 }}>
@@ -125,12 +125,9 @@ class UserGallery extends Component {
 					}}
 					onEndReachedThreshold={0.01}
 					scrollEventThrottle={700}
+					onRefresh={this.handleRefreshBtn}
+					refreshing={isFetching || isLoadingMore}
 				/>
-				{isLoadingMore && (
-					<View style={{ backgroundColor: '#a3a096' }}>
-						<ActivityIndicator size="large" color="#0000ff" />
-					</View>
-				)}
 			</View>
 		);
 	}

@@ -28,7 +28,7 @@ const authReducer = (state = initialState, action = {}) => {
 				...state,
 				isAuthenticated: false,
 				currentCognitoUser: null,
-				currentDBUser: null
+				currentDBUser: {}
 			};
 		default:
 			return state;

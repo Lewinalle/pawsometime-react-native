@@ -21,12 +21,29 @@ class GalleryItem extends Component {
 		showUserModal: false
 	};
 
+	// shouldComponentUpdate(nextProps, nextState) {
+	// 	return (
+	// 		this.props.refreshToggle !== nextProps.refreshToggle ||
+	// 		this.state.showComments !== nextState.showComments ||
+	// 		this.state.showUserModal !== nextState.showUserModal ||
+	// 		this.state.isSubmitting !== nextState.isSubmitting ||
+	// 		this.state.item !== nextState.item ||
+	// 		this.state.comment !== nextState.comment
+	// 	);
+	// }
+
+	// componentDidUpdate(prevProps, prevState) {
+	// 	if (!_.isEqual(JSON.stringify(prevState.item), JSON.stringify(this.props.item))) {
+	// 		this.setState({ item: this.props.item });
+	// 	}
+	// }
+
 	closeModal = () => {
 		this.setState({ modalUser: {}, showUserModal: false });
 	};
 
 	handleModalOpen = async (userId = null) => {
-		const { currentDBUser, itemUser } = this.props;
+		const { currentDBUser = {}, itemUser } = this.props;
 
 		if (userId === currentDBUser.id) {
 			return;
@@ -42,7 +59,7 @@ class GalleryItem extends Component {
 
 	handleLike = async () => {
 		const { isSubmitting, item } = this.state;
-		const { currentDBUser } = this.props;
+		const { currentDBUser = {} } = this.props;
 
 		if (isSubmitting) {
 			return;
@@ -78,7 +95,7 @@ class GalleryItem extends Component {
 
 	handleAddComment = async () => {
 		const { isSubmitting, comment, item } = this.state;
-		const { currentDBUser } = this.props;
+		const { currentDBUser = {} } = this.props;
 
 		if (isSubmitting) return;
 
@@ -211,7 +228,7 @@ class GalleryItem extends Component {
 	};
 
 	render() {
-		const { currentDBUser, isFirst, itemUser } = this.props;
+		const { currentDBUser = {}, isFirst, itemUser } = this.props;
 		const { item, showComments, comment, modalUser, showUserModal } = this.state;
 
 		const dateTime = new Date(item.createdAt);
@@ -231,7 +248,14 @@ class GalleryItem extends Component {
 					}}
 				>
 					<TouchableOpacity onPress={() => this.handleModalOpen(itemUser.id)}>
-						<View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
+						<View
+							style={{
+								flex: 1,
+								flexDirection: 'row',
+								alignItems: 'center',
+								maxWidth: Constants.window.width - 230
+							}}
+						>
 							{itemUser && itemUser.avatar ? (
 								<Avatar
 									containerStyle={{ width: 35, height: 35 }}
@@ -247,18 +271,20 @@ class GalleryItem extends Component {
 									source={require('../assets/images/profile-default.png')}
 								/>
 							)}
-							<Text style={{ marginLeft: 8, fontSize: 14, fontWeight: 'bold' }}>{item.userName}asd</Text>
+							<Text numberOfLines={1} style={{ marginLeft: 8, fontSize: 14, fontWeight: 'bold' }}>
+								{item.userName}
+							</Text>
 						</View>
 					</TouchableOpacity>
 					<View style={{ flex: 1, flexDirection: 'row', justifyContent: 'flex-end' }}>
 						{item.userId === currentDBUser.id && (
 							<TouchableOpacity onPress={() => this.props.toEditPage(item)}>
-								<View style={{ marginRight: 12 }}>{vectorIcon('AntDesign', 'edit', 22)}</View>
+								<View style={{ marginRight: 8 }}>{vectorIcon('AntDesign', 'edit', 22)}</View>
 							</TouchableOpacity>
 						)}
 						{item.userId === currentDBUser.id && (
 							<TouchableOpacity onPress={this.handleDeleteGallery}>
-								<View style={{ marginRight: 4 }}>{vectorIcon('AntDesign', 'delete', 22)}</View>
+								<View style={{ marginRight: 8 }}>{vectorIcon('AntDesign', 'delete', 22)}</View>
 							</TouchableOpacity>
 						)}
 						<Text style={{ fontSize: 14 }}>

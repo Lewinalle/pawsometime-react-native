@@ -4,6 +4,7 @@ import { SettingsListItem } from '../../components/SettingsListItem';
 import { connect } from 'react-redux';
 import { signOut } from '../../redux/actions/auth.actions';
 import { Auth } from 'aws-amplify';
+import AdmobBanner from '../../components/AdmobBanner';
 
 const settingItems = [
 	{
@@ -27,27 +28,13 @@ const settingItems = [
 		iconSize: 25,
 		to: 'SearchUsers'
 	},
-	{
-		title: 'My Meetups',
-		description: 'View and manage my meetups',
-		icon: 'FontAwesome.meetup',
-		iconSize: 24,
-		to: 'MyMeetups'
-	},
-	{
-		title: 'My Posts',
-		description: 'View and manage my posts',
-		icon: 'Entypo.news',
-		iconSize: 26,
-		to: 'MyPosts'
-	},
-	{
-		title: 'Change Password',
-		description: 'Change my password',
-		icon: 'SimpleLineIcons.lock-open',
-		iconSize: 26,
-		to: 'ChangePassword'
-	},
+	// {
+	// 	title: 'Change Password',
+	// 	description: 'Change my password',
+	// 	icon: 'SimpleLineIcons.lock-open',
+	// 	iconSize: 26,
+	// 	to: 'ChangePassword'
+	// },
 	{
 		title: 'About',
 		description: 'View details and description of application',
@@ -59,7 +46,7 @@ const settingItems = [
 
 const Settings = (props) => {
 	return (
-		<View>
+		<View style={{ flex: 1 }}>
 			{settingItems.map((item, index) => (
 				<SettingsListItem
 					key={index}
@@ -118,6 +105,9 @@ const Settings = (props) => {
 					);
 				}}
 			/>
+			<View style={{ marginTop: 'auto' }}>
+				<AdmobBanner />
+			</View>
 		</View>
 	);
 };

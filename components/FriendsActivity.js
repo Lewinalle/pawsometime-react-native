@@ -1,0 +1,234 @@
+import React, { useEffect, useState } from 'react';
+import { ScrollView, StyleSheet, Text, TouchableHighlight, View, Linking, RefreshControl } from 'react-native';
+import { Input, Button, ListItem, Card, Divider, ButtonGroup } from 'react-native-elements';
+import { connect } from 'react-redux';
+import { fetchFriendsActivity } from '../redux/actions/others.actions';
+import { TouchableOpacity } from 'react-native-gesture-handler';
+import { formatUsersIdsParams } from '../Utils/FormatParams';
+
+const STACKSIZE = 10;
+
+const FriendsActivity = (props) => {
+	const { friendsActivity, currentDBUser } = props;
+	const [ activities, setActivities ] = useState(props.friendsActivity);
+	const [ currentStack, setCurrentStack ] = useState(1);
+	const [ showLoadMore, setShowLoadMore ] = useState(false);
+	const [ isFetching, setIsFetching ] = useState(false);
+
+	useEffect(
+		() => {
+			setActivities(props.friendsActivity);
+			setShowLoadMore(props.friendsActivity.length > STACKSIZE);
+		},
+		[ props.friendsActivity ]
+	);
+
+	const loadMore = async () => {
+		const newCurrentStack = currentStack + 1;
+		setCurrentStack(newCurrentStack);
+		setShowLoadMore(activities.length > newCurrentStack * STACKSIZE);
+	};
+
+	const resetStack = () => {
+		setCurrentStack(1);
+	};
+
+	const refresh = async () => {
+		setIsFetching(true);
+
+		await props.fetchFriendsActivity(currentDBUser.id, {
+			friendsActivity: formatUsersIdsParams(currentDBUser.friends.friends)
+		});
+
+		resetStack();
+		setShowLoadMore(props.friendsActivity.length > STACKSIZE);
+		setIsFetching(false);
+	};
+
+	const handleCardClick = (item) => {
+		switch (item.resource) {
+			case 'meetup':
+				props.navigation.navigate('Meetup');
+				return;
+			case 'post':
+				props.navigation.navigate('Board');
+				return;
+			case 'gallery':
+				props.navigation.navigate('Gallery');
+				return;
+			case 'user':
+				props.navigation.navigate('Friends');
+				return;
+			default:
+				return;
+		}
+	};
+
+	const generateMessage = (item) => {
+		switch (item.resource) {
+			case 'meetup':
+				switch (item.action) {
+					case 'create':
+						return (
+							<Text numberOfLines={2} style={{ fontSize: 16 }}>
+								<Text style={{ fontWeight: 'bold' }}>{item.userName}</Text> created a meetup.
+							</Text>
+						);
+					case 'update':
+						return (
+							<Text numberOfLines={2} style={{ fontSize: 16 }}>
+								<Text style={{ fontWeight: 'bold' }}>{item.userName}</Text> updated a meetup.
+							</Text>
+						);
+					default:
+						return;
+				}
+			case 'post':
+				switch (item.action) {
+					case 'create':
+						return (
+							<Text numberOfLines={2} style={{ fontSize: 16 }}>
+								<Text style={{ fontWeight: 'bold' }}>{item.userName}</Text> created a{' '}
+								{item.resourceType} post.
+							</Text>
+						);
+					case 'update':
+						return (
+							<Text numberOfLines={2} style={{ fontSize: 16 }}>
+								<Text style={{ fontWeight: 'bold' }}>{item.userName}</Text> updated a{' '}
+								{item.resourceType} post.
+							</Text>
+						);
+					default:
+						return;
+				}
+			case 'gallery':
+				switch (item.action) {
+					case 'create':
+						return (
+							<Text numberOfLines={2} style={{ fontSize: 16 }}>
+								<Text style={{ fontWeight: 'bold' }}>{item.userName}</Text> added a photo.
+							</Text>
+						);
+					case 'update':
+						return (
+							<Text numberOfLines={2} style={{ fontSize: 16 }}>
+								<Text style={{ fontWeight: 'bold' }}>{item.userName}</Text> updated gallery.
+							</Text>
+						);
+					default:
+						return;
+				}
+			case 'user':
+				if (item.resourceId !== props.currentDBUser.id) {
+					return;
+				}
+				switch (item.action) {
+					case 'connect':
+						return (
+							<Text numberOfLines={2} style={{ fontSize: 16 }}>
+								You are now friends with <Text style={{ fontWeight: 'bold' }}>{item.userName}</Text>
+							</Text>
+						);
+					case 'request':
+						return (
+							<Text numberOfLines={2} style={{ fontSize: 16 }}>
+								<Text style={{ fontWeight: 'bold' }}>{item.userName}</Text> sent a friend request.
+							</Text>
+						);
+					case 'update':
+						return (
+							<Text numberOfLines={2} style={{ fontSize: 16 }}>
+								<Text style={{ fontWeight: 'bold' }}>{item.userName}</Text> updated profile.
+							</Text>
+						);
+					default:
+						return;
+				}
+			default:
+				return;
+		}
+	};
+
+	return (
+		<View style={{ flex: 1 }}>
+			<ScrollView
+				style={{ flex: 1 }}
+				refreshControl={<RefreshControl refreshing={isFetching} onRefresh={refresh} />}
+			>
+				<View>
+					{activities.slice(0, STACKSIZE * currentStack).map((item, index) => {
+						const dateTime = new Date(item.createdAt);
+						const message = generateMessage(item);
+						if (!message) {
+							return null;
+						}
+						return (
+							<Card
+								key={index}
+								containerStyle={{
+									paddingLeft: 5,
+									paddingRight: 10,
+									paddingVertical: 6,
+									marginTop: 0,
+									marginBottom: 4
+								}}
+							>
+								<TouchableOpacity onPress={() => handleCardClick(item)}>
+									<View>
+										<View style={{ flex: 1, flexDirection: 'row' }}>
+											<View style={{ flex: 1, paddingLeft: 6 }}>
+												<View
+													style={{
+														flex: 1,
+														flexDirection: 'row',
+														justifyContent: 'space-between',
+														marginBottom: 3
+													}}
+												>
+													{generateMessage(item)}
+												</View>
+												<View style={{ flex: 1, flexDirection: 'row' }}>
+													<Text style={{ flex: 1, fontSize: 12, textAlign: 'left' }}>
+														{dateTime.toLocaleDateString()}, {dateTime.toLocaleTimeString()}
+													</Text>
+													<Text style={{ fontSize: 12, textAlign: 'right' }}>
+														click to go to tab
+													</Text>
+												</View>
+											</View>
+										</View>
+									</View>
+								</TouchableOpacity>
+							</Card>
+						);
+					})}
+					{showLoadMore && (
+						<TouchableOpacity onPress={loadMore} style={{ marginBottom: 6 }}>
+							<View
+								style={{
+									marginHorizontal: 14,
+									padding: 4,
+									borderWidth: 0.5,
+									borderRadius: 25,
+									backgroundColor: '#f7da9c'
+								}}
+							>
+								<Text style={{ fontSize: 14, textAlign: 'center' }}>LOAD MORE</Text>
+							</View>
+						</TouchableOpacity>
+					)}
+				</View>
+			</ScrollView>
+		</View>
+	);
+};
+
+const mapStateToProps = ({ auth, others }) => ({
+	friendsActivity: others.friendsActivity,
+	currentDBUser: auth.currentDBUser
+});
+
+const mapDispatchToProps = { fetchFriendsActivity };
+
+export default connect(mapStateToProps, mapDispatchToProps)(FriendsActivity);

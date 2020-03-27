@@ -91,6 +91,26 @@ const CreatePost = (props) => {
 	};
 
 	const handleSubmit = async () => {
+		if (!title || !description) {
+			Alert.alert(
+				'Warning!',
+				`Title and Description cannot be empty.`,
+				[
+					{
+						text: 'OK',
+						onPress: () => {
+							return;
+						}
+					}
+				],
+				{
+					cancelable: false
+				}
+			);
+
+			return;
+		}
+
 		try {
 			setIsSubmitting(true);
 			if (imageName) {

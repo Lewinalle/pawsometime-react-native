@@ -15,16 +15,16 @@ import { vectorIcon } from '../../Utils/Icon';
 import Config from '../../config';
 import _ from 'lodash';
 import { connect } from 'react-redux';
-import { fetchPosts } from '../../redux/actions/posts.actions';
-import { fetchPostsHelper } from '../../Utils/FetchPostsHelper';
-import { test } from '../../redux/actions/test.actions';
+import { fetchPosts, fetchUserPosts } from '../../redux/actions/posts.actions';
+import { fetchPostsHelper, fetchUserPostsHelper } from '../../Utils/FetchPostsHelper';
+import AdmobBanner from '../../components/AdmobBanner';
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE = 7;
 const boardTabs = [ 'General', 'Questions', 'Tips', 'Trade' ];
 const boardTypes = [ 'general', 'qna', 'tips', 'trade' ];
 
 class Board extends Component {
-	state = {};
+	state = { isFetching: false };
 
 	componentDidMount() {
 		this.setState({
@@ -43,9 +43,30 @@ class Board extends Component {
 
 		this.props.navigation.setParams({
 			refresh: this.handleRefreshBtn,
-			onCreateBack: (type) => this.onCreateBack(type)
+			onCreateBack: (type) => this.onCreateBack(type),
+			myPostsBtn: this.myPostsBtn
 		});
 	}
+
+	myPostsBtn = () => {
+		const { userGeneralPosts = [], userQuestionPosts = [], userTipPosts = [], userTradePosts = [] } = this.props;
+		const { currentTab } = this.state;
+
+		switch (currentTab) {
+			case 0:
+				this.setState({ posts: userGeneralPosts });
+				break;
+			case 1:
+				this.setState({ posts: userQuestionPosts });
+				break;
+			case 2:
+				this.setState({ posts: userTipPosts });
+				break;
+			case 3:
+				this.setState({ posts: userTradePosts });
+				break;
+		}
+	};
 
 	onCreateBack(type) {
 		this.handleTabPress(boardTypes.findIndex((val) => val === type));
@@ -89,11 +110,12 @@ class Board extends Component {
 	}
 
 	async handleTabPress(i) {
-		const { fetchPosts } = this.props;
+		const { fetchPosts, fetchUserPosts, currentDBUser } = this.props;
 
 		this.setState({ currentTab: i, currentPage: 1 });
 
 		await fetchPostsHelper(fetchPosts, { type: i });
+		await fetchUserPostsHelper(fetchUserPosts, currentDBUser.id, { type: i });
 
 		this.resetList();
 	}
@@ -119,7 +141,6 @@ class Board extends Component {
 	}
 
 	onSearchTermChange = (text) => {
-		console.log(text);
 		this.setState({ searchTerm: text });
 	};
 
@@ -170,10 +191,7 @@ class Board extends Component {
 
 		this.setState({ isFetching: true });
 
-		if (
-			currentPage * PAGE_SIZE >= Config.DEFAULT_DATA_SIZE &&
-			(currentPage * PAGE_SIZE) % Config.DEFAULT_DATA_SIZE === 0
-		) {
+		if (true) {
 			await fetchPostsHelper(fetchPosts, { type: currentTab, page: types[boardTypes[currentTab]] + 1 });
 			let newTypes = types;
 			newTypes[boardTypes[currentTab]]++;
@@ -187,12 +205,14 @@ class Board extends Component {
 
 		setTimeout(() => {
 			this.setState({ isFetching: false });
-		}, 2500);
+		}, 1500);
 	}
 
 	handleRefreshBtn = async () => {
 		const { fetchPosts } = this.props;
 		const { currentTab } = this.state;
+
+		this.setState({ isFetching: true });
 
 		if (this.flatListRef) {
 			this.flatListRef.scrollToOffset({ animated: true, y: 0 });
@@ -201,19 +221,20 @@ class Board extends Component {
 		this.setState({ currentPage: 1, searchTerm: '' });
 
 		await AsyncStorage.removeItem(`getPosts-${boardTypes[currentTab]}`);
-		await fetchPostsHelper(fetchPosts, { type: currentTab });
+		fetchPostsHelper(fetchPosts, { type: currentTab }).then(() => this.setState({ isFetching: false }));
 
 		this.handleSearchSubmit({});
 	};
 
 	static navigationOptions = ({ navigation, screenProps }) => ({
-		title: 'test',
+		title: 'Board',
 		headerRight: (
 			<HeaderRightComponent
 				handleRefreshBtn={navigation.getParam('refresh')}
 				handleCreateBtn={() => {
 					navigation.navigate('CreatePost', { onCreateBack: navigation.getParam('onCreateBack') });
 				}}
+				myPostsBtn={navigation.getParam('myPostsBtn')}
 			/>
 		),
 		headerStyle: { backgroundColor: 'brown' },
@@ -221,66 +242,66 @@ class Board extends Component {
 	});
 
 	render() {
-		const { currentTab = 0, currentPage = 1, posts = [], searchTerm = '' } = this.state;
+		const { currentTab = 0, currentPage = 1, posts = [], searchTerm = '', isFetching } = this.state;
 
 		return (
-			<View style={styles.container}>
-				<View style={{}}>
-					<ButtonGroup
-						onPress={(i) => this.handleTabPress(i)}
-						selectedIndex={currentTab}
-						buttons={boardTabs}
-						containerStyle={{
-							height: 40,
-							minWidth: 250,
-							marginTop: 0,
-							marginBottom: 0,
-							marginLeft: 0,
-							marginRight: 0,
-							borderWidth: 0
-						}}
-						textStyle={{ fontSize: 12 }}
-						selectedButtonStyle={{ backgroundColor: 'grey' }}
-					/>
-				</View>
-				<View style={{ marginTop: 10 }}>
-					<BoardSearch
-						handleSearchSubmit={this.handleSearchSubmit}
-						onValueChange={this.onSearchTermChange}
-						value={searchTerm}
-					/>
-				</View>
-				<FlatList
-					ref={(ref) => (this.flatListRef = ref)}
-					style={{ marginTop: 35 }}
-					data={posts.slice(0, currentPage * PAGE_SIZE)}
-					numColumns={1}
-					keyExtrator={(item) => {
-						return `key-${item.id}`;
-					}}
-					renderItem={(item) => {
-						return (
-							<BoardListItem
-								post={item.item}
-								isFirst={item.index === 0}
-								handlePostClick={(post) => this.toPostInfo(post)}
-							/>
-						);
-					}}
-					onEndReached={({ distanceFromEnd }) => {
-						console.log('end reached! loading more!');
-						if (posts.length > this.state.currentPage * PAGE_SIZE) {
-							this.handleOnEndReached(distanceFromEnd);
-						}
-					}}
-					onEndReachedThreshold={0.01}
-					scrollEventThrottle={700}
-				/>
-				{this.state.isFetching && (
-					<View>
-						<ActivityIndicator size="large" color="#0000ff" />
+			<View style={{ flex: 1 }}>
+				<View style={styles.container}>
+					<View style={{}}>
+						<ButtonGroup
+							onPress={(i) => this.handleTabPress(i)}
+							selectedIndex={currentTab}
+							buttons={boardTabs}
+							containerStyle={{
+								height: 40,
+								minWidth: 250,
+								marginTop: 0,
+								marginBottom: 0,
+								marginLeft: 0,
+								marginRight: 0,
+								borderWidth: 0
+							}}
+							textStyle={{ fontSize: 12 }}
+							selectedButtonStyle={{ backgroundColor: 'grey' }}
+						/>
 					</View>
-				)}
+					<View style={{ marginTop: 10 }}>
+						<BoardSearch
+							handleSearchSubmit={this.handleSearchSubmit}
+							onValueChange={this.onSearchTermChange}
+							value={searchTerm}
+						/>
+					</View>
+					<FlatList
+						ref={(ref) => (this.flatListRef = ref)}
+						style={{ marginTop: 35 }}
+						data={posts.slice(0, currentPage * PAGE_SIZE)}
+						numColumns={1}
+						keyExtrator={(item) => {
+							return `key-${item.id}`;
+						}}
+						renderItem={(item) => {
+							return (
+								<BoardListItem
+									post={item.item}
+									isFirst={item.index === 0}
+									handlePostClick={(post) => this.toPostInfo(post)}
+								/>
+							);
+						}}
+						onEndReached={({ distanceFromEnd }) => {
+							console.log('end reached! loading more!');
+							if (posts.length > this.state.currentPage * PAGE_SIZE) {
+								this.handleOnEndReached(distanceFromEnd);
+							}
+						}}
+						onEndReachedThreshold={0.01}
+						scrollEventThrottle={700}
+						onRefresh={this.handleRefreshBtn}
+						refreshing={isFetching}
+					/>
+				</View>
+				<AdmobBanner />
 			</View>
 		);
 	}
@@ -289,16 +310,23 @@ class Board extends Component {
 const HeaderRightComponent = (props) => {
 	const [ isDisabled, setIsDisabled ] = useState(false);
 	return (
-		<View style={{ flex: 1, flexDirection: 'row' }}>
+		<View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
+			<TouchableOpacity>
+				<Button
+					title="My Posts"
+					onPress={props.myPostsBtn}
+					type="outline"
+					titleStyle={{ fontSize: 14 }}
+					buttonStyle={{ paddingHorizontal: 10, paddingVertical: 4 }}
+					containerStyle={{ marginRight: 10 }}
+				/>
+			</TouchableOpacity>
 			<TouchableOpacity
 				onPress={async () => {
 					if (!isDisabled) {
 						setIsDisabled(true);
-						await props.handleRefreshBtn();
+						props.handleRefreshBtn().then(() => setIsDisabled(false));
 					}
-					setTimeout(() => {
-						setIsDisabled(false);
-					}, 1500);
 				}}
 				disabled={isDisabled}
 				style={{ opacity: isDisabled ? 0.2 : 1 }}
@@ -312,17 +340,21 @@ const HeaderRightComponent = (props) => {
 	);
 };
 
-const mapStateToProps = ({ posts, test }) => ({
+const mapStateToProps = ({ auth, posts }) => ({
+	currentDBUser: auth.currentDBUser,
 	generalPosts: posts.generalPosts,
 	questionPosts: posts.questionPosts,
 	tipPosts: posts.tipPosts,
 	tradePosts: posts.tradePosts,
-	text: test.text
+	userGeneralPosts: posts.userGeneralPosts,
+	userQuestionPosts: posts.userQuestionPosts,
+	userTipPosts: posts.userTipPosts,
+	userTradePosts: posts.userTradePosts
 });
 
 const mapDispatchToProps = {
 	fetchPosts,
-	test
+	fetchUserPosts
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Board);
@@ -332,7 +364,7 @@ const styles = StyleSheet.create({
 		flex: 1,
 		backgroundColor: '#fff',
 		marginTop: 10,
-		marginBottom: 5,
-		marginHorizontal: 10
+		marginHorizontal: 10,
+		marginBottom: 2
 	}
 });
