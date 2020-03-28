@@ -5,6 +5,9 @@ import { connect } from 'react-redux';
 import { signOut } from '../../redux/actions/auth.actions';
 import { Auth } from 'aws-amplify';
 import AdmobBanner from '../../components/AdmobBanner';
+import { fetchUserPosts } from '../../redux/actions/posts.actions';
+import { fetchUserMeetups } from '../../redux/actions/meetups.actions';
+import store from '../../redux/store';
 
 const settingItems = [
 	{
@@ -28,6 +31,13 @@ const settingItems = [
 		iconSize: 25,
 		to: 'SearchUsers'
 	},
+	{
+		title: 'My Meetups',
+		description: 'Check and manage my meetups',
+		icon: 'MaterialCommunityIcons.account-search',
+		iconSize: 25,
+		to: 'Meetup'
+	},
 	// {
 	// 	title: 'Change Password',
 	// 	description: 'Change my password',
@@ -45,6 +55,25 @@ const settingItems = [
 ];
 
 const Settings = (props) => {
+	const handleItemClick = async (item) => {
+		switch (item.title) {
+			case 'My Meetups':
+				await props
+					.fetchUserMeetups(props.currentDBUser.id, {
+						lat: props.currentLocation.lat,
+						lon: props.currentLocation.lon
+					})
+					.then(() =>
+						props.navigation.navigate(item.to, {
+							myMeetups: props.userMeetups
+						})
+					);
+				return;
+			default:
+				props.navigation.navigate(item.to);
+				return;
+		}
+	};
 	return (
 		<View style={{ flex: 1 }}>
 			{settingItems.map((item, index) => (
@@ -54,7 +83,7 @@ const Settings = (props) => {
 					description={item.description}
 					icon={item.icon}
 					iconSize={item.iconSize}
-					onPress={() => props.navigation.navigate(item.to)}
+					onPress={() => handleItemClick(item)}
 				/>
 			))}
 			{/* {profileSettings.map((item, index) => (
@@ -116,8 +145,21 @@ Settings.navigationOptions = {
 	title: 'Settings'
 };
 
+const mapStateToProps = ({ others, meetups, posts, auth }) => ({
+	currentDBUser: auth.currentDBUser,
+	currentLocation: others.currentLocation,
+	meetups: meetups.meetups,
+	userMeetups: meetups.userMeetups,
+	userGeneralPosts: posts.userGeneralPosts,
+	userQuestionPosts: posts.userQuestionPosts,
+	userTipPosts: posts.userTipPosts,
+	userTradePosts: posts.userTradePosts
+});
+
 const mapDispatchToProps = {
+	fetchUserMeetups,
+	fetchUserPosts,
 	signOut
 };
 
-export default connect(null, mapDispatchToProps)(Settings);
+export default connect(mapStateToProps, mapDispatchToProps)(Settings);

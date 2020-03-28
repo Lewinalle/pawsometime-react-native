@@ -94,6 +94,10 @@ class Board extends Component {
 		let newPosts = posts;
 		let targetIndex = _.findIndex(newPosts, { id: postId });
 
+		if (targetIndex === -1) {
+			return;
+		}
+
 		switch (actionType) {
 			case 0:
 			case 1:
@@ -244,6 +248,14 @@ class Board extends Component {
 	render() {
 		const { currentTab = 0, currentPage = 1, posts = [], searchTerm = '', isFetching } = this.state;
 
+		if (this.props.navigation.getParam('toSpecificPost')) {
+			const item = this.props.navigation.getParam('toSpecificPost');
+			const type = this.props.navigation.getParam('postType');
+			this.props.navigation.setParams({ toSpecificPost: undefined, postType: undefined });
+			this.handleTabPress(type);
+			this.toPostInfo(item);
+		}
+
 		return (
 			<View style={{ flex: 1 }}>
 				<View style={styles.container}>
@@ -290,7 +302,6 @@ class Board extends Component {
 							);
 						}}
 						onEndReached={({ distanceFromEnd }) => {
-							console.log('end reached! loading more!');
 							if (posts.length > this.state.currentPage * PAGE_SIZE) {
 								this.handleOnEndReached(distanceFromEnd);
 							}

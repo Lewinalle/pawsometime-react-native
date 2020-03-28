@@ -98,6 +98,10 @@ class UserGallery extends Component {
 	render() {
 		const { photos, isLoadingMore, currentPage, galleryUser, isFetching } = this.state;
 
+		if (!galleryUser && this.props.navigation.getParam('galleryUser')) {
+			this.setState({ galleryUser: navigation.getParam('galleryUser') });
+		}
+
 		return (
 			<View style={{ flex: 1 }}>
 				<FlatList

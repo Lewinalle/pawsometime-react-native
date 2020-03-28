@@ -5,8 +5,13 @@ import { connect } from 'react-redux';
 import { fetchFriendsActivity } from '../redux/actions/others.actions';
 import { TouchableOpacity } from 'react-native-gesture-handler';
 import { formatUsersIdsParams } from '../Utils/FormatParams';
+import { fetchMeetupInfo } from '../Services/meetups';
+import { fetchUserGallery } from '../redux/actions/gallery.actions';
+import { fetchUserInfo } from '../Services/users';
+import { fetchPostInfo } from '../Services/posts';
 
 const STACKSIZE = 10;
+const boardTypes = [ 'general', 'qna', 'tips', 'trade' ];
 
 const FriendsActivity = (props) => {
 	const { friendsActivity, currentDBUser } = props;
@@ -45,16 +50,27 @@ const FriendsActivity = (props) => {
 		setIsFetching(false);
 	};
 
-	const handleCardClick = (item) => {
+	const handleCardClick = async (item) => {
 		switch (item.resource) {
 			case 'meetup':
-				props.navigation.navigate('Meetup');
+				await fetchMeetupInfo(item.resourceId).then((res) => {
+					props.navigation.navigate('Meetup', { toSpecificMeetup: res });
+				});
 				return;
 			case 'post':
-				props.navigation.navigate('Board');
+				await fetchPostInfo(item.resourceId, item.resourceType).then((res) => {
+					const typeIndex = boardTypes.findIndex((i) => i === item.resourceType);
+					props.navigation.navigate('Board', {
+						toSpecificPost: res,
+						postType: typeIndex
+					});
+				});
 				return;
 			case 'gallery':
-				props.navigation.navigate('Gallery');
+				await fetchUserInfo(item.userId).then(async (res) => {
+					await props.fetchUserGallery(item.userId, 1);
+					props.navigation.navigate('UserGallery', { galleryUser: res });
+				});
 				return;
 			case 'user':
 				props.navigation.navigate('Friends');
@@ -229,6 +245,6 @@ const mapStateToProps = ({ auth, others }) => ({
 	currentDBUser: auth.currentDBUser
 });
 
-const mapDispatchToProps = { fetchFriendsActivity };
+const mapDispatchToProps = { fetchFriendsActivity, fetchUserGallery };
 
 export default connect(mapStateToProps, mapDispatchToProps)(FriendsActivity);
