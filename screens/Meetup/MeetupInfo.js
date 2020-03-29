@@ -192,6 +192,8 @@ const MeetupInfo = (props) => {
 	};
 
 	const handleAddComment = async () => {
+		if (isSubmitting || !comment) return;
+
 		if (!isSubmitting) {
 			setIsSubmitting(true);
 
@@ -416,7 +418,11 @@ const MeetupInfo = (props) => {
 				alignItems: 'stretch'
 			}}
 		>
-			<KeyboardAvoidingView style={{ flex: 1 }} behavior="height" keyboardVerticalOffset={Header.HEIGHT + 50}>
+			<KeyboardAvoidingView
+				style={{ flex: 1 }}
+				behavior="height"
+				keyboardVerticalOffset={Constants.platform.ios ? Header.HEIGHT : Header.HEIGHT + 50}
+			>
 				<ScrollView contentContainerStyle={{}}>
 					<View
 						ref={containerRef}

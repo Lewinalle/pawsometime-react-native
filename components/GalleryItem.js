@@ -97,7 +97,7 @@ class GalleryItem extends Component {
 		const { isSubmitting, comment, item } = this.state;
 		const { currentDBUser = {} } = this.props;
 
-		if (isSubmitting) return;
+		if (isSubmitting || !comment) return;
 
 		this.setState({ isSubmitting: true });
 

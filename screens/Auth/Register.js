@@ -53,6 +53,8 @@ const Register = (props) => {
 				}
 			});
 
+			console.log('signUpResponse: ', signUpResponse);
+
 			setIsRegistering(false);
 
 			Alert.alert(
@@ -65,7 +67,9 @@ const Register = (props) => {
 			let err = null;
 			!error.message
 				? (err = { message: error })
-				: error.code === 'InvalidLambdaResponseException' ? (err = 'Username is duplicated.') : (err = error);
+				: error.code === 'InvalidLambdaResponseException'
+					? (err = 'Username has already been taken.')
+					: (err = error);
 			console.log(err);
 			setIsRegistering(false);
 			setErrors({ ...errors, cognito: err });
@@ -178,8 +182,16 @@ const Register = (props) => {
 						errors.email !== '' || errors.password !== '' || errors.passwordmatch !== true || isRegistering
 					}
 				/>
-				<Text>{errors.blankfield ? 'Every field must be filled.' : ''}</Text>
-				<Text>{errors.cognito && errors.cognito.message ? errors.cognito.message : ''}</Text>
+				{errors.blankfield && (
+					<Text style={{ paddingHorizontal: 10, color: 'red', marginTop: 4 }}>
+						{errors.blankfield ? 'Every field must be filled.' : ''}
+					</Text>
+				)}
+				{errors.cognito && (
+					<Text style={{ paddingHorizontal: 10, color: 'red', marginTop: 4 }}>
+						{errors.cognito && errors.cognito ? errors.cognito : ''}
+					</Text>
+				)}
 			</View>
 		</ScrollView>
 	);

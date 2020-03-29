@@ -107,7 +107,11 @@ const ChangeProfile = (props) => {
 				alignItems: 'stretch'
 			}}
 		>
-			<KeyboardAvoidingView style={{ flex: 1 }} behavior="height" keyboardVerticalOffset={Header.HEIGHT + 50}>
+			<KeyboardAvoidingView
+				style={{ flex: 1 }}
+				behavior="height"
+				keyboardVerticalOffset={Constants.platform.ios ? Header.HEIGHT : Header.HEIGHT + 50}
+			>
 				<ScrollView contentContainerStyle={{ padding: 20 }}>
 					<View
 						ref={containerRef}

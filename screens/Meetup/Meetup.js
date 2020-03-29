@@ -293,7 +293,7 @@ class Meetup extends Component {
 					<Button
 						onPress={this.handleCitySearch}
 						title="Search"
-						titleStyle={{ fontSize: 14 }}
+						titleStyle={{ fontSize: 12 }}
 						containerStyle={{
 							height: null,
 							width: null,
@@ -306,7 +306,7 @@ class Meetup extends Component {
 					<Button
 						onPress={this.handleRefreshBtn}
 						title="Refresh"
-						titleStyle={{ fontSize: 14 }}
+						titleStyle={{ fontSize: 12 }}
 						containerStyle={{
 							height: null,
 							width: null,

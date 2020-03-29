@@ -34,8 +34,8 @@ const settingItems = [
 	{
 		title: 'My Meetups',
 		description: 'Check and manage my meetups',
-		icon: 'MaterialCommunityIcons.account-search',
-		iconSize: 25,
+		icon: 'FontAwesome.meetup',
+		iconSize: 26,
 		to: 'Meetup'
 	},
 	// {

@@ -28,10 +28,9 @@ import Gallery from '../screens/Gallery/Gallery';
 import UserGallery from '../screens/Gallery/UserGallery';
 import CreateGallery from '../screens/Gallery/CreateGallery';
 
-const config = Platform.select({
-	web: { headerMode: 'screen' },
-	default: {}
-});
+const config = {
+	headerLayoutPreset: 'left'
+};
 
 /** Home Tab */
 

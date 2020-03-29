@@ -128,8 +128,16 @@ const SetPassword = (props) => {
 					onPress={handleSubmit}
 					disabled={errors.email !== '' || errors.password !== '' || isSending}
 				/>
-				<Text>{errors.blankfield ? 'Every field must be filled.' : ''}</Text>
-				<Text>{errors.cognito && errors.cognito.message ? errors.cognito.message : ''}</Text>
+				{errors.blankfield && (
+					<Text style={{ paddingHorizontal: 10, color: 'red', marginTop: 4 }}>
+						{errors.blankfield ? 'Every field must be filled.' : ''}
+					</Text>
+				)}
+				{errors.cognito && (
+					<Text style={{ paddingHorizontal: 10, color: 'red', marginTop: 4 }}>
+						{errors.cognito && errors.cognito.message ? errors.cognito.message : ''}
+					</Text>
+				)}
 			</View>
 		</ScrollView>
 	);
