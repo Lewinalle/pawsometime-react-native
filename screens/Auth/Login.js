@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { View, Text, Alert, StyleSheet, AsyncStorage, Keyboard } from 'react-native';
-import { Button, Input } from 'react-native-elements';
+import { View, Text, Alert, StyleSheet, AsyncStorage, Keyboard, ImageBackground } from 'react-native';
+import { Button, Input, Image } from 'react-native-elements';
 import { Auth } from 'aws-amplify';
 
 import { connect } from 'react-redux';
@@ -15,9 +15,11 @@ import { formatUsersIdsParams } from '../../Utils/FormatParams';
 
 import dimensions from '../../constants/Layout';
 import { validator } from '../../Utils/Validator';
+import Constants from '../../constants/Layout';
 
 import _ from 'lodash';
-import { ScrollView } from 'react-native-gesture-handler';
+import { ScrollView, TouchableOpacity } from 'react-native-gesture-handler';
+import Colors from '../../constants/Colors';
 
 const Login = (props) => {
 	const [ email, setEmail ] = useState(null);
@@ -137,77 +139,146 @@ const Login = (props) => {
 	};
 
 	return (
-		<ScrollView style={styles.scrollView}>
-			<View style={styles.container}>
-				<View style={styles.innerContainer}>
-					<Input
-						label="EMAIL"
-						placeholder="pawsometime@gmail.com"
-						value={email}
-						autoCompleteType="email"
-						onChangeText={(text) => onInputChange('email', text)}
-						containerStyle={{ marginBottom: 15 }}
-					/>
-					<Input
-						label="PASSWORD"
-						placeholder="password"
-						value={password}
-						autoCompleteType="password"
-						secureTextEntry
-						onChangeText={(text) => onInputChange('password', text)}
-						containerStyle={{ marginBottom: 6 }}
-					/>
+		<ImageBackground
+			source={require('../../assets/images/auth-bg.png')}
+			style={{ flex: 1, width: '100%', height: '100%' }}
+		>
+			<ScrollView style={styles.scrollView}>
+				<View style={{ paddingHorizontal: 30, flex: 1 }}>
+					<View style={{ flex: 1, alignSelf: 'center', paddingTop: 80 }}>
+						<Image source={require('../../assets/images/logo.png')} style={{ width: 100, height: 100 }} />
+					</View>
+					<View style={{ flex: 1, alignSelf: 'center', marginTop: 0, marginBottom: 20 }}>
+						<Text style={{ color: 'white', fontSize: 22, fontWeight: 'bold' }}>Welcome to Pawsometime</Text>
+					</View>
+					<View
+						style={{
+							borderRadius: 10,
+							backgroundColor: 'white',
+							padding: 20,
+							elevation: 10,
+							shadowOffset: { width: 5, height: 5 },
+							shadowColor: 'grey',
+							shadowOpacity: 0.5,
+							shadowRadius: 10
+						}}
+					>
+						<Input
+							placeholder="Email"
+							value={email}
+							autoCompleteType="email"
+							onChangeText={(text) => onInputChange('email', text)}
+							containerStyle={{ marginBottom: 15, marginTop: 18 }}
+							inputStyle={{ fontSize: 16 }}
+						/>
+						<Input
+							placeholder="Password"
+							value={password}
+							autoCompleteType="password"
+							secureTextEntry
+							onChangeText={(text) => onInputChange('password', text)}
+							containerStyle={{ marginBottom: 6 }}
+							inputStyle={{ fontSize: 16 }}
+						/>
 
-					{errors.blankfield && (
-						<Text style={{ marginBottom: 15, paddingHorizontal: 10, color: '#f73325' }}>
-							Email and Password must be provided
-						</Text>
-					)}
-					{errors.cognito &&
-					errors.cognito.message && (
-						<Text style={{ marginBottom: 15, paddingHorizontal: 10, color: '#f73325' }}>
-							{errors.cognito.message}
-						</Text>
-					)}
-					<Button
-						title="Sign In"
-						onPress={handleSubmit}
-						disabled={isLoggingin}
-						containerStyle={{ marginBottom: 15 }}
-					/>
-
-					<Button
-						title="Register"
-						onPress={() => props.navigation.navigate('Register')}
-						containerStyle={{ marginBottom: 15 }}
-					/>
-					<Button
-						title="Forgot Password"
-						onPress={() => props.navigation.navigate('ForgotPassword')}
-						containerStyle={{ marginBottom: 15 }}
-					/>
-					<Button
-						title="Resend Verification"
-						onPress={() => props.navigation.navigate('ResendVerification')}
-						containerStyle={{ marginBottom: 15 }}
-					/>
+						{errors.blankfield && (
+							<Text style={{ marginBottom: 15, paddingHorizontal: 10, color: '#f73325' }}>
+								Email and Password must be provided
+							</Text>
+						)}
+						{errors.cognito &&
+						errors.cognito.message && (
+							<Text style={{ marginBottom: 15, paddingHorizontal: 10, color: '#f73325' }}>
+								{errors.cognito.message}
+							</Text>
+						)}
+						<Button
+							title="SIGN IN"
+							onPress={handleSubmit}
+							disabled={isLoggingin}
+							containerStyle={{
+								marginTop: 30,
+								marginBottom: 6,
+								width: 100,
+								alignSelf: 'center'
+							}}
+							buttonStyle={{
+								paddingHorizontal: 12,
+								paddingVertical: 8,
+								borderRadius: 8,
+								backgroundColor: Colors.primaryColor
+							}}
+							titleStyle={{ fontSize: 14 }}
+						/>
+					</View>
+					<View
+						style={{
+							flex: 1,
+							flexDirection: 'row',
+							alignItems: 'center',
+							justifyContent: 'center',
+							marginTop: 60,
+							paddingHorizontal: 30
+						}}
+					>
+						<View style={{ marginRight: 14 }}>
+							<Image
+								source={require('../../assets/images/auth-dog.png')}
+								style={{ width: 100, height: 100 }}
+							/>
+						</View>
+						<View style={{ flex: 1, top: 8 }}>
+							<TouchableOpacity onPress={() => props.navigation.navigate('Register')}>
+								<Text
+									style={{
+										fontWeight: 'bold',
+										color: Colors.primaryColor,
+										fontSize: 17,
+										marginBottom: 6
+									}}
+								>
+									Register
+								</Text>
+							</TouchableOpacity>
+							<TouchableOpacity onPress={() => props.navigation.navigate('ForgotPassword')}>
+								<Text
+									style={{
+										fontWeight: 'bold',
+										color: Colors.primaryColor,
+										fontSize: 17,
+										marginBottom: 6
+									}}
+								>
+									Forgot Password
+								</Text>
+							</TouchableOpacity>
+							<TouchableOpacity onPress={() => props.navigation.navigate('ResendVerification')}>
+								<Text
+									style={{
+										fontWeight: 'bold',
+										color: Colors.primaryColor,
+										fontSize: 17,
+										marginBottom: 6
+									}}
+								>
+									Resend Verification
+								</Text>
+							</TouchableOpacity>
+						</View>
+					</View>
 				</View>
-			</View>
-		</ScrollView>
+			</ScrollView>
+		</ImageBackground>
 	);
 };
 
+Login.navigationOptions = ({ navigation }) => ({
+	headerShown: false
+});
+
 const styles = StyleSheet.create({
 	scrollView: {
-		backgroundColor: 'yellow',
 		minHeight: dimensions.window.height
-	},
-	container: {
-		padding: 20
-	},
-	innerContainer: {
-		backgroundColor: 'white',
-		padding: 20
 	},
 	signInButton: {
 		marginTop: 10
