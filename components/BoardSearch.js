@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { View, StyleSheet } from 'react-native';
 import { SearchBar, ButtonGroup, Button } from 'react-native-elements';
 import _ from 'lodash';
+import Colors from '../constants/Colors';
 
 export const BoardSearch = (props) => {
 	const [ selected, setSelected ] = useState([]);
@@ -25,7 +26,7 @@ export const BoardSearch = (props) => {
 
 	return (
 		<View style={{ marginBottom: 5 }}>
-			<SearchBar
+			{/* <SearchBar
 				placeholder="Search Posts"
 				onChangeText={props.onValueChange}
 				value={props.value}
@@ -44,8 +45,63 @@ export const BoardSearch = (props) => {
 				}}
 				lightTheme
 				round
-			/>
-			<View style={{ flex: 1, flexDirection: 'row', padding: 0, margin: 0, width: '100%' }}>
+			/> */}
+
+			<View>
+				<View
+					style={{
+						alignSelf: 'stretch',
+						marginBottom: 8,
+						height: 33
+					}}
+				>
+					<View
+						style={{
+							flex: 1,
+							flexDirection: 'row'
+						}}
+					>
+						<SearchBar
+							placeholder="Search Posts"
+							onChangeText={props.onValueChange}
+							value={props.value}
+							inputContainerStyle={{ alignSelf: 'stretch' }}
+							containerStyle={{
+								alignSelf: 'stretch',
+								flexGrow: 1,
+								backgroundColor: '#f2ead5',
+								padding: 0,
+								borderRadius: 0,
+								borderLeftWidth: 0,
+								borderRightWidth: 0,
+								borderTopWidth: 0,
+								borderBottomWidth: 0,
+								elevation: 2,
+								height: 40
+							}}
+							inputStyle={{ fontSize: 14 }}
+							inputContainerStyle={{ backgroundColor: 'transparent' }}
+						/>
+						<Button
+							onPress={handleSubmit}
+							title="Search"
+							buttonStyle={{
+								backgroundColor: '#fcb444',
+								borderTopWidth: 0,
+								borderRightWidth: 0,
+								borderBottomWidth: 0,
+								borderColor: 'black',
+								elevation: 2,
+								padding: 16,
+								height: 40
+							}}
+							titleStyle={{ height: 22, fontSize: 14 }}
+						/>
+					</View>
+				</View>
+			</View>
+
+			<View style={{ height: 0 }}>
 				<ButtonGroup
 					onPress={(index) => handleSearchBySelect(index)}
 					selectedIndexes={selected}
@@ -53,23 +109,13 @@ export const BoardSearch = (props) => {
 					buttons={searchBy}
 					containerStyle={{
 						height: 30,
-						minWidth: 250,
-						width: '60%',
 						marginTop: 0,
 						marginBottom: 0,
 						marginLeft: 0,
 						marginRight: 0
 					}}
 					textStyle={{ fontSize: 12 }}
-					selectedButtonStyle={{ backgroundColor: 'grey' }}
-				/>
-				<Button
-					title="Search"
-					type="outline"
-					onPress={handleSubmit}
-					titleStyle={{ fontSize: 14 }}
-					buttonStyle={{ height: 30 }}
-					containerStyle={{ marginLeft: 'auto', width: '30%' }}
+					selectedButtonStyle={{ backgroundColor: Colors.primaryColor }}
 				/>
 			</View>
 		</View>

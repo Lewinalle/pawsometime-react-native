@@ -235,7 +235,7 @@ class GalleryItem extends Component {
 		const hasUserLiked = _.includes(item.likes, currentDBUser.id);
 
 		return (
-			<View style={{ paddingVertical: 4, backgroundColor: '#a3a096' }}>
+			<View style={{ paddingVertical: 4 }}>
 				{!isFirst && <Divider />}
 				<View
 					style={{
@@ -243,8 +243,9 @@ class GalleryItem extends Component {
 						flexDirection: 'row',
 						alignItems: 'center',
 						justifyContent: 'space-between',
-						paddingVertical: 4,
-						paddingHorizontal: 6
+						paddingBottom: 4,
+						paddingHorizontal: 6,
+						paddingTop: isFirst ? 8 : 16
 					}}
 				>
 					<TouchableOpacity onPress={() => this.handleModalOpen(itemUser.id)}>
@@ -258,7 +259,7 @@ class GalleryItem extends Component {
 						>
 							{itemUser && itemUser.avatar ? (
 								<Avatar
-									containerStyle={{ width: 35, height: 35 }}
+									containerStyle={{ width: 50, height: 50 }}
 									rounded
 									source={{
 										uri: itemUser.avatar
@@ -266,30 +267,32 @@ class GalleryItem extends Component {
 								/>
 							) : (
 								<Avatar
-									containerStyle={{ width: 35, height: 35 }}
+									containerStyle={{ width: 50, height: 50 }}
 									rounded
 									source={require('../assets/images/profile-default.png')}
 								/>
 							)}
-							<Text numberOfLines={1} style={{ marginLeft: 8, fontSize: 14, fontWeight: 'bold' }}>
-								{item.userName}
-							</Text>
+							<View>
+								<Text numberOfLines={1} style={{ marginLeft: 12, fontSize: 14, fontWeight: 'bold' }}>
+									{item.userName}
+								</Text>
+								<Text style={{ marginLeft: 12, fontSize: 14 }}>
+									{dateTime.toLocaleDateString()}, {dateTime.toLocaleTimeString()}
+								</Text>
+							</View>
 						</View>
 					</TouchableOpacity>
 					<View style={{ flex: 1, flexDirection: 'row', justifyContent: 'flex-end' }}>
 						{item.userId === currentDBUser.id && (
 							<TouchableOpacity onPress={() => this.props.toEditPage(item)}>
-								<View style={{ marginRight: 8 }}>{vectorIcon('AntDesign', 'edit', 22)}</View>
+								<View style={{ marginRight: 14 }}>{vectorIcon('AntDesign', 'edit', 22)}</View>
 							</TouchableOpacity>
 						)}
 						{item.userId === currentDBUser.id && (
 							<TouchableOpacity onPress={this.handleDeleteGallery}>
-								<View style={{ marginRight: 8 }}>{vectorIcon('AntDesign', 'delete', 22)}</View>
+								<View style={{ marginRight: 16 }}>{vectorIcon('AntDesign', 'delete', 22)}</View>
 							</TouchableOpacity>
 						)}
-						<Text style={{ fontSize: 14 }}>
-							{dateTime.toLocaleDateString()}, {dateTime.toLocaleTimeString()}
-						</Text>
 					</View>
 				</View>
 				<CacheImage

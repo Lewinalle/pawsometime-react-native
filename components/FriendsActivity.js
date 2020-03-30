@@ -9,6 +9,7 @@ import { fetchMeetupInfo } from '../Services/meetups';
 import { fetchUserGallery } from '../redux/actions/gallery.actions';
 import { fetchUserInfo } from '../Services/users';
 import { fetchPostInfo } from '../Services/posts';
+import Colors from '../constants/Colors';
 
 const STACKSIZE = 10;
 const boardTypes = [ 'general', 'qna', 'tips', 'trade' ];
@@ -86,14 +87,14 @@ const FriendsActivity = (props) => {
 				switch (item.action) {
 					case 'create':
 						return (
-							<Text numberOfLines={2} style={{ fontSize: 16 }}>
-								<Text style={{ fontWeight: 'bold' }}>{item.userName}</Text> created a meetup.
+							<Text numberOfLines={2} style={{ fontSize: 14 }}>
+								created a meetup.
 							</Text>
 						);
 					case 'update':
 						return (
-							<Text numberOfLines={2} style={{ fontSize: 16 }}>
-								<Text style={{ fontWeight: 'bold' }}>{item.userName}</Text> updated a meetup.
+							<Text numberOfLines={2} style={{ fontSize: 14 }}>
+								updated a meetup.
 							</Text>
 						);
 					default:
@@ -103,16 +104,14 @@ const FriendsActivity = (props) => {
 				switch (item.action) {
 					case 'create':
 						return (
-							<Text numberOfLines={2} style={{ fontSize: 16 }}>
-								<Text style={{ fontWeight: 'bold' }}>{item.userName}</Text> created a{' '}
-								{item.resourceType} post.
+							<Text numberOfLines={2} style={{ fontSize: 14 }}>
+								created a {item.resourceType} post.
 							</Text>
 						);
 					case 'update':
 						return (
-							<Text numberOfLines={2} style={{ fontSize: 16 }}>
-								<Text style={{ fontWeight: 'bold' }}>{item.userName}</Text> updated a{' '}
-								{item.resourceType} post.
+							<Text numberOfLines={2} style={{ fontSize: 14 }}>
+								updated a {item.resourceType} post.
 							</Text>
 						);
 					default:
@@ -122,14 +121,14 @@ const FriendsActivity = (props) => {
 				switch (item.action) {
 					case 'create':
 						return (
-							<Text numberOfLines={2} style={{ fontSize: 16 }}>
-								<Text style={{ fontWeight: 'bold' }}>{item.userName}</Text> added a photo.
+							<Text numberOfLines={2} style={{ fontSize: 14 }}>
+								added a photo.
 							</Text>
 						);
 					case 'update':
 						return (
-							<Text numberOfLines={2} style={{ fontSize: 16 }}>
-								<Text style={{ fontWeight: 'bold' }}>{item.userName}</Text> updated gallery.
+							<Text numberOfLines={2} style={{ fontSize: 14 }}>
+								updated gallery.
 							</Text>
 						);
 					default:
@@ -142,20 +141,20 @@ const FriendsActivity = (props) => {
 				switch (item.action) {
 					case 'connect':
 						return (
-							<Text numberOfLines={2} style={{ fontSize: 16 }}>
-								You are now friends with <Text style={{ fontWeight: 'bold' }}>{item.userName}</Text>
+							<Text numberOfLines={2} style={{ fontSize: 14 }}>
+								You are now friends with {item.userName}
 							</Text>
 						);
 					case 'request':
 						return (
-							<Text numberOfLines={2} style={{ fontSize: 16 }}>
-								<Text style={{ fontWeight: 'bold' }}>{item.userName}</Text> sent a friend request.
+							<Text numberOfLines={2} style={{ fontSize: 14 }}>
+								sent a friend request.
 							</Text>
 						);
 					case 'update':
 						return (
-							<Text numberOfLines={2} style={{ fontSize: 16 }}>
-								<Text style={{ fontWeight: 'bold' }}>{item.userName}</Text> updated profile.
+							<Text numberOfLines={2} style={{ fontSize: 14 }}>
+								updated profile.
 							</Text>
 						);
 					default:
@@ -167,7 +166,7 @@ const FriendsActivity = (props) => {
 	};
 
 	return (
-		<View style={{ flex: 1 }}>
+		<View style={{ flex: 1, marginTop: 10 }}>
 			<ScrollView
 				style={{ flex: 1 }}
 				refreshControl={<RefreshControl refreshing={isFetching} onRefresh={refresh} />}
@@ -180,43 +179,53 @@ const FriendsActivity = (props) => {
 							return null;
 						}
 						return (
-							<Card
-								key={index}
-								containerStyle={{
-									paddingLeft: 5,
-									paddingRight: 10,
-									paddingVertical: 6,
-									marginTop: 0,
-									marginBottom: 4
-								}}
-							>
-								<TouchableOpacity onPress={() => handleCardClick(item)}>
-									<View>
-										<View style={{ flex: 1, flexDirection: 'row' }}>
-											<View style={{ flex: 1, paddingLeft: 6 }}>
-												<View
-													style={{
-														flex: 1,
-														flexDirection: 'row',
-														justifyContent: 'space-between',
-														marginBottom: 3
-													}}
-												>
-													{generateMessage(item)}
-												</View>
-												<View style={{ flex: 1, flexDirection: 'row' }}>
-													<Text style={{ flex: 1, fontSize: 12, textAlign: 'left' }}>
-														{dateTime.toLocaleDateString()}, {dateTime.toLocaleTimeString()}
-													</Text>
-													<Text style={{ fontSize: 12, textAlign: 'right' }}>
-														click to go to tab
-													</Text>
+							<View key={index}>
+								<Card
+									key={index}
+									containerStyle={{
+										elevation: 0,
+										paddingTop: 20,
+										paddingBottom: 8,
+										paddingHorizontal: 14,
+										margin: 0,
+										borderWidth: 0
+									}}
+								>
+									<TouchableOpacity onPress={() => handleCardClick(item)}>
+										<View>
+											<View style={{ flex: 1, flexDirection: 'row' }}>
+												<View style={{ flex: 1, paddingLeft: 6 }}>
+													<View style={{}}>
+														<Text style={{ fontWeight: 'bold', fontSize: 14 }}>
+															{item.userName}
+														</Text>
+													</View>
+													<View
+														style={{
+															flex: 1,
+															flexDirection: 'row',
+															justifyContent: 'space-between',
+															marginBottom: 3
+														}}
+													>
+														{generateMessage(item)}
+													</View>
+													<View style={{ flex: 1, flexDirection: 'row' }}>
+														<Text style={{ flex: 1, fontSize: 12, textAlign: 'left' }}>
+															{dateTime.toLocaleDateString()},{' '}
+															{dateTime.toLocaleTimeString()}
+														</Text>
+														<Text style={{ fontSize: 12, textAlign: 'right' }}>
+															click to go to tab
+														</Text>
+													</View>
 												</View>
 											</View>
 										</View>
-									</View>
-								</TouchableOpacity>
-							</Card>
+									</TouchableOpacity>
+								</Card>
+								<Divider style={{ height: 2, backgroundColor: '#f7f7f7' }} />
+							</View>
 						);
 					})}
 					{showLoadMore && (

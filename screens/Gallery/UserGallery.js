@@ -1,10 +1,12 @@
 import React, { Component, useEffect, useState } from 'react';
-import { View, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native';
+import { View, TouchableOpacity, FlatList, ActivityIndicator, Text } from 'react-native';
+import { Divider, Image } from 'react-native-elements';
 import { connect } from 'react-redux';
 import { fetchUserGallery } from '../../redux/actions/gallery.actions';
 import { vectorIcon } from '../../Utils/Icon';
 import Config from '../../config';
 import GalleryItem from '../../components/GalleryItem';
+import Colors from '../../constants/Colors';
 
 const PAGE_SIZE = 10;
 
@@ -34,19 +36,20 @@ class UserGallery extends Component {
 
 	static navigationOptions = ({ navigation, screenProps }) => {
 		return {
-			title: navigation.getParam('galleryUser') ? navigation.getParam('galleryUser').username : '',
-			headerRight: (
-				<HeaderRightComponent
-					handleRefreshBtn={navigation.getParam('refresh')}
-					handleCreateBtn={() => {
-						navigation.navigate('CreateGallery', {
-							onCreateBack: navigation.getParam('onCreateBack')
-						});
-					}}
-				/>
-			),
-			headerStyle: { backgroundColor: 'brown' },
-			headerTitleStyle: { color: 'blue' }
+			// title: navigation.getParam('galleryUser') ? navigation.getParam('galleryUser').username : '',
+			// headerRight: (
+			// 	<HeaderRightComponent
+			// 		handleRefreshBtn={navigation.getParam('refresh')}
+			// 		handleCreateBtn={() => {
+			// 			navigation.navigate('CreateGallery', {
+			// 				onCreateBack: navigation.getParam('onCreateBack')
+			// 			});
+			// 		}}
+			// 	/>
+			// ),
+			// headerStyle: { backgroundColor: 'brown' },
+			// headerTitleStyle: { color: 'blue' }
+			headerShown: false
 		};
 	};
 
@@ -104,6 +107,56 @@ class UserGallery extends Component {
 
 		return (
 			<View style={{ flex: 1 }}>
+				<View
+					style={{
+						flex: 1,
+						flexDirection: 'row',
+						alignItems: 'center',
+						paddingLeft: 14,
+						paddingRight: 0,
+						marginTop: 49,
+						maxHeight: 50,
+						minHeight: 50,
+						justifyContent: 'space-between'
+					}}
+				>
+					<View style={{ top: 2 }}>{vectorIcon('Ionicons', 'md-photos', 30, Colors.primaryColor)}</View>
+					<View style={{}}>
+						<View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+							<Text style={{ fontSize: 20, fontWeight: 'bold', color: 'black' }}>
+								{galleryUser.username}'s Gallery
+							</Text>
+						</View>
+					</View>
+					<View style={{}}>
+						<View
+							style={{
+								flex: 1,
+								flexDirection: 'row',
+								alignItems: 'center',
+								justifyContent: 'flex-end'
+							}}
+						>
+							<TouchableOpacity
+								onPress={this.handleRefreshBtn}
+								disabled={isFetching}
+								style={{ opacity: isFetching ? 0.2 : 1 }}
+							>
+								<View style={{ marginRight: 20 }}>{vectorIcon('FrontAwesome', 'refresh', 26)}</View>
+							</TouchableOpacity>
+							<TouchableOpacity
+								onPress={() => {
+									this.props.navigation.navigate('CreateGallery', {
+										onCreateBack: this.onCreateBack
+									});
+								}}
+							>
+								<View style={{ marginRight: 25 }}>{vectorIcon('Feather', 'plus-circle', 26)}</View>
+							</TouchableOpacity>
+						</View>
+					</View>
+				</View>
+				<Divider style={{ marginBottom: 10, height: 1.5, backgroundColor: Colors.primaryColor }} />
 				<FlatList
 					ref={(ref) => (this.flatListRef = ref)}
 					style={{}}

@@ -8,7 +8,7 @@ import {
 	ActivityIndicator,
 	AsyncStorage
 } from 'react-native';
-import { SearchBar, ButtonGroup, Button, Text } from 'react-native-elements';
+import { SearchBar, ButtonGroup, Button, Text, Divider } from 'react-native-elements';
 import { BoardListItem } from '../../components/BoardListItem';
 import { BoardSearch } from '../../components/BoardSearch';
 import { vectorIcon } from '../../Utils/Icon';
@@ -18,8 +18,9 @@ import { connect } from 'react-redux';
 import { fetchPosts, fetchUserPosts } from '../../redux/actions/posts.actions';
 import { fetchPostsHelper, fetchUserPostsHelper } from '../../Utils/FetchPostsHelper';
 import AdmobBanner from '../../components/AdmobBanner';
+import Colors from '../../constants/Colors';
 
-const PAGE_SIZE = 7;
+const PAGE_SIZE = 5;
 const boardTabs = [ 'General', 'Questions', 'Tips', 'Trade' ];
 const boardTypes = [ 'general', 'qna', 'tips', 'trade' ];
 
@@ -38,7 +39,8 @@ class Board extends Component {
 				tips: 1,
 				trade: 1
 			},
-			searchTerm: ''
+			searchTerm: '',
+			currentMenu: 0
 		});
 
 		this.props.navigation.setParams({
@@ -64,6 +66,26 @@ class Board extends Component {
 				break;
 			case 3:
 				this.setState({ posts: userTradePosts });
+				break;
+		}
+	};
+
+	boardBtn = () => {
+		const { generalPosts = [], questionPosts = [], tipPosts = [], tradePosts = [] } = this.props;
+		const { currentTab } = this.state;
+
+		switch (currentTab) {
+			case 0:
+				this.setState({ posts: generalPosts });
+				break;
+			case 1:
+				this.setState({ posts: questionPosts });
+				break;
+			case 2:
+				this.setState({ posts: tipPosts });
+				break;
+			case 3:
+				this.setState({ posts: tradePosts });
 				break;
 		}
 	};
@@ -216,7 +238,7 @@ class Board extends Component {
 		const { fetchPosts } = this.props;
 		const { currentTab } = this.state;
 
-		this.setState({ isFetching: true });
+		this.setState({ isFetching: true, currentMenu: 0 });
 
 		if (this.flatListRef) {
 			this.flatListRef.scrollToOffset({ animated: true, y: 0 });
@@ -231,22 +253,11 @@ class Board extends Component {
 	};
 
 	static navigationOptions = ({ navigation, screenProps }) => ({
-		title: 'Board',
-		headerRight: (
-			<HeaderRightComponent
-				handleRefreshBtn={navigation.getParam('refresh')}
-				handleCreateBtn={() => {
-					navigation.navigate('CreatePost', { onCreateBack: navigation.getParam('onCreateBack') });
-				}}
-				myPostsBtn={navigation.getParam('myPostsBtn')}
-			/>
-		),
-		headerStyle: { backgroundColor: 'brown' },
-		headerTitleStyle: { color: 'blue' }
+		headerShown: false
 	});
 
 	render() {
-		const { currentTab = 0, currentPage = 1, posts = [], searchTerm = '', isFetching } = this.state;
+		const { currentTab = 0, currentPage = 1, posts = [], searchTerm = '', isFetching, currentMenu } = this.state;
 
 		if (this.props.navigation.getParam('toSpecificPost')) {
 			const item = this.props.navigation.getParam('toSpecificPost');
@@ -258,6 +269,88 @@ class Board extends Component {
 
 		return (
 			<View style={{ flex: 1 }}>
+				<View
+					style={{
+						flex: 1,
+						flexDirection: 'row',
+						marginTop: 49,
+						alignItems: 'center',
+						paddingLeft: 14,
+						paddingRight: 0,
+						maxHeight: 50,
+						justifyContent: 'space-between'
+					}}
+				>
+					<View style={{ top: 2 }}>{vectorIcon('Entypo', 'blackboard', 28, Colors.primaryColor)}</View>
+					<View style={{}}>
+						<View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+							<TouchableOpacity
+								onPress={() => {
+									this.boardBtn();
+									this.setState({ currentMenu: 0 });
+								}}
+							>
+								<View style={{ marginRight: 25 }}>
+									<Text
+										style={{
+											color: currentMenu === 0 ? 'black' : '#b3bab5',
+											fontWeight: currentMenu === 0 ? 'bold' : '500',
+											fontSize: 20
+										}}
+									>
+										Board
+									</Text>
+								</View>
+							</TouchableOpacity>
+							<TouchableOpacity
+								onPress={() => {
+									this.myPostsBtn();
+									this.setState({ currentMenu: 1 });
+								}}
+							>
+								<View>
+									<Text
+										style={{
+											color: currentMenu === 1 ? 'black' : '#b3bab5',
+											fontWeight: currentMenu === 1 ? 'bold' : '500',
+											fontSize: 20
+										}}
+									>
+										My Posts
+									</Text>
+								</View>
+							</TouchableOpacity>
+						</View>
+					</View>
+					<View style={{}}>
+						<View
+							style={{
+								flex: 1,
+								flexDirection: 'row',
+								alignItems: 'center',
+								justifyContent: 'flex-end'
+							}}
+						>
+							<TouchableOpacity
+								onPress={this.handleRefreshBtn}
+								disabled={isFetching}
+								style={{ opacity: isFetching ? 0.2 : 1 }}
+							>
+								<View style={{ marginRight: 20 }}>{vectorIcon('FrontAwesome', 'refresh', 26)}</View>
+							</TouchableOpacity>
+							<TouchableOpacity
+								onPress={() => {
+									this.props.navigation.navigate('CreatePost', {
+										onCreateBack: this.onCreateBack
+									});
+								}}
+							>
+								<View style={{ marginRight: 25 }}>{vectorIcon('Feather', 'plus-circle', 26)}</View>
+							</TouchableOpacity>
+						</View>
+					</View>
+				</View>
+				<Divider style={{ height: 1.5, backgroundColor: Colors.primaryColor }} />
 				<View style={styles.container}>
 					<View style={{}}>
 						<ButtonGroup
@@ -273,8 +366,8 @@ class Board extends Component {
 								marginRight: 0,
 								borderWidth: 0
 							}}
-							textStyle={{ fontSize: 12 }}
-							selectedButtonStyle={{ backgroundColor: 'grey' }}
+							textStyle={{ fontSize: 14 }}
+							selectedButtonStyle={{ backgroundColor: Colors.primaryColor }}
 						/>
 					</View>
 					<View style={{ marginTop: 10 }}>
@@ -286,7 +379,7 @@ class Board extends Component {
 					</View>
 					<FlatList
 						ref={(ref) => (this.flatListRef = ref)}
-						style={{ marginTop: 35 }}
+						style={{ marginTop: 35, marginBottom: 12 }}
 						data={posts.slice(0, currentPage * PAGE_SIZE)}
 						numColumns={1}
 						keyExtrator={(item) => {
@@ -317,39 +410,6 @@ class Board extends Component {
 		);
 	}
 }
-
-const HeaderRightComponent = (props) => {
-	const [ isDisabled, setIsDisabled ] = useState(false);
-	return (
-		<View style={{ flex: 1, flexDirection: 'row', alignItems: 'center' }}>
-			<TouchableOpacity>
-				<Button
-					title="My Posts"
-					onPress={props.myPostsBtn}
-					type="outline"
-					titleStyle={{ fontSize: 14 }}
-					buttonStyle={{ paddingHorizontal: 10, paddingVertical: 4 }}
-					containerStyle={{ marginRight: 10 }}
-				/>
-			</TouchableOpacity>
-			<TouchableOpacity
-				onPress={async () => {
-					if (!isDisabled) {
-						setIsDisabled(true);
-						props.handleRefreshBtn().then(() => setIsDisabled(false));
-					}
-				}}
-				disabled={isDisabled}
-				style={{ opacity: isDisabled ? 0.2 : 1 }}
-			>
-				<View style={{ marginRight: 20 }}>{vectorIcon('FrontAwesome', 'refresh', 26)}</View>
-			</TouchableOpacity>
-			<TouchableOpacity onPress={props.handleCreateBtn}>
-				<View style={{ marginRight: 25 }}>{vectorIcon('Feather', 'plus-circle', 26)}</View>
-			</TouchableOpacity>
-		</View>
-	);
-};
 
 const mapStateToProps = ({ auth, posts }) => ({
 	currentDBUser: auth.currentDBUser,

@@ -1,6 +1,6 @@
 import React, { Component, useState, useEffect, useRef } from 'react';
 import { ScrollView, StyleSheet, Text, View, TouchableHighlight, TouchableOpacity, RefreshControl } from 'react-native';
-import { Button, SearchBar } from 'react-native-elements';
+import { Button, SearchBar, Divider } from 'react-native-elements';
 import MeetupListCard from '../../components/MeetupListCard';
 import MapView, { Marker, Callout } from 'react-native-maps';
 import dimensions from '../../constants/Layout';
@@ -12,6 +12,7 @@ import _ from 'lodash';
 import { fetchMeetups, fetchUserMeetups } from '../../redux/actions/meetups.actions';
 import AdmobBanner from '../../components/AdmobBanner';
 import { searchCity } from '../../helpers/GeoDBHelper';
+import Colors from '../../constants/Colors';
 
 const MAX_TITLE_LENGTH = 30;
 const MAP_WIDTH = dimensions.window.width - 32;
@@ -34,37 +35,15 @@ class Meetup extends Component {
 		isFetching: false,
 		citySearchTerm: '',
 		citySearchResult: [],
-		isCitySearching: false
+		isCitySearching: false,
+		currentMenu: 0
 	};
 	markerRefs = {};
 	scrollviewRef = null;
 	viewRef = null;
 
-	async componentDidMount() {
-		const { navigation } = this.props;
-
-		navigation.setParams({
-			refresh: this.handleRefreshBtn,
-			onCreateBack: this.onCreateBack,
-			myMeetupBtn: this.myMeetupBtn
-		});
-	}
-
 	static navigationOptions = ({ navigation, screenProps }) => ({
-		title: 'Meetup',
-		headerRight: (
-			<HeaderRightComponent
-				handleRefreshBtn={navigation.getParam('refresh')}
-				handleCreateBtn={() => {
-					navigation.navigate('CreateMeetup', {
-						onCreateBack: navigation.getParam('onCreateBack')
-					});
-				}}
-				myMeetupBtn={navigation.getParam('myMeetupBtn')}
-			/>
-		),
-		headerStyle: { backgroundColor: 'brown' },
-		headerTitleStyle: { color: 'blue' }
+		headerShown: false
 	});
 
 	myMeetupBtn = () => {
@@ -76,7 +55,7 @@ class Meetup extends Component {
 		const { centerLat, centerLon, lat_offset } = this.state;
 		const { fetchMeetups, fetchUserMeetups, currentDBUser } = this.props;
 
-		this.setState({ isFetching: true });
+		this.setState({ isFetching: true, currentMenu: 0 });
 
 		fetchMeetups({
 			lat: centerLat,
@@ -191,7 +170,8 @@ class Meetup extends Component {
 			isFetching,
 			citySearchTerm,
 			citySearchResult,
-			isCitySearching
+			isCitySearching,
+			currentMenu
 		} = this.state;
 
 		if (!meetups) {
@@ -201,7 +181,7 @@ class Meetup extends Component {
 		if (this.props.navigation.getParam('myMeetups')) {
 			const items = this.props.navigation.getParam('myMeetups');
 			this.props.navigation.setParams({ myMeetups: undefined });
-			this.setState({ meetups: items });
+			this.setState({ meetups: items, currentMenu: 1 });
 		}
 
 		if (this.props.navigation.getParam('toSpecificMeetup')) {
@@ -212,59 +192,94 @@ class Meetup extends Component {
 
 		return (
 			<View style={styles.container}>
-				<CitySearchModal
-					showModal={showModal}
-					closeModal={this.closeModal}
-					searchTerm={citySearchTerm}
-					searchResult={citySearchResult}
-					handleCitySelect={(city) => this.handleCitySelect(city)}
-				/>
-				<MapView
-					ref={(el) => (this.mapRef = el)}
-					style={styles.map}
-					initialRegion={{
-						latitude: this.props.currentLocation.lat,
-						longitude: this.props.currentLocation.lon,
-						latitudeDelta: lat_offset,
-						longitudeDelta: lon_offset
+				<View
+					style={{
+						flex: 1,
+						flexDirection: 'row',
+						marginTop: 43,
+						alignItems: 'center',
+						paddingLeft: 14,
+						paddingRight: 0,
+						maxHeight: 50,
+						justifyContent: 'space-between'
 					}}
-					onRegionChange={(region) =>
-						this.setState({
-							centerLat: region.latitude,
-							centerLon: region.longitude,
-							lat_offset: region.latitudeDelta,
-							lon_offset: region.longitudeDelta
-						})}
 				>
-					{meetups.map((item, index) => {
-						let titleTruncated =
-							item.title.length > MAX_TITLE_LENGTH + 5
-								? item.title.substring(0, MAX_TITLE_LENGTH) + '...'
-								: item.title;
-						return (
-							<Marker
-								key={index}
-								ref={(el) => (this.markerRefs[item.id] = el)}
-								coordinate={{
-									latitude: item.latlon.lat,
-									longitude: item.latlon.lon
+					<View style={{ top: 2 }}>{vectorIcon('FontAwesome', 'meetup', 35, Colors.primaryColor)}</View>
+					<View style={{}}>
+						<View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+							<TouchableOpacity
+								onPress={() => {
+									this.setState({ currentMenu: 0, meetups: this.props.meetups });
 								}}
-								title={titleTruncated}
-								onPress={() => this.handleMarkerSelect(item)}
 							>
-								<Callout>
-									<Text>{titleTruncated}</Text>
-								</Callout>
-							</Marker>
-						);
-					})}
-				</MapView>
+								<View style={{ marginRight: 25 }}>
+									<Text
+										style={{
+											color: currentMenu === 0 ? 'black' : '#b3bab5',
+											fontWeight: currentMenu === 0 ? 'bold' : '500',
+											fontSize: 20
+										}}
+									>
+										Meetup
+									</Text>
+								</View>
+							</TouchableOpacity>
+							<TouchableOpacity
+								onPress={() => {
+									this.myMeetupBtn();
+									this.setState({ currentMenu: 1 });
+								}}
+							>
+								<View>
+									<Text
+										style={{
+											color: currentMenu === 1 ? 'black' : '#b3bab5',
+											fontWeight: currentMenu === 1 ? 'bold' : '500',
+											fontSize: 20
+										}}
+									>
+										My Meetup
+									</Text>
+								</View>
+							</TouchableOpacity>
+						</View>
+					</View>
+					<View style={{}}>
+						<View
+							style={{
+								flex: 1,
+								flexDirection: 'row',
+								alignItems: 'center',
+								justifyContent: 'flex-end'
+							}}
+						>
+							<TouchableOpacity
+								onPress={this.handleRefreshBtn}
+								disabled={isFetching}
+								style={{ opacity: isFetching ? 0.2 : 1 }}
+							>
+								<View style={{ marginRight: 20 }}>{vectorIcon('FrontAwesome', 'refresh', 26)}</View>
+							</TouchableOpacity>
+							<TouchableOpacity
+								onPress={() => {
+									this.props.navigation.navigate('CreateMeetup', {
+										onCreateBack: this.onCreateBack
+									});
+								}}
+							>
+								<View style={{ marginRight: 25 }}>{vectorIcon('Feather', 'plus-circle', 26)}</View>
+							</TouchableOpacity>
+						</View>
+					</View>
+				</View>
+				<Divider style={{ height: 1.5, backgroundColor: Colors.primaryColor }} />
 				<View
 					style={{
 						flex: 1,
 						flexDirection: 'row',
 						paddingHorizontal: 15,
-						maxHeight: 35
+						maxHeight: 35,
+						marginTop: 10
 					}}
 				>
 					<SearchBar
@@ -317,6 +332,53 @@ class Meetup extends Component {
 						disabledStyle={{ opacity: 0.5, backgroundColor: '#fcb444' }}
 					/>
 				</View>
+				<CitySearchModal
+					showModal={showModal}
+					closeModal={this.closeModal}
+					searchTerm={citySearchTerm}
+					searchResult={citySearchResult}
+					handleCitySelect={(city) => this.handleCitySelect(city)}
+				/>
+				<MapView
+					ref={(el) => (this.mapRef = el)}
+					style={styles.map}
+					initialRegion={{
+						latitude: this.props.currentLocation.lat,
+						longitude: this.props.currentLocation.lon,
+						latitudeDelta: lat_offset,
+						longitudeDelta: lon_offset
+					}}
+					onRegionChange={(region) =>
+						this.setState({
+							centerLat: region.latitude,
+							centerLon: region.longitude,
+							lat_offset: region.latitudeDelta,
+							lon_offset: region.longitudeDelta
+						})}
+				>
+					{meetups.map((item, index) => {
+						let titleTruncated =
+							item.title.length > MAX_TITLE_LENGTH + 5
+								? item.title.substring(0, MAX_TITLE_LENGTH) + '...'
+								: item.title;
+						return (
+							<Marker
+								key={index}
+								ref={(el) => (this.markerRefs[item.id] = el)}
+								coordinate={{
+									latitude: item.latlon.lat,
+									longitude: item.latlon.lon
+								}}
+								title={titleTruncated}
+								onPress={() => this.handleMarkerSelect(item)}
+							>
+								<Callout>
+									<Text>{titleTruncated}</Text>
+								</Callout>
+							</Marker>
+						);
+					})}
+				</MapView>
 				<ScrollView
 					ref={(el) => (this.scrollviewRef = el)}
 					style={{
@@ -336,7 +398,7 @@ class Meetup extends Component {
 								});
 							}
 						}}
-						style={{ paddingBottom: 2 }}
+						style={{ paddingBottom: 2, marginBottom: 12 }}
 					>
 						{meetups.map((item, index) => (
 							<MeetupListCard
@@ -355,42 +417,6 @@ class Meetup extends Component {
 	}
 }
 
-const HeaderRightComponent = (props) => {
-	const [ isDisabled, setIsDisabled ] = useState(false);
-	return (
-		<View style={{ flex: 1, flexDirection: 'row' }}>
-			<TouchableOpacity>
-				<Button
-					title="My Meetups"
-					onPress={props.myMeetupBtn}
-					type="outline"
-					titleStyle={{ fontSize: 14 }}
-					buttonStyle={{ paddingHorizontal: 10, paddingVertical: 4 }}
-					containerStyle={{ marginRight: 10 }}
-				/>
-			</TouchableOpacity>
-			<TouchableOpacity
-				onPress={async () => {
-					if (!isDisabled) {
-						setIsDisabled(true);
-						await props.handleRefreshBtn();
-					}
-					setTimeout(() => {
-						setIsDisabled(false);
-					}, 1500);
-				}}
-				disabled={isDisabled}
-				style={{ opacity: isDisabled ? 0.2 : 1 }}
-			>
-				<View style={{ marginRight: 20 }}>{vectorIcon('FrontAwesome', 'refresh', 26)}</View>
-			</TouchableOpacity>
-			<TouchableOpacity onPress={props.handleCreateBtn}>
-				<View style={{ marginRight: 25 }}>{vectorIcon('Feather', 'plus-circle', 26)}</View>
-			</TouchableOpacity>
-		</View>
-	);
-};
-
 const mapStateToProps = ({ others, meetups, auth }) => ({
 	currentDBUser: auth.currentDBUser,
 	currentLocation: others.currentLocation,
@@ -407,6 +433,8 @@ export default connect(mapStateToProps, mapDispatchToProps)(Meetup);
 
 const styles = StyleSheet.create({
 	map: {
+		marginTop: 4,
+		marginBottom: 4,
 		position: 'relative',
 		left: 16,
 		width: MAP_WIDTH,

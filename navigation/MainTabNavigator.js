@@ -51,7 +51,8 @@ HomeStack.navigationOptions = {
 			style={{ marginBottom: -5 }}
 			color={focused ? Colors.tabIconSelected : Colors.tabIconDefault}
 		/>
-	)
+	),
+	tabBarOptions: { activeTintColor: Colors.primaryColor }
 };
 
 HomeStack.path = '';
@@ -76,7 +77,8 @@ MeetupStack.navigationOptions = {
 			style={{ marginBottom: -5 }}
 			color={focused ? Colors.tabIconSelected : Colors.tabIconDefault}
 		/>
-	)
+	),
+	tabBarOptions: { activeTintColor: Colors.primaryColor }
 };
 
 MeetupStack.path = '';
@@ -101,7 +103,8 @@ BoardStack.navigationOptions = {
 			style={{ marginBottom: -5 }}
 			color={focused ? Colors.tabIconSelected : Colors.tabIconDefault}
 		/>
-	)
+	),
+	tabBarOptions: { activeTintColor: Colors.primaryColor }
 };
 
 BoardStack.path = '';
@@ -126,7 +129,8 @@ GalleryStack.navigationOptions = {
 			style={{ marginBottom: -4 }}
 			color={focused ? Colors.tabIconSelected : Colors.tabIconDefault}
 		/>
-	)
+	),
+	tabBarOptions: { activeTintColor: Colors.primaryColor }
 };
 
 GalleryStack.path = '';
@@ -156,7 +160,8 @@ SettingsStack.navigationOptions = {
 			style={{ marginBottom: -4 }}
 			color={focused ? Colors.tabIconSelected : Colors.tabIconDefault}
 		/>
-	)
+	),
+	tabBarOptions: { activeTintColor: Colors.primaryColor }
 };
 
 SettingsStack.path = '';

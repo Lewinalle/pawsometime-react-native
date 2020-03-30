@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
-import { ScrollView, View, KeyboardAvoidingView, Alert, TouchableOpacity } from 'react-native';
-import { Input, Button, Text, Divider, Avatar } from 'react-native-elements';
+import { ScrollView, View, KeyboardAvoidingView, Alert, TouchableOpacity, RefreshControl } from 'react-native';
+import { Input, Button, Text, Divider, Avatar, Image } from 'react-native-elements';
 import { Header } from 'react-navigation-stack';
 import Constants from '../../constants/Layout';
 import { connect } from 'react-redux';
@@ -10,6 +10,7 @@ import { likeResource, addComment, deleteComment } from '../../Services/general'
 import { fetchMeetupInfo, deleteMeetup, autoJoin, requestJoin, cancelJoin } from '../../Services/meetups';
 import _ from 'lodash';
 import MapView, { Marker } from 'react-native-maps';
+import Colors from '../../constants/Colors';
 
 const MAP_HEIGHT = 200;
 const LAT_DELTA = 0.07;
@@ -346,46 +347,59 @@ const MeetupInfo = (props) => {
 		}
 
 		return (
-			<View style={{ marginRight: 10 }}>
-				<Button
-					title={title}
-					buttonStyle={{ paddingVertical: 4, paddingHorizontal: 10 }}
-					onPress={handleJoin}
-				/>
-			</View>
+			<TouchableOpacity onPress={handleJoin} disabled={isSubmitting} style={{ marginTop: 20, marginBottom: 6 }}>
+				<View
+					style={{
+						flex: 1,
+						alignSelf: 'center'
+					}}
+				>
+					<Image
+						source={require('../../assets/images/home-news-loadmore.png')}
+						style={{ width: 80, height: 40 }}
+					/>
+					<Button
+						title={title}
+						onPress={handleJoin}
+						buttonStyle={{ padding: 0, backgroundColor: Colors.primaryColor }}
+						inputStyle={{ color: 'white' }}
+						titleStyle={{ fontSize: 14 }}
+					/>
+				</View>
+			</TouchableOpacity>
 		);
 	};
 
-	const renderStatusText = () => {
-		let message = '';
+	// const renderStatusText = () => {
+	// 	let message = '';
 
-		switch (joinStatus) {
-			case 0:
-				message = 'You are not in this meetup';
-				break;
-			case 1:
-				message = "You've requested to join this meetup";
-				break;
-			case 2:
-				message = "You've joined this meetup";
-				break;
-			default:
-				break;
-		}
+	// 	switch (joinStatus) {
+	// 		case 0:
+	// 			message = 'You are not in this meetup';
+	// 			break;
+	// 		case 1:
+	// 			message = "You've requested to join this meetup";
+	// 			break;
+	// 		case 2:
+	// 			message = "You've joined this meetup";
+	// 			break;
+	// 		default:
+	// 			break;
+	// 	}
 
-		return (
-			<View
-				style={{
-					marginHorizontal: 6,
-					flex: 1
-				}}
-			>
-				<Text numberOfLines={2} style={{ flex: 1, textAlign: 'right', textAlignVertical: 'center' }}>
-					{message}
-				</Text>
-			</View>
-		);
-	};
+	// 	return (
+	// 		<View
+	// 			style={{
+	// 				marginHorizontal: 6,
+	// 				flex: 1
+	// 			}}
+	// 		>
+	// 			<Text numberOfLines={2} style={{ flex: 1, textAlign: 'right', textAlignVertical: 'center' }}>
+	// 				{message}
+	// 			</Text>
+	// 		</View>
+	// 	);
+	// };
 
 	const toEditPage = () => {
 		Alert.alert(
@@ -410,235 +424,270 @@ const MeetupInfo = (props) => {
 	};
 
 	return (
-		<View
-			style={{
-				flex: 1,
-				flexDirection: 'column',
-				alignItems: 'center',
-				alignItems: 'stretch'
-			}}
-		>
-			<KeyboardAvoidingView
-				style={{ flex: 1 }}
-				behavior="height"
-				keyboardVerticalOffset={Constants.platform.ios ? Header.HEIGHT : Header.HEIGHT + 50}
+		<View style={{ flex: 1 }}>
+			<View
+				style={{
+					flex: 1,
+					flexDirection: 'row',
+					marginTop: 52,
+					alignItems: 'center',
+					paddingHorizontal: 14,
+					maxHeight: 40
+				}}
 			>
-				<ScrollView contentContainerStyle={{}}>
-					<View
-						ref={containerRef}
-						onLayout={() => {
-							if (containerRef.current) {
-								containerRef.current.measure((x, y, width, height, pageX, pageY) => {
-									setContainerWidth(width);
-								});
-							}
-						}}
-						style={{ backgroundColor: '#8a8483' }}
+				<TouchableOpacity onPress={() => props.navigation.goBack()}>
+					<View style={{ top: 2 }}>{vectorIcon('Ionicons', 'ios-arrow-back', 40, Colors.primaryColor)}</View>
+				</TouchableOpacity>
+				<View style={{ flex: 1 }}>
+					<View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+						<View style={{ marginRight: 25 }}>
+							<View style={{ top: 2 }}>
+								{vectorIcon('FontAwesome', 'meetup', 40, Colors.primaryColor)}
+							</View>
+						</View>
+					</View>
+				</View>
+			</View>
+			<View style={{ marginBottom: 10, marginTop: 6 }}>
+				<Divider style={{ height: 1.5, backgroundColor: Colors.primaryColor }} />
+			</View>
+			<View
+				style={{
+					flex: 1,
+					flexDirection: 'column',
+					alignItems: 'center',
+					alignItems: 'stretch',
+					paddingHorizontal: 14
+				}}
+			>
+				<KeyboardAvoidingView
+					style={{ flex: 1 }}
+					behavior="height"
+					keyboardVerticalOffset={Constants.platform.ios ? Header.HEIGHT : Header.HEIGHT + 50}
+				>
+					<ScrollView
+						contentContainerStyle={{}}
+						refreshControl={<RefreshControl refreshing={isSubmitting} onRefresh={refresh} />}
 					>
-						<View style={{ backgroundColor: '#75706f', paddingHorizontal: 10, paddingVertical: 4 }}>
-							<Text style={{ fontSize: 24, fontWeight: 'bold' }}>{meetup.title}</Text>
+						<View
+							ref={containerRef}
+							onLayout={() => {
+								if (containerRef.current) {
+									containerRef.current.measure((x, y, width, height, pageX, pageY) => {
+										setContainerWidth(width);
+									});
+								}
+							}}
+							style={{}}
+						>
+							<View style={{ paddingHorizontal: 0, paddingVertical: 4 }}>
+								<Text style={{ fontSize: 18, fontWeight: 'bold' }}>{meetup.title}</Text>
+								<View
+									style={{
+										flex: 1,
+										flexDirection: 'row',
+										justifyContent: 'space-between',
+										width: '100%',
+										marginRight: 'auto'
+									}}
+								>
+									<Text>{meetup.userName}</Text>
+									<View>
+										<View style={{ flex: 1, flexDirection: 'row' }}>
+											<TouchableOpacity onPress={refresh}>
+												<View style={{ marginHorizontal: 10 }}>
+													{vectorIcon('FrontAwesome', 'refresh', 22)}
+												</View>
+											</TouchableOpacity>
+											{meetup.userId === props.currentDBUser.id && (
+												<TouchableOpacity onPress={toEditPage}>
+													<View style={{ marginRight: 12 }}>
+														{vectorIcon('AntDesign', 'edit', 22)}
+													</View>
+												</TouchableOpacity>
+											)}
+											{meetup.userId === props.currentDBUser.id && (
+												<TouchableOpacity onPress={handleDeleteMeetup}>
+													<View style={{ marginRight: 10 }}>
+														{vectorIcon('AntDesign', 'delete', 22)}
+													</View>
+												</TouchableOpacity>
+											)}
+											<Text>
+												{dateTime.toLocaleDateString()}, {dateTime.toLocaleTimeString()}
+											</Text>
+										</View>
+									</View>
+								</View>
+							</View>
+							<View style={{ paddingTop: 10, paddingBottom: 4 }}>
+								<View>
+									<Text style={{ marginBottom: 10 }}>{meetup.description}</Text>
+								</View>
+							</View>
+							{meetup.attachment && (
+								<View>
+									<CacheImage
+										style={{ width: containerWidth, height: containerWidth }}
+										uri={meetup.attachment}
+									/>
+								</View>
+							)}
+							<MapView
+								style={{
+									width: containerWidth,
+									height: MAP_HEIGHT,
+									marginVertical: 8
+								}}
+								initialRegion={{
+									latitude: meetup.latlon.lat,
+									longitude: meetup.latlon.lon,
+									latitudeDelta: LAT_DELTA,
+									longitudeDelta: LON_DELTA
+								}}
+							>
+								<Marker
+									coordinate={{
+										latitude: meetup.latlon.lat,
+										longitude: meetup.latlon.lon
+									}}
+								/>
+							</MapView>
+							<View>
+								<View
+									style={{
+										flex: 1,
+										flexDirection: 'row',
+										justifyContent: 'flex-end',
+										alignItems: 'center',
+										marginVertical: 8
+									}}
+								>
+									<TouchableOpacity onPress={handleLike}>
+										<View style={{ marginRight: 10 }}>
+											{vectorIcon('AntDesign', hasUserLiked ? 'like1' : 'like2', 20)}
+										</View>
+									</TouchableOpacity>
+									<Text style={{ marginRight: 26 }}>{meetup.likes.length}</Text>
+
+									<View style={{ marginRight: 10 }}>
+										{vectorIcon('MaterialCommunityIcons', 'comment-multiple-outline', 18)}
+									</View>
+									<Text style={{ marginRight: 10 }}>{meetup.comments.length}</Text>
+								</View>
+							</View>
+							<Divider />
 							<View
 								style={{
 									flex: 1,
 									flexDirection: 'row',
 									justifyContent: 'space-between',
-									width: '100%',
-									marginRight: 'auto'
+									alignItems: 'center',
+									maxWidth: Constants.window.width - 62
 								}}
 							>
-								<Text>{meetup.userName}</Text>
-								<View>
-									<View style={{ flex: 1, flexDirection: 'row' }}>
-										<TouchableOpacity onPress={refresh}>
-											<View style={{ marginHorizontal: 10 }}>
-												{vectorIcon('FrontAwesome', 'refresh', 22)}
-											</View>
-										</TouchableOpacity>
-										{meetup.userId === props.currentDBUser.id && (
-											<TouchableOpacity onPress={toEditPage}>
-												<View style={{ marginRight: 12 }}>
-													{vectorIcon('AntDesign', 'edit', 22)}
-												</View>
-											</TouchableOpacity>
-										)}
-										{meetup.userId === props.currentDBUser.id && (
-											<TouchableOpacity onPress={handleDeleteMeetup}>
-												<View style={{ marginRight: 10 }}>
-													{vectorIcon('AntDesign', 'delete', 22)}
-												</View>
-											</TouchableOpacity>
-										)}
-										<Text>
-											{dateTime.toLocaleDateString()}, {dateTime.toLocaleTimeString()}
-										</Text>
-									</View>
-								</View>
-							</View>
-						</View>
-						<View style={{ paddingHorizontal: 10, paddingVertical: 8, backgroundColor: '#a2a0a3' }}>
-							<View>
-								<Text style={{ marginBottom: 10 }}>{meetup.description}</Text>
-							</View>
-							<View
-								style={{
-									flex: 1,
-									flexDirection: 'row',
-									justifyContent: 'flex-end',
-									alignItems: 'center'
-								}}
-							>
-								{renderStatusText()}
-								{renderJoinButton()}
-								<TouchableOpacity onPress={handleLike}>
-									<View style={{ marginRight: 10 }}>
-										{vectorIcon('AntDesign', hasUserLiked ? 'like1' : 'like2', 24)}
-									</View>
-								</TouchableOpacity>
-								<Text style={{ marginRight: 26 }}>{meetup.likes.length}</Text>
-
-								<View style={{ marginRight: 10 }}>
-									{vectorIcon('MaterialCommunityIcons', 'comment-multiple-outline', 22)}
-								</View>
-								<Text style={{ marginRight: 10 }}>{meetup.comments.length}</Text>
-							</View>
-						</View>
-						<MapView
-							style={{
-								width: containerWidth,
-								height: MAP_HEIGHT
-							}}
-							initialRegion={{
-								latitude: meetup.latlon.lat,
-								longitude: meetup.latlon.lon,
-								latitudeDelta: LAT_DELTA,
-								longitudeDelta: LON_DELTA
-							}}
-						>
-							<Marker
-								coordinate={{
-									latitude: meetup.latlon.lat,
-									longitude: meetup.latlon.lon
-								}}
-							/>
-						</MapView>
-						{meetup.attachment && (
-							<View>
-								<CacheImage
-									style={{ width: containerWidth, height: containerWidth }}
-									uri={meetup.attachment}
+								<Input
+									placeholder="Add a comment..."
+									value={comment}
+									multiline
+									numberOfLines={2}
+									containerStyle={{
+										padding: 0,
+										marginBottom: 0
+									}}
+									inputContainerStyle={{
+										borderBottomColor: 'transparent',
+										borderBottomWidth: 0
+									}}
+									inputStyle={{ textAlignVertical: 'top', paddingVertical: 4 }}
+									onChangeText={(text) => setComment(text)}
 								/>
+								<TouchableOpacity onPress={handleAddComment}>
+									<View style={{ marginRight: 10 }}>{vectorIcon('Feather', 'plus-circle', 34)}</View>
+								</TouchableOpacity>
 							</View>
-						)}
-						<View
-							style={{
-								flex: 1,
-								flexDirection: 'row',
-								justifyContent: 'space-between',
-								alignItems: 'center',
-								maxWidth: Constants.window.width - 38
-							}}
-						>
-							<Input
-								placeholder="Add a comment..."
-								value={comment}
-								multiline
-								numberOfLines={2}
-								containerStyle={{
-									padding: 0,
-									marginBottom: 0
-								}}
-								inputContainerStyle={{
-									borderBottomColor: 'transparent',
-									borderBottomWidth: 0
-								}}
-								inputStyle={{ textAlignVertical: 'top', paddingVertical: 4 }}
-								onChangeText={(text) => setComment(text)}
-							/>
-							<TouchableOpacity onPress={handleAddComment}>
-								<View style={{ marginRight: 10 }}>{vectorIcon('Feather', 'plus-circle', 34)}</View>
-							</TouchableOpacity>
-						</View>
-						{meetup.comments.map((c, i) => {
-							const dateTime = new Date(c.createdAt);
-							return (
-								<View key={i}>
-									<Divider />
-									<View
-										style={{
-											flex: 1,
-											flexDirection: 'row',
-											alignItems: 'center',
-											paddingHorizontal: 6,
-											paddingVertical: 8
-										}}
-									>
-										<View style={{ paddingRight: 8 }}>
-											{c.userAvatar ? (
-												<Avatar
-													containerStyle={{ width: 38, height: 38 }}
-													rounded
-													source={{
-														uri: c.userAvatar
+							{meetup.comments.map((c, i) => {
+								const dateTime = new Date(c.createdAt);
+								return (
+									<View key={i}>
+										<Divider />
+										<View
+											style={{
+												flex: 1,
+												flexDirection: 'row',
+												alignItems: 'center',
+												paddingHorizontal: 6,
+												paddingVertical: 8
+											}}
+										>
+											<View style={{ paddingRight: 8 }}>
+												{c.userAvatar ? (
+													<Avatar
+														containerStyle={{ width: 38, height: 38 }}
+														rounded
+														source={{
+															uri: c.userAvatar
+														}}
+													/>
+												) : (
+													<Avatar
+														containerStyle={{ width: 38, height: 38 }}
+														rounded
+														source={require('../../assets/images/profile-default.png')}
+													/>
+												)}
+											</View>
+											<View style={{ width: Constants.window.width - 60 }}>
+												<View
+													style={{
+														flex: 1,
+														flexDirection: 'row',
+														justifyContent: 'space-between'
 													}}
-												/>
-											) : (
-												<Avatar
-													containerStyle={{ width: 38, height: 38 }}
-													rounded
-													source={require('../../assets/images/profile-default.png')}
-												/>
-											)}
-										</View>
-										<View style={{ width: Constants.window.width - 60 }}>
-											<View
-												style={{
-													flex: 1,
-													flexDirection: 'row',
-													justifyContent: 'space-between'
-												}}
-											>
-												<Text style={{ fontSize: 16, fontWeight: 'bold' }}>{c.userName}</Text>
+												>
+													<Text style={{ fontSize: 16, fontWeight: 'bold' }}>
+														{c.userName}
+													</Text>
 
-												<View>
-													<View style={{ flex: 1, flexDirection: 'row' }}>
-														{c.userId === props.currentDBUser.id && (
-															<TouchableOpacity onPress={() => handleDeleteComment(c.id)}>
-																<View style={{ marginRight: 10, marginTop: 2 }}>
-																	{vectorIcon('AntDesign', 'delete', 16)}
-																</View>
-															</TouchableOpacity>
-														)}
-														<Text>
-															{dateTime.toLocaleDateString()},{' '}
-															{dateTime.toLocaleTimeString()}
-														</Text>
+													<View>
+														<View style={{ flex: 1, flexDirection: 'row' }}>
+															{c.userId === props.currentDBUser.id && (
+																<TouchableOpacity
+																	onPress={() => handleDeleteComment(c.id)}
+																>
+																	<View style={{ marginRight: 10, marginTop: 2 }}>
+																		{vectorIcon('AntDesign', 'delete', 16)}
+																	</View>
+																</TouchableOpacity>
+															)}
+															<Text>
+																{dateTime.toLocaleDateString()},{' '}
+																{dateTime.toLocaleTimeString()}
+															</Text>
+														</View>
 													</View>
 												</View>
-											</View>
-											<View>
-												<Text>{c.description}</Text>
+												<View>
+													<Text>{c.description}</Text>
+												</View>
 											</View>
 										</View>
 									</View>
-								</View>
-							);
-						})}
-					</View>
-				</ScrollView>
-			</KeyboardAvoidingView>
+								);
+							})}
+							<Divider />
+							<View style={{ marginBottom: 20 }}>{renderJoinButton()}</View>
+						</View>
+					</ScrollView>
+				</KeyboardAvoidingView>
+			</View>
 		</View>
 	);
 };
 
-MeetupInfo.navigationOptions = ({ navigation }) => {
-	const meetup = navigation.getParam('meetup');
-	return {
-		title: meetup.title,
-		headerStyle: { backgroundColor: 'brown' },
-		headerTitleStyle: { color: 'blue' }
-	};
-};
-
+MeetupInfo.navigationOptions = ({ navigation }) => ({
+	headerShown: false
+});
 const mapStateToProps = ({ auth }) => ({
 	currentDBUser: auth.currentDBUser
 });

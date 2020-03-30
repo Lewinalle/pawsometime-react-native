@@ -8,10 +8,7 @@ export function BoardListItemRenderer(props) {
 	const dateTime = new Date(post.createdAt);
 
 	return (
-		<TouchableHighlight
-			onPress={() => props.handlePostClick(post)}
-			// TODO: implement navigate to the page onPress
-		>
+		<TouchableHighlight onPress={() => props.handlePostClick(post)}>
 			<View style={style.post}>
 				<View style={getItemStyle(isFirst)}>
 					<Text numberOfLines={1} style={style.title}>
@@ -47,11 +44,12 @@ const getItemStyle = (isFirst) => {
 		paddingVertical: 8,
 		backgroundColor: '#ffffff',
 		borderColor: '#C0C5CA',
-		borderWidth: 1,
+		borderWidth: 0,
 		borderRadius: 4
 	};
 	if (!isFirst) {
 		style.borderTopWidth = 0;
+		style.paddingTop = 20;
 	}
 	return style;
 };

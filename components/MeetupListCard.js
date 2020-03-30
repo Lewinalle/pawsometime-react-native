@@ -57,12 +57,13 @@ export default MeetupListCard;
 
 const style = StyleSheet.create({
 	cardStyle: {
-		paddingVertical: 6,
+		elevation: 4,
+		paddingVertical: 10,
 		paddingHorizontal: 9,
-		marginVertical: 4
+		marginVertical: 10
 	},
 	cardSelected: {
-		backgroundColor: '#EEEEEE'
+		backgroundColor: '#fff8e8'
 	},
 	itemStyle: {},
 	infoRow: {
@@ -71,7 +72,8 @@ const style = StyleSheet.create({
 		justifyContent: 'flex-end'
 	},
 	title: {
-		fontSize: 18,
+		fontSize: 14,
+		fontWeight: 'bold',
 		marginBottom: 4
 	},
 	description: {

@@ -4,13 +4,13 @@ import {
 	StyleSheet,
 	Text,
 	View,
-	Image,
 	KeyboardAvoidingView,
 	TextInput,
 	Picker,
-	Alert
+	Alert,
+	TouchableOpacity
 } from 'react-native';
-import { Input, Button } from 'react-native-elements';
+import { Input, Button, ButtonGroup, Image, Divider } from 'react-native-elements';
 import { Header } from 'react-navigation-stack';
 import { uploadToS3 } from '../../helpers/uploadToS3';
 import * as ImagePicker from 'expo-image-picker';
@@ -20,25 +20,12 @@ import { createPost, updatePost } from '../../Services/posts';
 import { connect } from 'react-redux';
 import Config from '../../config';
 import { fetchPosts } from '../../redux/actions/posts.actions';
+import Colors from '../../constants/Colors';
+import { vectorIcon } from '../../Utils/Icon';
 
-const boardTypes = [
-	{
-		label: 'General',
-		value: 'general'
-	},
-	{
-		label: 'Questions',
-		value: 'qna'
-	},
-	{
-		label: 'Tips',
-		value: 'tips'
-	},
-	{
-		label: 'Trade',
-		value: 'trade'
-	}
-];
+const boardTypeNames = [ 'General', 'Questions', 'Tips', 'Trade' ];
+
+const boardTypes = [ 'general', 'qna', 'tips', 'trade' ];
 
 const CreatePost = (props) => {
 	const original = props.navigation.getParam('originalPost');
@@ -64,8 +51,8 @@ const CreatePost = (props) => {
 		}
 	};
 
-	const pickType = (itemValue, itemIndex) => {
-		setType(itemValue);
+	const pickType = (i) => {
+		setType(boardTypes[i]);
 	};
 
 	const pickImage = async () => {
@@ -108,6 +95,10 @@ const CreatePost = (props) => {
 				}
 			);
 
+			return;
+		}
+
+		if (isSubmitting) {
 			return;
 		}
 
@@ -160,129 +151,213 @@ const CreatePost = (props) => {
 	};
 
 	return (
-		<View
-			style={{
-				padding: 20,
-				flex: 1,
-				flexDirection: 'column',
-				alignItems: 'center',
-				alignItems: 'stretch'
-			}}
-		>
-			<KeyboardAvoidingView
-				style={{ flex: 1 }}
-				behavior="height"
-				keyboardVerticalOffset={Constants.platform.ios ? Header.HEIGHT : Header.HEIGHT + 50}
+		<View style={{ flex: 1 }}>
+			<View
+				style={{
+					flex: 1,
+					flexDirection: 'row',
+					marginTop: 52,
+					alignItems: 'center',
+					paddingHorizontal: 14,
+					maxHeight: 40
+				}}
 			>
-				<ScrollView contentContainerStyle={{}}>
-					<View
-						ref={containerRef}
-						onLayout={() => {
-							if (containerRef.current) {
-								containerRef.current.measure((x, y, width, height, pageX, pageY) => {
-									setContainerWidth(width);
-								});
-							}
-						}}
-					>
-						<View>
-							<Picker
-								selectedValue={type}
-								style={{ height: 50, width: 150 }}
-								onValueChange={pickType}
-								enabled={original ? false : true}
+				<TouchableOpacity onPress={() => props.navigation.goBack()}>
+					<View style={{ top: 2 }}>{vectorIcon('Ionicons', 'ios-arrow-back', 40, Colors.primaryColor)}</View>
+				</TouchableOpacity>
+				<View style={{ flex: 1 }}>
+					<View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+						<View style={{ marginRight: 25 }}>
+							<Text
+								style={{
+									color: 'black',
+									fontWeight: 'bold',
+									fontSize: 20
+								}}
 							>
-								{boardTypes.map((item, index) => (
-									<Picker.Item key={index} label={item.label} value={item.value} />
-								))}
-							</Picker>
-						</View>
-						<View style={{ alignSelf: 'stretch' }}>
-							<Input
-								placeholder="Title"
-								value={title}
-								label="TITLE"
-								labelStyle={{ fontSize: 12, marginBottom: 10 }}
-								blurOnSubmit
-								multiline
-								numberOfLines={2}
-								containerStyle={{
-									paddingHorizontal: 20,
-									paddingVertical: 10,
-									borderWidth: 1,
-									borderColor: 'grey'
-								}}
-								inputContainerStyle={{
-									borderBottomColor: 'transparent',
-									borderBottomWidth: 0
-								}}
-								inputStyle={{ textAlignVertical: 'top' }}
-								onChangeText={(text) => setTitle(text)}
-							/>
-						</View>
-						<View style={{ marginVertical: 10, alignSelf: 'stretch' }}>
-							<Input
-								placeholder="Description"
-								value={description}
-								label="DESCRIPTION"
-								labelStyle={{ fontSize: 12, marginBottom: 10 }}
-								multiline
-								returnKeyType="none"
-								numberOfLines={10}
-								containerStyle={{
-									height: 285,
-									paddingHorizontal: 20,
-									paddingTop: 10,
-									paddingBottom: 30,
-									borderWidth: 1,
-									borderColor: 'grey'
-								}}
-								inputContainerStyle={{
-									borderBottomColor: 'transparent',
-									borderBottomWidth: 0
-								}}
-								inputStyle={{ textAlignVertical: 'top' }}
-								onChangeText={(text) => setDescription(text)}
-							/>
-						</View>
-						{imageUri && (
-							<View style={{ marginBottom: 15, flex: 1, flexDirection: 'row', justifyContent: 'center' }}>
-								<Image source={{ uri: imageUri }} style={{ width: '100%', height: containerWidth }} />
-							</View>
-						)}
-						<View
-							style={{
-								flex: 1,
-								flexDirection: 'row',
-								justifyContent: 'space-between',
-								paddingHorizontal: 15
-							}}
-						>
-							<Button
-								titleStyle={{ marginHorizontal: 25 }}
-								title="Add Image"
-								onPress={pickImage}
-								disabled={isSubmitting}
-							/>
-							<Button
-								titleStyle={{ paddingHorizontal: 25 }}
-								title="Submit"
-								onPress={handleSubmit}
-								disabled={isSubmitting}
-							/>
+								{original ? 'Update my post' : 'Create my post'}
+							</Text>
 						</View>
 					</View>
-				</ScrollView>
-			</KeyboardAvoidingView>
+				</View>
+			</View>
+			<View style={{ marginBottom: 10, marginTop: 6 }}>
+				<Divider style={{ height: 1.5, backgroundColor: Colors.primaryColor }} />
+			</View>
+			<View
+				style={{
+					padding: 20,
+					flex: 1,
+					flexDirection: 'column',
+					alignItems: 'center',
+					alignItems: 'stretch'
+				}}
+			>
+				<KeyboardAvoidingView
+					style={{ flex: 1 }}
+					behavior="height"
+					keyboardVerticalOffset={Constants.platform.ios ? Header.HEIGHT : Header.HEIGHT + 50}
+				>
+					<ScrollView contentContainerStyle={{}}>
+						<View
+							ref={containerRef}
+							onLayout={() => {
+								if (containerRef.current) {
+									containerRef.current.measure((x, y, width, height, pageX, pageY) => {
+										setContainerWidth(width);
+									});
+								}
+							}}
+						>
+							<View style={{ marginBottom: 14 }}>
+								<ButtonGroup
+									onPress={pickType}
+									selectedIndex={boardTypes.findIndex((i) => i === type)}
+									buttons={boardTypeNames}
+									containerStyle={{
+										height: 40,
+										minWidth: 250,
+										marginTop: 0,
+										marginBottom: 0,
+										marginLeft: 0,
+										marginRight: 0,
+										borderWidth: 0
+									}}
+									textStyle={{ fontSize: 14 }}
+									selectedButtonStyle={{ backgroundColor: Colors.primaryColor }}
+								/>
+							</View>
+							<View style={{ alignSelf: 'stretch' }}>
+								<Input
+									placeholder="Title"
+									value={title}
+									label="TITLE"
+									labelStyle={{ fontSize: 12, marginBottom: 10 }}
+									blurOnSubmit
+									multiline
+									numberOfLines={2}
+									containerStyle={{
+										paddingHorizontal: 20,
+										paddingVertical: 10,
+										borderWidth: Constants.platform.ios ? 0.3 : 0.1,
+										elevation: 2
+									}}
+									inputContainerStyle={{
+										borderBottomColor: 'transparent',
+										borderBottomWidth: 0
+									}}
+									inputStyle={{ textAlignVertical: 'top' }}
+									onChangeText={(text) => setTitle(text)}
+								/>
+							</View>
+							<View style={{ marginVertical: 10, alignSelf: 'stretch' }}>
+								<Input
+									placeholder="Description"
+									value={description}
+									label="DESCRIPTION"
+									labelStyle={{ fontSize: 12, marginBottom: 10 }}
+									multiline
+									returnKeyType="none"
+									numberOfLines={10}
+									containerStyle={{
+										height: 285,
+										paddingHorizontal: 20,
+										paddingTop: 10,
+										paddingBottom: 30,
+										borderWidth: Constants.platform.ios ? 0.3 : 0.1,
+										elevation: 2
+									}}
+									inputContainerStyle={{
+										borderBottomColor: 'transparent',
+										borderBottomWidth: 0
+									}}
+									inputStyle={{ textAlignVertical: 'top' }}
+									onChangeText={(text) => setDescription(text)}
+								/>
+							</View>
+							{imageUri && (
+								<View
+									style={{
+										marginBottom: 15,
+										flex: 1,
+										flexDirection: 'row',
+										justifyContent: 'center'
+									}}
+								>
+									<Image
+										source={{ uri: imageUri }}
+										style={{ width: '100%', height: containerWidth }}
+									/>
+								</View>
+							)}
+							<View
+								style={{
+									flex: 1,
+									flexDirection: 'row',
+									justifyContent: 'space-between',
+									paddingHorizontal: 24
+								}}
+							>
+								<TouchableOpacity
+									onPress={pickImage}
+									disabled={isSubmitting}
+									style={{ marginTop: 20, marginBottom: 6 }}
+								>
+									<View
+										style={{
+											flex: 1,
+											alignSelf: 'center'
+										}}
+									>
+										<Image
+											source={require('../../assets/images/home-news-loadmore.png')}
+											style={{ width: 80, height: 40 }}
+										/>
+										<Button
+											title="Add Image"
+											onPress={pickImage}
+											buttonStyle={{ padding: 0, backgroundColor: Colors.primaryColor }}
+											inputStyle={{ color: 'white' }}
+											titleStyle={{ fontSize: 14 }}
+										/>
+									</View>
+								</TouchableOpacity>
+								<TouchableOpacity
+									onPress={handleSubmit}
+									disabled={isSubmitting}
+									style={{ marginTop: 20, marginBottom: 6 }}
+								>
+									<View
+										style={{
+											flex: 1,
+											alignSelf: 'center'
+										}}
+									>
+										<Image
+											source={require('../../assets/images/home-news-loadmore.png')}
+											style={{ width: 80, height: 40 }}
+										/>
+										<Button
+											title="Submit"
+											onPress={handleSubmit}
+											buttonStyle={{ padding: 0, backgroundColor: Colors.primaryColor }}
+											inputStyle={{ color: 'white' }}
+											titleStyle={{ fontSize: 14 }}
+										/>
+									</View>
+								</TouchableOpacity>
+							</View>
+						</View>
+					</ScrollView>
+				</KeyboardAvoidingView>
+			</View>
 		</View>
 	);
 };
 
-CreatePost.navigationOptions = (props) => {
-	return {
-		title: props.navigation.getParam('originalPost') ? 'Edit' : 'Create'
-	};
-};
+CreatePost.navigationOptions = (props) => ({
+	headerShown: false
+});
 
 const styles = StyleSheet.create({});
 

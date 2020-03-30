@@ -1,6 +1,6 @@
 import React, { Component, useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Text, View, Image, KeyboardAvoidingView, Alert } from 'react-native';
-import { Input, Button } from 'react-native-elements';
+import { ScrollView, StyleSheet, Text, View, Image, KeyboardAvoidingView, Alert, TouchableOpacity } from 'react-native';
+import { Input, Button, Divider } from 'react-native-elements';
 import { Header } from 'react-navigation-stack';
 import { uploadToS3 } from '../../helpers/uploadToS3';
 import * as ImagePicker from 'expo-image-picker';
@@ -10,6 +10,8 @@ import CacheImage from '../../components/CacheImage';
 import { connect } from 'react-redux';
 import { createGallery, updateGallery } from '../../Services/gallery';
 import Config from '../../config';
+import { vectorIcon } from '../../Utils/Icon';
+import Colors from '../../constants/Colors';
 
 class CreateGallery extends Component {
 	original = this.props.navigation.getParam('originalGallery');
@@ -29,7 +31,8 @@ class CreateGallery extends Component {
 	}
 
 	static navigationOptions = ({ navigation, screenProps }) => ({
-		title: navigation.getParam('originalGallery') ? 'Edit' : 'New Photo'
+		// title: navigation.getParam('originalGallery') ? 'Edit' : 'New Photo'
+		headerShown: false
 	});
 
 	getPermissionAsync = async () => {
@@ -62,7 +65,7 @@ class CreateGallery extends Component {
 	};
 
 	handleSubmit = async () => {
-		const { imageUri, imageName, imageType, description } = this.state;
+		const { imageUri, imageName, imageType, description, isSubmitting } = this.state;
 		const { currentDBUser } = this.props;
 
 		if (!this.original && !imageName) {
@@ -82,6 +85,10 @@ class CreateGallery extends Component {
 				}
 			);
 
+			return;
+		}
+
+		if (isSubmitting) {
 			return;
 		}
 
@@ -136,100 +143,175 @@ class CreateGallery extends Component {
 	render() {
 		const { description, isSubmitting, imageUri, containerWidth } = this.state;
 		return (
-			<View
-				style={{
-					padding: 20,
-					flex: 1,
-					flexDirection: 'column',
-					alignItems: 'center',
-					alignItems: 'stretch'
-				}}
-			>
-				<KeyboardAvoidingView
-					style={{ flex: 1 }}
-					behavior="height"
-					keyboardVerticalOffset={Constants.platform.ios ? Header.HEIGHT : Header.HEIGHT + 50}
+			<View style={{ flex: 1 }}>
+				<View
+					style={{
+						flex: 1,
+						flexDirection: 'row',
+						marginTop: 52,
+						alignItems: 'center',
+						paddingHorizontal: 14,
+						maxHeight: 40
+					}}
 				>
-					<ScrollView contentContainerStyle={{}}>
-						<View
-							ref={(el) => (this.containerRef = el)}
-							onLayout={() => {
-								if (this.containerRef) {
-									this.containerRef.measure((x, y, width, height, pageX, pageY) => {
-										this.setState({ containerWidth: width });
-									});
-								}
-							}}
-						>
-							{imageUri && (
-								<View
+					<TouchableOpacity onPress={() => props.navigation.goBack()}>
+						<View style={{ top: 2 }}>
+							{vectorIcon('Ionicons', 'ios-arrow-back', 40, Colors.primaryColor)}
+						</View>
+					</TouchableOpacity>
+					<View style={{ flex: 1 }}>
+						<View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
+							<View style={{ marginRight: 25 }}>
+								<Text
 									style={{
-										marginBottom: 10,
-										flex: 1,
-										flexDirection: 'row',
-										justifyContent: 'center'
+										color: 'black',
+										fontWeight: 'bold',
+										fontSize: 20
 									}}
 								>
-									<Image
-										source={{ uri: imageUri }}
-										style={{ width: '100%', height: containerWidth }}
+									{this.original ? 'Update my post' : 'Add a photo'}
+								</Text>
+							</View>
+						</View>
+					</View>
+				</View>
+				<View style={{ marginBottom: 10, marginTop: 6 }}>
+					<Divider style={{ height: 1.5, backgroundColor: Colors.primaryColor }} />
+				</View>
+				<View
+					style={{
+						padding: 20,
+						flex: 1,
+						flexDirection: 'column',
+						alignItems: 'center',
+						alignItems: 'stretch'
+					}}
+				>
+					<KeyboardAvoidingView
+						style={{ flex: 1 }}
+						behavior="height"
+						keyboardVerticalOffset={Constants.platform.ios ? Header.HEIGHT : Header.HEIGHT + 50}
+					>
+						<ScrollView contentContainerStyle={{}}>
+							<View
+								ref={(el) => (this.containerRef = el)}
+								onLayout={() => {
+									if (this.containerRef) {
+										this.containerRef.measure((x, y, width, height, pageX, pageY) => {
+											this.setState({ containerWidth: width });
+										});
+									}
+								}}
+							>
+								{imageUri && (
+									<View
+										style={{
+											marginBottom: 10,
+											flex: 1,
+											flexDirection: 'row',
+											justifyContent: 'center'
+										}}
+									>
+										<Image
+											source={{ uri: imageUri }}
+											style={{ width: '100%', height: containerWidth }}
+										/>
+									</View>
+								)}
+								<View style={{ marginBottom: 14 }}>
+									<Input
+										placeholder="Description"
+										value={description}
+										multiline
+										numberOfLines={5}
+										containerStyle={{
+											height: 140,
+											padding: 0,
+											marginBottom: 0,
+											borderWidth: Constants.platform.ios ? 0.3 : 0.1,
+											elevation: 2
+										}}
+										inputContainerStyle={{
+											borderBottomColor: 'transparent',
+											borderBottomWidth: 0
+										}}
+										inputStyle={{
+											textAlignVertical: 'top',
+											paddingVertical: 4,
+											fontSize: 14,
+											alignSelf: 'center'
+										}}
+										onChangeText={(text) => this.setState({ description: text })}
 									/>
 								</View>
-							)}
-							<View style={{ borderWidth: 1, marginBottom: 14 }}>
-								<Input
-									placeholder="Description"
-									value={description}
-									multiline
-									numberOfLines={5}
-									containerStyle={{
-										padding: 0,
-										marginBottom: 0
-									}}
-									inputContainerStyle={{
-										borderBottomColor: 'transparent',
-										borderBottomWidth: 0
-									}}
-									inputStyle={{
-										textAlignVertical: 'top',
-										paddingVertical: 4,
-										fontSize: 14,
-										alignSelf: 'center'
-									}}
-									onChangeText={(text) => this.setState({ description: text })}
-								/>
 							</View>
 							<View
 								style={{
 									flex: 1,
 									flexDirection: 'row',
 									justifyContent: 'space-between',
-									paddingHorizontal: 15
+									paddingHorizontal: 24
 								}}
 							>
-								<Button
-									titleStyle={{ marginHorizontal: 25 }}
-									title="Change Image"
+								<TouchableOpacity
 									onPress={this.pickImage}
 									disabled={isSubmitting}
-								/>
-								<Button
-									titleStyle={{ paddingHorizontal: 25 }}
-									title="Submit"
+									style={{ marginTop: 20, marginBottom: 6 }}
+								>
+									<View
+										style={{
+											flex: 1,
+											alignSelf: 'center'
+										}}
+									>
+										<Image
+											source={require('../../assets/images/home-news-loadmore.png')}
+											style={{ width: 80, height: 40 }}
+										/>
+										<Button
+											title="Add Image"
+											onPress={this.pickImage}
+											buttonStyle={{ padding: 0, backgroundColor: Colors.primaryColor }}
+											inputStyle={{ color: 'white' }}
+											titleStyle={{ fontSize: 14 }}
+										/>
+									</View>
+								</TouchableOpacity>
+								<TouchableOpacity
 									onPress={this.handleSubmit}
 									disabled={isSubmitting}
-								/>
+									style={{ marginTop: 20, marginBottom: 6 }}
+								>
+									<View
+										style={{
+											flex: 1,
+											alignSelf: 'center'
+										}}
+									>
+										<Image
+											source={require('../../assets/images/home-news-loadmore.png')}
+											style={{ width: 80, height: 40 }}
+										/>
+										<Button
+											title="Submit"
+											onPress={this.handleSubmit}
+											buttonStyle={{ padding: 0, backgroundColor: Colors.primaryColor }}
+											inputStyle={{ color: 'white' }}
+											titleStyle={{ fontSize: 14 }}
+										/>
+									</View>
+								</TouchableOpacity>
 							</View>
-						</View>
-						{this.props.navigation.getParam('originalGallery') && (
-							<View style={{ marginTop: 10 }}>
-								<Text style={{ fontSize: 11 }}>
-									** Please restart the app after if it is not updated.
-								</Text>
-							</View>
-						)}
-					</ScrollView>
-				</KeyboardAvoidingView>
+							{this.props.navigation.getParam('originalGallery') && (
+								<View style={{ marginTop: 10 }}>
+									<Text style={{ fontSize: 11 }}>
+										** Please restart the app after if it is not updated.
+									</Text>
+								</View>
+							)}
+						</ScrollView>
+					</KeyboardAvoidingView>
+				</View>
 			</View>
 		);
 	}
