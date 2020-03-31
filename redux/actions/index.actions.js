@@ -24,6 +24,7 @@ export const FETCH_USER_TRADE_POSTS = 'FETCH_USER_TRADE_POSTS';
 // others
 export const FETCH_NEWS = 'FETCH_NEWS';
 export const SET_CURRENT_LOCATION = 'SET_CURRENT_LOCATION';
+export const TRIGGER_KEYBOARD = 'TRIGGER_KEYBOARD';
 
 // gallery
 export const FETCH_GALLERY = 'FETCH_GALLERY';

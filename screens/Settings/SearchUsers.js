@@ -4,6 +4,7 @@ import { SearchBar, Text, Card, Button, Image, Divider } from 'react-native-elem
 import UserInfoModal from '../../components/UserInfoModal';
 import { getUsers } from '../../Services/users';
 import CacheImage from '../../components/CacheImage';
+import Colors from '../../constants/Colors';
 
 const SearchUsers = (props) => {
 	const [ searchTerm, setSearchTerm ] = useState('');
@@ -62,39 +63,46 @@ const SearchUsers = (props) => {
 	};
 
 	return (
-		<View style={{ padding: 5, flex: 1, flexDirection: 'column', alignItems: 'center' }}>
+		<View style={{ padding: 10, flex: 1, flexDirection: 'column', alignItems: 'center' }}>
 			<View
 				style={{
-					marginBottom: 6,
-					padding: 6,
-					backgroundColor: 'grey',
+					marginBottom: 14,
+					padding: 0,
 					alignSelf: 'stretch'
 				}}
 			>
 				<View style={{}}>
 					<SearchBar
 						containerStyle={{
-							backgroundColor: 'white',
+							backgroundColor: '#f2ead5',
 							borderTopWidth: 0,
-							borderBottomWidth: 0
+							borderBottomWidth: 0,
+							elevation: 2,
+							borderWidth: 0,
+							height: 44
 						}}
-						inputContainerStyle={{ backgroundColor: 'white' }}
+						inputContainerStyle={{ backgroundColor: '#f2ead5', height: 30 }}
+						inputStyle={{ fontSize: 16 }}
 						placeholder="Search is case-sensitive"
 						onChangeText={handleSearch}
 						value={searchTerm}
 					/>
+
 					<Button
 						title="search"
 						disabled={isFetching}
 						onPress={handleSearchSubmit}
-						buttonStyle={{ paddingVertical: 4 }}
+						buttonStyle={{
+							paddingVertical: 4,
+							width: 150,
+							backgroundColor: Colors.primaryColor,
+							borderRadius: 6
+						}}
+						containerStyle={{ alignSelf: 'center', marginTop: 6 }}
 					/>
 				</View>
 			</View>
-			<ScrollView
-				style={{ alignSelf: 'stretch', paddingTop: 0 }}
-				contentContainerStyle={{ padding: 8, backgroundColor: 'grey' }}
-			>
+			<ScrollView style={{ alignSelf: 'stretch', paddingTop: 0 }} contentContainerStyle={{ padding: 0 }}>
 				<View style={{}}>
 					<View>
 						<Card
@@ -102,7 +110,7 @@ const SearchUsers = (props) => {
 							titleNumberOfLines={1}
 							titleStyle={{}}
 							dividerStyle={{ paddingTop: 0 }}
-							containerStyle={{ margin: 0, padding: 5, borderRadius: 8 }}
+							containerStyle={{ margin: 0, padding: 5, borderRadius: 8, borderWidth: 1, elevation: 2 }}
 						>
 							{users.map((user, i) => {
 								return (

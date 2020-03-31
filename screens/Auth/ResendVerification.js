@@ -42,7 +42,6 @@ const ResendVerification = (props) => {
 			setIsSending(true);
 
 			const existingUser = await getUsers({ email });
-			console.log(existingUser);
 
 			if (existingUser.length > 0) {
 				if (!existingUser[0].neverLoggedIn) {
@@ -56,8 +55,6 @@ const ResendVerification = (props) => {
 				}
 
 				const res = await Auth.resendSignUp(email);
-
-				console.log('resendVerificationRes: ', res);
 
 				setIsSending(false);
 

@@ -36,19 +36,6 @@ class UserGallery extends Component {
 
 	static navigationOptions = ({ navigation, screenProps }) => {
 		return {
-			// title: navigation.getParam('galleryUser') ? navigation.getParam('galleryUser').username : '',
-			// headerRight: (
-			// 	<HeaderRightComponent
-			// 		handleRefreshBtn={navigation.getParam('refresh')}
-			// 		handleCreateBtn={() => {
-			// 			navigation.navigate('CreateGallery', {
-			// 				onCreateBack: navigation.getParam('onCreateBack')
-			// 			});
-			// 		}}
-			// 	/>
-			// ),
-			// headerStyle: { backgroundColor: 'brown' },
-			// headerTitleStyle: { color: 'blue' }
 			headerShown: false
 		};
 	};
@@ -67,9 +54,7 @@ class UserGallery extends Component {
 
 		this.setState({ photos: this.props.userGallery });
 
-		setTimeout(() => {
-			this.setState({ isFetching: false });
-		}, 1500);
+		this.setState({ isFetching: false });
 	};
 
 	onCreateBack = async () => {
@@ -93,9 +78,7 @@ class UserGallery extends Component {
 
 		// this.setState({ currentPage: this.state.currentPage + 1 });
 
-		setTimeout(() => {
-			this.setState({ isLoadingMore: false, currentPage: this.state.currentPage + 1 });
-		}, 1000);
+		this.setState({ isLoadingMore: false, currentPage: this.state.currentPage + 1 });
 	};
 
 	render() {
@@ -120,7 +103,11 @@ class UserGallery extends Component {
 						justifyContent: 'space-between'
 					}}
 				>
-					<View style={{ top: 2 }}>{vectorIcon('Ionicons', 'md-photos', 30, Colors.primaryColor)}</View>
+					<TouchableOpacity onPress={() => this.props.navigation.goBack()}>
+						<View style={{ top: 2, paddingRight: 34 }}>
+							{vectorIcon('Ionicons', 'ios-arrow-back', 40, Colors.primaryColor)}
+						</View>
+					</TouchableOpacity>
 					<View style={{}}>
 						<View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
 							<Text style={{ fontSize: 20, fontWeight: 'bold', color: 'black' }}>
@@ -143,15 +130,6 @@ class UserGallery extends Component {
 								style={{ opacity: isFetching ? 0.2 : 1 }}
 							>
 								<View style={{ marginRight: 20 }}>{vectorIcon('FrontAwesome', 'refresh', 26)}</View>
-							</TouchableOpacity>
-							<TouchableOpacity
-								onPress={() => {
-									this.props.navigation.navigate('CreateGallery', {
-										onCreateBack: this.onCreateBack
-									});
-								}}
-							>
-								<View style={{ marginRight: 25 }}>{vectorIcon('Feather', 'plus-circle', 26)}</View>
 							</TouchableOpacity>
 						</View>
 					</View>
@@ -190,28 +168,6 @@ class UserGallery extends Component {
 	}
 }
 
-const HeaderRightComponent = (props) => {
-	const [ isDisabled, setIsDisabled ] = useState(false);
-	return (
-		<View style={{ flex: 1, flexDirection: 'row' }}>
-			<TouchableOpacity
-				onPress={async () => {
-					if (!isDisabled) {
-						setIsDisabled(true);
-						await props.handleRefreshBtn();
-					}
-					setTimeout(() => {
-						setIsDisabled(false);
-					}, 1500);
-				}}
-				disabled={isDisabled}
-				style={{ opacity: isDisabled ? 0.2 : 1 }}
-			>
-				<View style={{ marginRight: 20 }}>{vectorIcon('FrontAwesome', 'refresh', 26)}</View>
-			</TouchableOpacity>
-		</View>
-	);
-};
 const mapStateToProps = ({ auth, gallery }) => ({
 	currentDBUser: auth.currentDBUser,
 	userGallery: gallery.userGallery

@@ -7,6 +7,7 @@ import { setAuthStatus, setCognitoUser, setDBUser } from '../../redux/actions/au
 import { fetchUserInfo, getUsers, updateUser, acceptFriend, requestFriend } from '../../Services/users';
 import { formatUsersIdsParams } from '../../Utils/FormatParams';
 import _ from 'lodash';
+import Colors from '../../constants/Colors';
 
 const Friends = (props) => {
 	const [ searchTerm, setSearchTerm ] = useState('');
@@ -179,20 +180,25 @@ const Friends = (props) => {
 	}
 
 	return (
-		<View style={{ padding: 5, flex: 1, flexDirection: 'column', alignItems: 'center' }}>
-			<View style={{ marginBottom: 10, padding: 10, backgroundColor: 'grey', alignSelf: 'stretch' }}>
+		<View style={{ padding: 10, flex: 1, flexDirection: 'column', alignItems: 'center' }}>
+			<View style={{ marginBottom: 10, padding: 0, backgroundColor: '#f2ead5', alignSelf: 'stretch' }}>
 				<SearchBar
-					containerStyle={{ backgroundColor: 'white', borderTopWidth: 0, borderBottomWidth: 0 }}
-					inputContainerStyle={{ backgroundColor: 'white' }}
+					containerStyle={{
+						backgroundColor: '#f2ead5',
+						borderTopWidth: 0,
+						borderBottomWidth: 0,
+						elevation: 2,
+						borderWidth: 0,
+						height: 44
+					}}
+					inputContainerStyle={{ backgroundColor: '#f2ead5', height: 30 }}
+					inputStyle={{ fontSize: 16 }}
 					placeholder="Search friends.."
 					onChangeText={handleSearch}
 					value={searchTerm}
 				/>
 			</View>
-			<ScrollView
-				style={{ alignSelf: 'stretch', paddingTop: 0 }}
-				contentContainerStyle={{ padding: 8, backgroundColor: 'grey' }}
-			>
+			<ScrollView style={{ alignSelf: 'stretch', paddingTop: 0 }} contentContainerStyle={{ padding: 0 }}>
 				{renderEmpty()}
 				{pendingUsers.length > 0 && (
 					<View style={{ marginBottom: 8 }}>

@@ -198,7 +198,6 @@ class Board extends Component {
 		newList = newList.filter((p) => {
 			let found = 0;
 			_.forIn(searchObj, function(value, key) {
-				console.log('key searching: ' + key, p[key].toLowerCase(), value.toLowerCase());
 				if (_.includes(p[key].toLowerCase(), value.toLowerCase())) {
 					found |= 1;
 				} else {
@@ -229,9 +228,7 @@ class Board extends Component {
 
 		this.setState({ currentPage: this.state.currentPage + 1 });
 
-		setTimeout(() => {
-			this.setState({ isFetching: false });
-		}, 1500);
+		this.setState({ isFetching: false });
 	}
 
 	handleRefreshBtn = async () => {

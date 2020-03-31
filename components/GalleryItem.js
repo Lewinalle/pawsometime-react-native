@@ -10,6 +10,7 @@ import { deleteGallery } from '../Services/gallery';
 import { fetchUserInfo } from '../Services/users';
 import UserInfoModal from '../components/UserInfoModal';
 import _ from 'lodash';
+import ActivityIndicator from '../components/ActivityIndicator';
 
 class GalleryItem extends Component {
 	state = {
@@ -49,12 +50,8 @@ class GalleryItem extends Component {
 			return;
 		}
 
-		if (userId === itemUser.id) {
-			this.setState({ modalUser: itemUser, showUserModal: true });
-		} else {
-			const user = await fetchUserInfo(userId);
-			this.setState({ modalUser: user, showUserModal: true });
-		}
+		const user = await fetchUserInfo(userId);
+		this.setState({ modalUser: user, showUserModal: true });
 	};
 
 	handleLike = async () => {
@@ -120,9 +117,7 @@ class GalleryItem extends Component {
 				{
 					text: 'OK',
 					onPress: async () => {
-						setTimeout(() => {
-							this.setState({ isSubmitting: false });
-						}, 1000);
+						this.setState({ isSubmitting: false });
 					}
 				}
 			],
@@ -229,7 +224,7 @@ class GalleryItem extends Component {
 
 	render() {
 		const { currentDBUser = {}, isFirst, itemUser } = this.props;
-		const { item, showComments, comment, modalUser, showUserModal } = this.state;
+		const { item, showComments, comment, modalUser, showUserModal, isSubmitting } = this.state;
 
 		const dateTime = new Date(item.createdAt);
 		const hasUserLiked = _.includes(item.likes, currentDBUser.id);
@@ -248,6 +243,7 @@ class GalleryItem extends Component {
 						paddingTop: isFirst ? 8 : 16
 					}}
 				>
+					{isSubmitting && <ActivityIndicator />}
 					<TouchableOpacity onPress={() => this.handleModalOpen(itemUser.id)}>
 						<View
 							style={{

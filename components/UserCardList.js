@@ -152,7 +152,13 @@ const UserCardList = (props) => {
 				titleNumberOfLines={1}
 				titleStyle={{}}
 				dividerStyle={{ paddingTop: 0 }}
-				containerStyle={{ margin: 0, padding: 5, borderRadius: 8 }}
+				containerStyle={{
+					margin: 0,
+					padding: 5,
+					borderRadius: 8,
+					elevation: 2,
+					borderWidth: 1
+				}}
 			>
 				{users.map((user, i) => {
 					return (

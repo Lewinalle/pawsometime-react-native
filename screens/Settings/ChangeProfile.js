@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { ScrollView, StyleSheet, View, KeyboardAvoidingView, Alert } from 'react-native';
+import { ScrollView, StyleSheet, View, KeyboardAvoidingView, Alert, TouchableOpacity } from 'react-native';
 import { Text, Button, Image, Input } from 'react-native-elements';
 import { Header } from 'react-navigation-stack';
 import { connect } from 'react-redux';
@@ -12,6 +12,10 @@ import * as ImagePicker from 'expo-image-picker';
 import Constants from 'expo-constants';
 import Config from '../../config';
 import * as Permissions from 'expo-permissions';
+import Colors from '../../constants/Colors';
+import Axios from 'axios';
+import { sleep } from '../../Utils/Sleep';
+import { RefreshControl } from 'react-native';
 
 const ChangeProfile = (props) => {
 	const [ imageUri, setImageUri ] = useState(null);
@@ -57,6 +61,10 @@ const ChangeProfile = (props) => {
 	};
 
 	const handleSubmit = async () => {
+		if (isUpdating) {
+			return;
+		}
+
 		try {
 			setIsUpdating(true);
 
@@ -65,17 +73,31 @@ const ChangeProfile = (props) => {
 			if (imageUri) {
 				await uploadToS3(imageUri, imageType, imageName);
 			}
-			if (newDescription) {
-				let body = {
-					description: newDescription
-				};
-				if (imageUri) {
-					body.avatar = `${Config.S3_BASE_URL}/${imageName}`;
-				}
-				const newUser = await updateUser(props.currentDBUser.id, body);
 
-				await props.setDBUser(newUser);
+			let isUploaded = false;
+			let count = 0;
+			while (!isUploaded && count < 10) {
+				try {
+					isUploaded = await Axios({
+						method: 'GET',
+						url: `${Config.S3_BASE_URL}/${imageName}`
+					});
+				} catch (err) {
+					count = count + 1;
+					await sleep(800);
+				}
 			}
+
+			let body = {
+				description: newDescription
+			};
+			if (imageUri) {
+				body.avatar = `${Config.S3_BASE_URL}/${imageName}`;
+			}
+
+			const newUser = await updateUser(props.currentDBUser.id, body);
+
+			await props.setDBUser(newUser);
 
 			Alert.alert(
 				'Updated!',
@@ -85,6 +107,7 @@ const ChangeProfile = (props) => {
 						text: 'OK',
 						onPress: async () => {
 							setIsUpdating(false);
+							props.navigation.navigate('Settings');
 						}
 					}
 				],
@@ -112,7 +135,10 @@ const ChangeProfile = (props) => {
 				behavior="height"
 				keyboardVerticalOffset={Constants.platform.ios ? Header.HEIGHT : Header.HEIGHT + 50}
 			>
-				<ScrollView contentContainerStyle={{ padding: 20 }}>
+				<ScrollView
+					contentContainerStyle={{ padding: 20 }}
+					refreshControl={<RefreshControl refreshing={isUpdating} onRefresh={() => {}} />}
+				>
 					<View
 						ref={containerRef}
 						style={{ alignSelf: 'stretch' }}
@@ -152,8 +178,8 @@ const ChangeProfile = (props) => {
 								containerStyle={{
 									paddingHorizontal: 20,
 									paddingVertical: 10,
-									borderWidth: 1,
-									borderColor: 'grey'
+									borderWidth: Constants.platform.ios ? 0.3 : 0.1,
+									elevation: 2
 								}}
 								inputContainerStyle={{
 									borderBottomColor: 'transparent',
@@ -163,9 +189,62 @@ const ChangeProfile = (props) => {
 								onChangeText={(text) => setNewDescription(text)}
 							/>
 						</View>
-						<View style={{ marginTop: 20, flex: 1, flexDirection: 'row', justifyContent: 'space-evenly' }}>
-							<Button title="Choose New Picture" onPress={pickImage} disabled={isUpdating} />
-							<Button title="Update" onPress={() => handleSubmit()} disabled={isUpdating} />
+						<View
+							style={{
+								flex: 1,
+								flexDirection: 'row',
+								justifyContent: 'space-between',
+								paddingHorizontal: 24
+							}}
+						>
+							<TouchableOpacity
+								onPress={pickImage}
+								disabled={isUpdating}
+								style={{ marginTop: 20, marginBottom: 6 }}
+							>
+								<View
+									style={{
+										flex: 1,
+										alignSelf: 'center'
+									}}
+								>
+									<Image
+										source={require('../../assets/images/home-news-loadmore.png')}
+										style={{ width: 80, height: 40 }}
+									/>
+									<Button
+										title="Add Image"
+										onPress={pickImage}
+										buttonStyle={{ padding: 0, backgroundColor: Colors.primaryColor }}
+										inputStyle={{ color: 'white' }}
+										titleStyle={{ fontSize: 14 }}
+									/>
+								</View>
+							</TouchableOpacity>
+							<TouchableOpacity
+								onPress={handleSubmit}
+								disabled={isUpdating}
+								style={{ marginTop: 20, marginBottom: 6 }}
+							>
+								<View
+									style={{
+										flex: 1,
+										alignSelf: 'center'
+									}}
+								>
+									<Image
+										source={require('../../assets/images/home-news-loadmore.png')}
+										style={{ width: 80, height: 40 }}
+									/>
+									<Button
+										title="Submit"
+										onPress={handleSubmit}
+										buttonStyle={{ padding: 0, backgroundColor: Colors.primaryColor }}
+										inputStyle={{ color: 'white' }}
+										titleStyle={{ fontSize: 14 }}
+									/>
+								</View>
+							</TouchableOpacity>
 						</View>
 					</View>
 				</ScrollView>

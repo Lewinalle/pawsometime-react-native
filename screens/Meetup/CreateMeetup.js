@@ -49,6 +49,7 @@ const CreateMeetup = (props) => {
 	const [ searchTerm, setSearchTerm ] = useState('');
 	const [ searchResult, setSearchResult ] = useState([]);
 	const [ isPrivate, setIsPrivate ] = useState(original ? original.isPrivate : false);
+	const [ isMultiTouch, setIsMultiTouch ] = useState(false);
 
 	const mapRef = useRef(null);
 	const containerRef = useRef(null);
@@ -186,6 +187,19 @@ const CreateMeetup = (props) => {
 		}
 	};
 
+	const onStartShouldSetResponder = (e) => {
+		if (e.nativeEvent.touches.length > 1) {
+			setIsMultiTouch(true);
+			return true;
+		}
+		setIsMultiTouch(false);
+		return false;
+	};
+
+	const onResponderRelease = (e) => {
+		setIsMultiTouch(false);
+	};
+
 	return (
 		<View style={{ flex: 1 }}>
 			<View
@@ -199,7 +213,9 @@ const CreateMeetup = (props) => {
 				}}
 			>
 				<TouchableOpacity onPress={() => props.navigation.goBack()}>
-					<View style={{ top: 2 }}>{vectorIcon('Ionicons', 'ios-arrow-back', 40, Colors.primaryColor)}</View>
+					<View style={{ top: 2, paddingRight: 34 }}>
+						{vectorIcon('Ionicons', 'ios-arrow-back', 40, Colors.primaryColor)}
+					</View>
 				</TouchableOpacity>
 				<View style={{ flex: 1 }}>
 					<View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
@@ -298,33 +314,51 @@ const CreateMeetup = (props) => {
 									onChangeText={(text) => setDescription(text)}
 								/>
 							</View>
-							<MapView
-								ref={mapRef}
-								style={{
-									width: containerWidth,
-									height: MAP_HEIGHT,
-									marginBottom: 10
-								}}
-								initialRegion={{
-									latitude: original ? original.latlon.lat : props.currentLocation.lat,
-									longitude: original ? original.latlon.lon : props.currentLocation.lon,
-									latitudeDelta: latDelta,
-									longitudeDelta: lonDelta
-								}}
-								onRegionChange={(region) => {
-									setLat(region.latitude);
-									setLon(region.longitude);
-									setLatDelta(region.latitudeDelta);
-									setLonDelta(region.longitudeDelta);
-								}}
+							<View
+								onStartShouldSetResponder={onStartShouldSetResponder}
+								onResponderRelease={onResponderRelease}
 							>
-								<Marker
-									coordinate={{
-										latitude: lat,
-										longitude: lon
+								<MapView
+									ref={mapRef}
+									style={{
+										width: containerWidth,
+										height: MAP_HEIGHT,
+										marginBottom: 10
 									}}
-								/>
-							</MapView>
+									initialRegion={{
+										latitude: original ? original.latlon.lat : props.currentLocation.lat,
+										longitude: original ? original.latlon.lon : props.currentLocation.lon,
+										latitudeDelta: latDelta,
+										longitudeDelta: lonDelta
+									}}
+									onRegionChange={(region) => {
+										setLat(region.latitude);
+										setLon(region.longitude);
+										setLatDelta(region.latitudeDelta);
+										setLonDelta(region.longitudeDelta);
+									}}
+									scrollEnabled={isMultiTouch}
+									pitchEnabled={false}
+								>
+									<Marker
+										coordinate={{
+											latitude: lat,
+											longitude: lon
+										}}
+									/>
+								</MapView>
+								<Text
+									style={{
+										textAlign: 'right',
+										marginRight: 4,
+										fontSize: 11,
+										color: 'grey',
+										bottom: 10
+									}}
+								>
+									Use two fingers to drag
+								</Text>
+							</View>
 							<View style={{ flex: 1, flexDirection: 'column', alignSelf: 'stretch' }}>
 								<View
 									style={{

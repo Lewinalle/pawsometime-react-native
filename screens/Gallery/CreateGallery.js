@@ -154,8 +154,8 @@ class CreateGallery extends Component {
 						maxHeight: 40
 					}}
 				>
-					<TouchableOpacity onPress={() => props.navigation.goBack()}>
-						<View style={{ top: 2 }}>
+					<TouchableOpacity onPress={() => this.props.navigation.goBack()}>
+						<View style={{ top: 2, paddingRight: 34 }}>
 							{vectorIcon('Ionicons', 'ios-arrow-back', 40, Colors.primaryColor)}
 						</View>
 					</TouchableOpacity>

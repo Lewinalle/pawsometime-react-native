@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Text, Image, ScrollView, View, StyleSheet, Modal, TouchableHighlight } from 'react-native';
 import { Overlay, Button } from 'react-native-elements';
+import Colors from '../constants/Colors';
 
 export const AddressSearchModal = (props) => {
 	const { showModal, closeModal, searchResult, handleAddressSelect } = props;
@@ -31,20 +32,31 @@ export const AddressSearchModal = (props) => {
 					padding: 10
 				}}
 			>
-				<View style={{ marginBottom: 10 }}>
-					<Text style={{ fontSize: 26, fontWeight: 'bold', textAlign: 'center' }} numberOfLines={2}>
+				<View style={{ marginBottom: 8, paddingVertical: 10 }}>
+					<Text style={{ fontSize: 16, fontWeight: 'bold', textAlign: 'center' }} numberOfLines={2}>
 						Pick address
 					</Text>
-					{searchResult.map((item, index) => {
-						return (
-							<View key={index}>
-								<Button title={item.title} type="outline" onPress={() => handleAddressClick(item)} />
-							</View>
-						);
-					})}
 				</View>
-				<View>
-					<Text>Warning: Postal Code could not be accurate.</Text>
+				{searchResult.map((item, index) => {
+					return (
+						<Button
+							key={index}
+							title={item.title}
+							titleStyle={{ fontSize: 14, color: Colors.primaryColor }}
+							containerStyle={{ padding: 0, margin: 6 }}
+							buttonStyle={{
+								padding: 4,
+								borderColor: Colors.primaryColor,
+								borderWidth: 1
+							}}
+							type="outline"
+							onPress={() => handleAddressClick(item)}
+							raised
+						/>
+					);
+				})}
+				<View style={{ marginVertical: 10, padding: 4 }}>
+					<Text style={{ textAlign: 'center' }}>Warning: Postal Code could not be accurate.</Text>
 				</View>
 			</View>
 		</Overlay>

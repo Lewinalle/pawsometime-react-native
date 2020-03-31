@@ -10,6 +10,7 @@ import {
 	KeyboardAvoidingView
 } from 'react-native';
 import { Overlay, Button } from 'react-native-elements';
+import Colors from '../constants/Colors';
 class CitySearchModal extends Component {
 	render() {
 		const { showModal, closeModal, searchResult = [], handleCitySelect } = this.props;
@@ -27,7 +28,7 @@ class CitySearchModal extends Component {
 				}}
 				overlayStyle={{ padding: 0, borderRadius: 4 }}
 			>
-				<KeyboardAvoidingView style={{ flex: 1 }} behavior="height" keyboardVerticalOffset={200}>
+				<ScrollView>
 					<View
 						style={{
 							flex: 1,
@@ -43,7 +44,7 @@ class CitySearchModal extends Component {
 								alignSelf: 'stretch'
 							}}
 						>
-							<View style={{ marginBottom: 10 }}>
+							<View style={{ marginBottom: 6, paddingVertical: 10 }}>
 								<Text
 									style={{ fontSize: 16, fontWeight: 'bold', textAlign: 'center' }}
 									numberOfLines={2}
@@ -57,18 +58,23 @@ class CitySearchModal extends Component {
 										<Button
 											key={index}
 											title={`${city.name}, ${city.region}, ${city.country}`}
-											titleStyle={{ fontSize: 14 }}
-											containerStyle={{ padding: 0, marginBottom: 6 }}
-											buttonStyle={{ padding: 4 }}
+											titleStyle={{ fontSize: 14, color: Colors.primaryColor }}
+											containerStyle={{ padding: 0, margin: 6 }}
+											buttonStyle={{
+												padding: 4,
+												borderColor: Colors.primaryColor,
+												borderWidth: 1
+											}}
 											type="outline"
 											onPress={() => handleCitySelect(city)}
+											raised
 										/>
 									);
 								})}
 							</View>
 						</View>
 					</View>
-				</KeyboardAvoidingView>
+				</ScrollView>
 			</Overlay>
 		);
 	}

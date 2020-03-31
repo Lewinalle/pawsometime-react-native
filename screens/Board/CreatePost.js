@@ -8,9 +8,10 @@ import {
 	TextInput,
 	Picker,
 	Alert,
-	TouchableOpacity
+	TouchableOpacity,
+	Image
 } from 'react-native';
-import { Input, Button, ButtonGroup, Image, Divider } from 'react-native-elements';
+import { Input, Button, ButtonGroup, Divider } from 'react-native-elements';
 import { Header } from 'react-navigation-stack';
 import { uploadToS3 } from '../../helpers/uploadToS3';
 import * as ImagePicker from 'expo-image-picker';
@@ -22,6 +23,7 @@ import Config from '../../config';
 import { fetchPosts } from '../../redux/actions/posts.actions';
 import Colors from '../../constants/Colors';
 import { vectorIcon } from '../../Utils/Icon';
+import KeyboardSpacer from 'react-native-keyboard-spacer';
 
 const boardTypeNames = [ 'General', 'Questions', 'Tips', 'Trade' ];
 
@@ -150,6 +152,8 @@ const CreatePost = (props) => {
 		props.navigation.navigate('Board');
 	};
 
+	console.log(imageUri);
+
 	return (
 		<View style={{ flex: 1 }}>
 			<View
@@ -163,7 +167,9 @@ const CreatePost = (props) => {
 				}}
 			>
 				<TouchableOpacity onPress={() => props.navigation.goBack()}>
-					<View style={{ top: 2 }}>{vectorIcon('Ionicons', 'ios-arrow-back', 40, Colors.primaryColor)}</View>
+					<View style={{ top: 2, paddingRight: 34 }}>
+						{vectorIcon('Ionicons', 'ios-arrow-back', 40, Colors.primaryColor)}
+					</View>
 				</TouchableOpacity>
 				<View style={{ flex: 1 }}>
 					<View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
@@ -193,163 +199,155 @@ const CreatePost = (props) => {
 					alignItems: 'stretch'
 				}}
 			>
-				<KeyboardAvoidingView
-					style={{ flex: 1 }}
-					behavior="height"
-					keyboardVerticalOffset={Constants.platform.ios ? Header.HEIGHT : Header.HEIGHT + 50}
-				>
-					<ScrollView contentContainerStyle={{}}>
+				<ScrollView contentContainerStyle={{}}>
+					<View
+						ref={containerRef}
+						onLayout={() => {
+							if (containerRef.current) {
+								containerRef.current.measure((x, y, width, height, pageX, pageY) => {
+									setContainerWidth(width);
+								});
+							}
+						}}
+					>
+						<View style={{ marginBottom: 14 }}>
+							<ButtonGroup
+								onPress={pickType}
+								selectedIndex={boardTypes.findIndex((i) => i === type)}
+								buttons={boardTypeNames}
+								containerStyle={{
+									height: 40,
+									minWidth: 250,
+									marginTop: 0,
+									marginBottom: 0,
+									marginLeft: 0,
+									marginRight: 0,
+									borderWidth: 0
+								}}
+								textStyle={{ fontSize: 14 }}
+								selectedButtonStyle={{ backgroundColor: Colors.primaryColor }}
+							/>
+						</View>
+						<View style={{ alignSelf: 'stretch' }}>
+							<Input
+								placeholder="Title"
+								value={title}
+								label="TITLE"
+								labelStyle={{ fontSize: 12, marginBottom: 10 }}
+								blurOnSubmit
+								multiline
+								numberOfLines={2}
+								containerStyle={{
+									paddingHorizontal: 20,
+									paddingVertical: 10,
+									borderWidth: Constants.platform.ios ? 0.3 : 0.1,
+									elevation: 2
+								}}
+								inputContainerStyle={{
+									borderBottomColor: 'transparent',
+									borderBottomWidth: 0
+								}}
+								inputStyle={{ textAlignVertical: 'top' }}
+								onChangeText={(text) => setTitle(text)}
+							/>
+						</View>
+						<View style={{ marginVertical: 10, alignSelf: 'stretch' }}>
+							<Input
+								placeholder="Description"
+								value={description}
+								label="DESCRIPTION"
+								labelStyle={{ fontSize: 12, marginBottom: 10 }}
+								multiline
+								returnKeyType="none"
+								numberOfLines={10}
+								containerStyle={{
+									height: 285,
+									paddingHorizontal: 20,
+									paddingTop: 10,
+									paddingBottom: 30,
+									borderWidth: Constants.platform.ios ? 0.3 : 0.1,
+									elevation: 2
+								}}
+								inputContainerStyle={{
+									borderBottomColor: 'transparent',
+									borderBottomWidth: 0
+								}}
+								inputStyle={{ textAlignVertical: 'top' }}
+								onChangeText={(text) => setDescription(text)}
+							/>
+						</View>
+						{imageUri && (
+							<View
+								style={{
+									marginBottom: 15,
+									flex: 1,
+									flexDirection: 'row',
+									justifyContent: 'center'
+								}}
+							>
+								<Image source={{ uri: imageUri }} style={{ width: '100%', height: containerWidth }} />
+							</View>
+						)}
 						<View
-							ref={containerRef}
-							onLayout={() => {
-								if (containerRef.current) {
-									containerRef.current.measure((x, y, width, height, pageX, pageY) => {
-										setContainerWidth(width);
-									});
-								}
+							style={{
+								flex: 1,
+								flexDirection: 'row',
+								justifyContent: 'space-between',
+								paddingHorizontal: 24
 							}}
 						>
-							<View style={{ marginBottom: 14 }}>
-								<ButtonGroup
-									onPress={pickType}
-									selectedIndex={boardTypes.findIndex((i) => i === type)}
-									buttons={boardTypeNames}
-									containerStyle={{
-										height: 40,
-										minWidth: 250,
-										marginTop: 0,
-										marginBottom: 0,
-										marginLeft: 0,
-										marginRight: 0,
-										borderWidth: 0
-									}}
-									textStyle={{ fontSize: 14 }}
-									selectedButtonStyle={{ backgroundColor: Colors.primaryColor }}
-								/>
-							</View>
-							<View style={{ alignSelf: 'stretch' }}>
-								<Input
-									placeholder="Title"
-									value={title}
-									label="TITLE"
-									labelStyle={{ fontSize: 12, marginBottom: 10 }}
-									blurOnSubmit
-									multiline
-									numberOfLines={2}
-									containerStyle={{
-										paddingHorizontal: 20,
-										paddingVertical: 10,
-										borderWidth: Constants.platform.ios ? 0.3 : 0.1,
-										elevation: 2
-									}}
-									inputContainerStyle={{
-										borderBottomColor: 'transparent',
-										borderBottomWidth: 0
-									}}
-									inputStyle={{ textAlignVertical: 'top' }}
-									onChangeText={(text) => setTitle(text)}
-								/>
-							</View>
-							<View style={{ marginVertical: 10, alignSelf: 'stretch' }}>
-								<Input
-									placeholder="Description"
-									value={description}
-									label="DESCRIPTION"
-									labelStyle={{ fontSize: 12, marginBottom: 10 }}
-									multiline
-									returnKeyType="none"
-									numberOfLines={10}
-									containerStyle={{
-										height: 285,
-										paddingHorizontal: 20,
-										paddingTop: 10,
-										paddingBottom: 30,
-										borderWidth: Constants.platform.ios ? 0.3 : 0.1,
-										elevation: 2
-									}}
-									inputContainerStyle={{
-										borderBottomColor: 'transparent',
-										borderBottomWidth: 0
-									}}
-									inputStyle={{ textAlignVertical: 'top' }}
-									onChangeText={(text) => setDescription(text)}
-								/>
-							</View>
-							{imageUri && (
+							<TouchableOpacity
+								onPress={pickImage}
+								disabled={isSubmitting}
+								style={{ marginTop: 20, marginBottom: 6 }}
+							>
 								<View
 									style={{
-										marginBottom: 15,
 										flex: 1,
-										flexDirection: 'row',
-										justifyContent: 'center'
+										alignSelf: 'center'
 									}}
 								>
 									<Image
-										source={{ uri: imageUri }}
-										style={{ width: '100%', height: containerWidth }}
+										source={require('../../assets/images/home-news-loadmore.png')}
+										style={{ width: 80, height: 40 }}
+									/>
+									<Button
+										title="Add Image"
+										onPress={pickImage}
+										buttonStyle={{ padding: 0, backgroundColor: Colors.primaryColor }}
+										inputStyle={{ color: 'white' }}
+										titleStyle={{ fontSize: 14 }}
 									/>
 								</View>
-							)}
-							<View
-								style={{
-									flex: 1,
-									flexDirection: 'row',
-									justifyContent: 'space-between',
-									paddingHorizontal: 24
-								}}
+							</TouchableOpacity>
+							<TouchableOpacity
+								onPress={handleSubmit}
+								disabled={isSubmitting}
+								style={{ marginTop: 20, marginBottom: 6 }}
 							>
-								<TouchableOpacity
-									onPress={pickImage}
-									disabled={isSubmitting}
-									style={{ marginTop: 20, marginBottom: 6 }}
+								<View
+									style={{
+										flex: 1,
+										alignSelf: 'center'
+									}}
 								>
-									<View
-										style={{
-											flex: 1,
-											alignSelf: 'center'
-										}}
-									>
-										<Image
-											source={require('../../assets/images/home-news-loadmore.png')}
-											style={{ width: 80, height: 40 }}
-										/>
-										<Button
-											title="Add Image"
-											onPress={pickImage}
-											buttonStyle={{ padding: 0, backgroundColor: Colors.primaryColor }}
-											inputStyle={{ color: 'white' }}
-											titleStyle={{ fontSize: 14 }}
-										/>
-									</View>
-								</TouchableOpacity>
-								<TouchableOpacity
-									onPress={handleSubmit}
-									disabled={isSubmitting}
-									style={{ marginTop: 20, marginBottom: 6 }}
-								>
-									<View
-										style={{
-											flex: 1,
-											alignSelf: 'center'
-										}}
-									>
-										<Image
-											source={require('../../assets/images/home-news-loadmore.png')}
-											style={{ width: 80, height: 40 }}
-										/>
-										<Button
-											title="Submit"
-											onPress={handleSubmit}
-											buttonStyle={{ padding: 0, backgroundColor: Colors.primaryColor }}
-											inputStyle={{ color: 'white' }}
-											titleStyle={{ fontSize: 14 }}
-										/>
-									</View>
-								</TouchableOpacity>
-							</View>
+									<Image
+										source={require('../../assets/images/home-news-loadmore.png')}
+										style={{ width: 80, height: 40 }}
+									/>
+									<Button
+										title="Submit"
+										onPress={handleSubmit}
+										buttonStyle={{ padding: 0, backgroundColor: Colors.primaryColor }}
+										inputStyle={{ color: 'white' }}
+										titleStyle={{ fontSize: 14 }}
+									/>
+								</View>
+							</TouchableOpacity>
 						</View>
-					</ScrollView>
-				</KeyboardAvoidingView>
+					</View>
+				</ScrollView>
+				<KeyboardSpacer topSpacing={-45} />
 			</View>
 		</View>
 	);

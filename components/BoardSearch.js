@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { View, StyleSheet } from 'react-native';
+import { View, StyleSheet, Text } from 'react-native';
 import { SearchBar, ButtonGroup, Button } from 'react-native-elements';
 import _ from 'lodash';
 import Colors from '../constants/Colors';
@@ -18,7 +18,6 @@ export const BoardSearch = (props) => {
 		let query = {};
 		if (props.value !== '') {
 			selected.map((i) => (query[searchByAttr[i]] = props.value));
-			console.log(query);
 		}
 
 		props.handleSearchSubmit(query);
@@ -101,7 +100,10 @@ export const BoardSearch = (props) => {
 				</View>
 			</View>
 
-			<View style={{ height: 0 }}>
+			<View style={{ height: 0, flex: 1, flexDirection: 'row' }}>
+				<View style={{ marginRight: 8, marginLeft: 6 }}>
+					<Text style={{ top: 6, fontSize: 12, color: Colors.primaryColor }}>Search For</Text>
+				</View>
 				<ButtonGroup
 					onPress={(index) => handleSearchBySelect(index)}
 					selectedIndexes={selected}
@@ -112,9 +114,10 @@ export const BoardSearch = (props) => {
 						marginTop: 0,
 						marginBottom: 0,
 						marginLeft: 0,
-						marginRight: 0
+						marginRight: 0,
+						flex: 1
 					}}
-					textStyle={{ fontSize: 12 }}
+					textStyle={{ fontSize: 12, color: 'grey' }}
 					selectedButtonStyle={{ backgroundColor: Colors.primaryColor }}
 				/>
 			</View>

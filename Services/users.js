@@ -55,6 +55,7 @@ export const updateUser = async (id, data) => {
 		};
 
 		const res = await axios(options);
+
 		return res.data;
 	} catch (err) {
 		console.log(err);

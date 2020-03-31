@@ -21,7 +21,6 @@ export const searchCity = async (city) => {
 	}
 
 	let data = await response.data;
-	console.log(data.data);
 
 	return data.data;
 };

@@ -6,7 +6,7 @@ import Config from '../config';
 
 const UNIT_ID = Platform.OS === 'ios' ? Config.ADMOB_UNIT_ID_IOS : Config.ADMOB_UNIT_ID_ANDROID;
 
-class Meetup extends Component {
+class AdmobBanner extends Component {
 	async componentDidMount() {
 		AdMobInterstitial.setAdUnitID('ca-app-pub-3940256099942544/6300978111'); // replace to real one
 		await setTestDeviceIDAsync('EMULATOR');
@@ -28,4 +28,4 @@ class Meetup extends Component {
 	}
 }
 
-export default Meetup;
+export default AdmobBanner;

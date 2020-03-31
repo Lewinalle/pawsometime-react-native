@@ -46,7 +46,6 @@ const ForgotPassword = (props) => {
 			setIsSending(true);
 
 			const existingUser = await getUsers({ email });
-			console.log(existingUser);
 
 			if (existingUser.length > 0) {
 				const res = await Auth.forgotPassword(email);

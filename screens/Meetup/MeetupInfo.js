@@ -8,9 +8,12 @@ import CacheImage from '../../components/CacheImage';
 import { vectorIcon } from '../../Utils/Icon';
 import { likeResource, addComment, deleteComment } from '../../Services/general';
 import { fetchMeetupInfo, deleteMeetup, autoJoin, requestJoin, cancelJoin } from '../../Services/meetups';
+import { fetchUserInfo } from '../../Services/users';
 import _ from 'lodash';
 import MapView, { Marker } from 'react-native-maps';
 import Colors from '../../constants/Colors';
+import UserInfoModal from '../../components/UserInfoModal';
+import MeetupUserListModal from '../../components/MeetupUserList';
 
 const MAP_HEIGHT = 200;
 const LAT_DELTA = 0.07;
@@ -21,6 +24,12 @@ const MeetupInfo = (props) => {
 	const [ comment, setComment ] = useState('');
 	const [ isSubmitting, setIsSubmitting ] = useState(false);
 	const [ containerWidth, setContainerWidth ] = useState(350);
+	const [ modalUser, setModalUser ] = useState({});
+	const [ showUserModal, setShowUserModal ] = useState(false);
+	const [ showUserListModal, setShowUserListModal ] = useState(false);
+	const [ joinedUsers, setJoinedUsers ] = useState([]);
+	const [ pendingUsers, setPendingUsers ] = useState([]);
+	const [ isMultiTouch, setIsMultiTouch ] = useState(false);
 
 	const containerRef = useRef(null);
 
@@ -65,7 +74,8 @@ const MeetupInfo = (props) => {
 								if (meetup.isPrivate && props.currentDBUser.id !== meetup.userId) {
 									res = await requestJoin(meetup.id, {
 										userId: props.currentDBUser.id,
-										userName: props.currentDBUser.username
+										userName: props.currentDBUser.username,
+										userAvatar: props.currentDBUser.avatar ? props.currentDBUser.avatar : null
 									});
 									actionType = 5;
 									alertTitle = 'Requested';
@@ -73,7 +83,8 @@ const MeetupInfo = (props) => {
 								} else {
 									res = await autoJoin(meetup.id, {
 										userId: props.currentDBUser.id,
-										userName: props.currentDBUser.username
+										userName: props.currentDBUser.username,
+										userAvatar: props.currentDBUser.avatar ? props.currentDBUser.avatar : null
 									});
 									actionType = 6;
 									alertTitle = 'Joined';
@@ -112,7 +123,8 @@ const MeetupInfo = (props) => {
 								let res;
 								res = await cancelJoin(meetup.id, {
 									userId: props.currentDBUser.id,
-									userName: props.currentDBUser.username
+									userName: props.currentDBUser.username,
+									userAvatar: props.currentDBUser.avatar ? props.currentDBUser.avatar : null
 								});
 								setMeetup(res);
 								handleMeetupInfoAction(res.id, 9, res);
@@ -139,9 +151,7 @@ const MeetupInfo = (props) => {
 				break;
 		}
 
-		setTimeout(() => {
-			setIsSubmitting(false);
-		}, 1000);
+		setIsSubmitting(false);
 	};
 
 	const refresh = async () => {
@@ -155,14 +165,11 @@ const MeetupInfo = (props) => {
 
 		setMeetup(newMeetup);
 
-		setTimeout(() => {
-			setIsSubmitting(false);
-		}, 1000);
+		setIsSubmitting(false);
 	};
 
 	const handleLike = async () => {
 		if (isSubmitting) {
-			console.log('liking, waiting for current liking');
 			return;
 		}
 
@@ -198,8 +205,6 @@ const MeetupInfo = (props) => {
 		if (!isSubmitting) {
 			setIsSubmitting(true);
 
-			console.log('Not Submitting, adding a comment.');
-
 			const body = {
 				resource: 'meetups',
 				description: comment,
@@ -223,22 +228,18 @@ const MeetupInfo = (props) => {
 						onPress: async () => {
 							await handleMeetupInfoAction(meetup.id, 2, resItem);
 
-							setTimeout(() => {
-								setIsSubmitting(false);
-							}, 1000);
+							setIsSubmitting(false);
 						}
 					}
 				],
 				{ cancelable: false }
 			);
 		} else {
-			console.log('Already Submitting, waiting for current submit');
 		}
 	};
 
 	const handleDeleteComment = async (commentId) => {
 		if (isSubmitting) {
-			console.log('already submitting, wait!');
 			return;
 		}
 
@@ -289,7 +290,6 @@ const MeetupInfo = (props) => {
 
 	const handleDeleteMeetup = async () => {
 		if (isSubmitting) {
-			console.log('already submitting, wait!');
 			return;
 		}
 
@@ -423,28 +423,100 @@ const MeetupInfo = (props) => {
 		);
 	};
 
+	const handleModalOpen = async (userId = null) => {
+		const { currentDBUser = {} } = props;
+
+		if (userId === currentDBUser.id) {
+			return;
+		}
+
+		const user = await fetchUserInfo(userId);
+
+		setModalUser(user);
+		setShowUserModal(true);
+	};
+
+	const closeModal = () => {
+		setShowUserModal(false);
+		setModalUser({});
+	};
+
+	const showMeetupUserModal = async () => {
+		setJoinedUsers(meetup.joined);
+		setPendingUsers(meetup.pending);
+		setShowUserListModal(true);
+	};
+
+	const closeMeetupUserModal = () => {
+		setShowUserListModal(false);
+	};
+
+	const onStartShouldSetResponder = (e) => {
+		if (e.nativeEvent.touches.length > 1) {
+			setIsMultiTouch(true);
+			return true;
+		}
+		setIsMultiTouch(false);
+		return false;
+	};
+
+	const onResponderRelease = (e) => {
+		setIsMultiTouch(false);
+	};
+
 	return (
 		<View style={{ flex: 1 }}>
+			<MeetupUserListModal
+				showModal={showUserListModal}
+				closeModal={closeMeetupUserModal}
+				joined={joinedUsers}
+				pending={pendingUsers}
+			/>
 			<View
 				style={{
 					flex: 1,
 					flexDirection: 'row',
-					marginTop: 52,
 					alignItems: 'center',
-					paddingHorizontal: 14,
-					maxHeight: 40
+					paddingLeft: 14,
+					paddingRight: 0,
+					marginTop: 49,
+					maxHeight: 50,
+					minHeight: 50,
+					justifyContent: 'space-between'
 				}}
 			>
 				<TouchableOpacity onPress={() => props.navigation.goBack()}>
-					<View style={{ top: 2 }}>{vectorIcon('Ionicons', 'ios-arrow-back', 40, Colors.primaryColor)}</View>
+					<View style={{ top: 2, paddingRight: 34 }}>
+						{vectorIcon('Ionicons', 'ios-arrow-back', 40, Colors.primaryColor)}
+					</View>
 				</TouchableOpacity>
-				<View style={{ flex: 1 }}>
+				<View style={{}}>
 					<View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
-						<View style={{ marginRight: 25 }}>
+						<View style={{ marginLeft: 12 }}>
 							<View style={{ top: 2 }}>
 								{vectorIcon('FontAwesome', 'meetup', 40, Colors.primaryColor)}
 							</View>
 						</View>
+					</View>
+				</View>
+				<View style={{}}>
+					<View
+						style={{
+							flex: 1,
+							flexDirection: 'row',
+							alignItems: 'center',
+							justifyContent: 'flex-end'
+						}}
+					>
+						<TouchableOpacity
+							onPress={() => {
+								showMeetupUserModal();
+							}}
+						>
+							<View style={{ marginRight: 25, top: 2 }}>
+								{vectorIcon('FontAwesome5', 'users', 30, Colors.primaryColor)}
+							</View>
+						</TouchableOpacity>
 					</View>
 				</View>
 			</View>
@@ -533,26 +605,44 @@ const MeetupInfo = (props) => {
 									/>
 								</View>
 							)}
-							<MapView
-								style={{
-									width: containerWidth,
-									height: MAP_HEIGHT,
-									marginVertical: 8
-								}}
-								initialRegion={{
-									latitude: meetup.latlon.lat,
-									longitude: meetup.latlon.lon,
-									latitudeDelta: LAT_DELTA,
-									longitudeDelta: LON_DELTA
-								}}
+							<View
+								onStartShouldSetResponder={onStartShouldSetResponder}
+								onResponderRelease={onResponderRelease}
 							>
-								<Marker
-									coordinate={{
-										latitude: meetup.latlon.lat,
-										longitude: meetup.latlon.lon
+								<MapView
+									style={{
+										width: containerWidth,
+										height: MAP_HEIGHT,
+										marginVertical: 8
 									}}
-								/>
-							</MapView>
+									initialRegion={{
+										latitude: meetup.latlon.lat,
+										longitude: meetup.latlon.lon,
+										latitudeDelta: LAT_DELTA,
+										longitudeDelta: LON_DELTA
+									}}
+									scrollEnabled={isMultiTouch}
+									pitchEnabled={false}
+								>
+									<Marker
+										coordinate={{
+											latitude: meetup.latlon.lat,
+											longitude: meetup.latlon.lon
+										}}
+									/>
+								</MapView>
+								<Text
+									style={{
+										textAlign: 'right',
+										marginRight: 4,
+										fontSize: 11,
+										color: 'grey',
+										bottom: 10
+									}}
+								>
+									Use two fingers to drag
+								</Text>
+							</View>
 							<View>
 								<View
 									style={{
@@ -620,23 +710,25 @@ const MeetupInfo = (props) => {
 												paddingVertical: 8
 											}}
 										>
-											<View style={{ paddingRight: 8 }}>
-												{c.userAvatar ? (
-													<Avatar
-														containerStyle={{ width: 38, height: 38 }}
-														rounded
-														source={{
-															uri: c.userAvatar
-														}}
-													/>
-												) : (
-													<Avatar
-														containerStyle={{ width: 38, height: 38 }}
-														rounded
-														source={require('../../assets/images/profile-default.png')}
-													/>
-												)}
-											</View>
+											<TouchableOpacity onPress={() => handleModalOpen(c.userId)}>
+												<View style={{ paddingRight: 8 }}>
+													{c.userAvatar ? (
+														<Avatar
+															containerStyle={{ width: 38, height: 38 }}
+															rounded
+															source={{
+																uri: c.userAvatar
+															}}
+														/>
+													) : (
+														<Avatar
+															containerStyle={{ width: 38, height: 38 }}
+															rounded
+															source={require('../../assets/images/profile-default.png')}
+														/>
+													)}
+												</View>
+											</TouchableOpacity>
 											<View style={{ width: Constants.window.width - 60 }}>
 												<View
 													style={{
@@ -645,9 +737,11 @@ const MeetupInfo = (props) => {
 														justifyContent: 'space-between'
 													}}
 												>
-													<Text style={{ fontSize: 16, fontWeight: 'bold' }}>
-														{c.userName}
-													</Text>
+													<TouchableOpacity onPress={() => handleModalOpen(c.userId)}>
+														<Text style={{ fontSize: 16, fontWeight: 'bold' }}>
+															{c.userName}
+														</Text>
+													</TouchableOpacity>
 
 													<View>
 														<View style={{ flex: 1, flexDirection: 'row' }}>
@@ -680,6 +774,12 @@ const MeetupInfo = (props) => {
 						</View>
 					</ScrollView>
 				</KeyboardAvoidingView>
+				<UserInfoModal
+					showModal={showUserModal}
+					user={modalUser}
+					closeModal={closeModal}
+					navigation={props.navigation}
+				/>
 			</View>
 		</View>
 	);

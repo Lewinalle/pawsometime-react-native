@@ -8,13 +8,18 @@ import CacheImage from '../../components/CacheImage';
 import { vectorIcon } from '../../Utils/Icon';
 import { likeResource, addComment, deleteComment } from '../../Services/general';
 import { fetchPostInfo, deletePost } from '../../Services/posts';
+import { fetchUserInfo } from '../../Services/users';
 import Colors from '../../constants/Colors';
+import UserInfoModal from '../../components/UserInfoModal';
+import KeyboardSpacer from 'react-native-keyboard-spacer';
 
 const PostInfo = (props) => {
 	const [ post, setPost ] = useState(props.navigation.getParam('post') ? props.navigation.getParam('post') : {});
 	const [ comment, setComment ] = useState('');
 	const [ isSubmitting, setIsSubmitting ] = useState(false);
 	const [ containerWidth, setContainerWidth ] = useState(350);
+	const [ modalUser, setModalUser ] = useState({});
+	const [ showUserModal, setShowUserModal ] = useState(false);
 
 	const containerRef = useRef(null);
 
@@ -26,7 +31,6 @@ const PostInfo = (props) => {
 
 	const refresh = async () => {
 		if (isSubmitting) {
-			console.log('already submitting, wait!');
 			return;
 		}
 
@@ -36,14 +40,11 @@ const PostInfo = (props) => {
 
 		setPost(newPost);
 
-		setTimeout(() => {
-			setIsSubmitting(false);
-		}, 1000);
+		setIsSubmitting(false);
 	};
 
 	const handleLike = async () => {
 		if (isSubmitting) {
-			console.log('liking, waiting for current liking');
 			return;
 		}
 
@@ -79,8 +80,6 @@ const PostInfo = (props) => {
 		if (!isSubmitting) {
 			setIsSubmitting(true);
 
-			console.log('Not Submitting, adding a comment.');
-
 			const body = {
 				resource: `posts_${postType}`,
 				description: comment,
@@ -104,26 +103,20 @@ const PostInfo = (props) => {
 						onPress: async () => {
 							await handlePostInfoAction(post.id, 2, resItem);
 
-							setTimeout(() => {
-								setIsSubmitting(false);
-							}, 1000);
+							setIsSubmitting(false);
 						}
 					}
 				],
 				{ cancelable: false }
 			);
 		} else {
-			console.log('Already Submitting, waiting for current submit');
 		}
 	};
 
 	const handleDeleteComment = async (commentId) => {
 		if (isSubmitting) {
-			console.log('already submitting, wait!');
 			return;
 		}
-
-		console.log('delete!');
 
 		Alert.alert(
 			'Warning!',
@@ -172,7 +165,6 @@ const PostInfo = (props) => {
 
 	const handleDeletePost = async () => {
 		if (isSubmitting) {
-			console.log('already submitting, wait!');
 			return;
 		}
 
@@ -235,6 +227,24 @@ const PostInfo = (props) => {
 		);
 	};
 
+	const handleModalOpen = async (userId = null) => {
+		const { currentDBUser = {} } = props;
+
+		if (userId === currentDBUser.id) {
+			return;
+		}
+
+		const user = await fetchUserInfo(userId);
+
+		setModalUser(user);
+		setShowUserModal(true);
+	};
+
+	const closeModal = () => {
+		setShowUserModal(false);
+		setModalUser({});
+	};
+
 	return (
 		<View style={{ flex: 1 }}>
 			<View
@@ -248,7 +258,9 @@ const PostInfo = (props) => {
 				}}
 			>
 				<TouchableOpacity onPress={() => props.navigation.goBack()}>
-					<View style={{ top: 2 }}>{vectorIcon('Ionicons', 'ios-arrow-back', 40, Colors.primaryColor)}</View>
+					<View style={{ top: 2, paddingRight: 34 }}>
+						{vectorIcon('Ionicons', 'ios-arrow-back', 40, Colors.primaryColor)}
+					</View>
 				</TouchableOpacity>
 				<View style={{ flex: 1 }}>
 					<View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
@@ -273,142 +285,138 @@ const PostInfo = (props) => {
 					paddingHorizontal: 14
 				}}
 			>
-				<KeyboardAvoidingView
-					style={{ flex: 1 }}
-					behavior="height"
-					keyboardVerticalOffset={Constants.platform.ios ? Header.HEIGHT : Header.HEIGHT + 50}
+				<ScrollView
+					contentContainerStyle={{}}
+					refreshControl={<RefreshControl refreshing={isSubmitting} onRefresh={refresh} />}
 				>
-					<ScrollView
-						contentContainerStyle={{}}
-						refreshControl={<RefreshControl refreshing={isSubmitting} onRefresh={refresh} />}
+					<View
+						ref={containerRef}
+						onLayout={() => {
+							if (containerRef.current) {
+								containerRef.current.measure((x, y, width, height, pageX, pageY) => {
+									setContainerWidth(width);
+								});
+							}
+						}}
+						style={{}}
 					>
-						<View
-							ref={containerRef}
-							onLayout={() => {
-								if (containerRef.current) {
-									containerRef.current.measure((x, y, width, height, pageX, pageY) => {
-										setContainerWidth(width);
-									});
-								}
-							}}
-							style={{}}
-						>
-							<View style={{ paddingHorizontal: 0, paddingVertical: 4 }}>
-								<Text style={{ fontSize: 18, fontWeight: 'bold' }}>{post.title}</Text>
-								<View
-									style={{
-										flex: 1,
-										flexDirection: 'row',
-										justifyContent: 'space-between',
-										width: '100%',
-										marginRight: 'auto'
-									}}
-								>
-									<Text>{post.userName}</Text>
-									<View>
-										<View style={{ flex: 1, flexDirection: 'row' }}>
-											<TouchableOpacity onPress={refresh}>
-												<View style={{ marginHorizontal: 10 }}>
-													{vectorIcon('FrontAwesome', 'refresh', 22)}
-												</View>
-											</TouchableOpacity>
-											{post.userId === props.currentDBUser.id && (
-												<TouchableOpacity onPress={toEditPage}>
-													<View style={{ marginRight: 12 }}>
-														{vectorIcon('AntDesign', 'edit', 22)}
-													</View>
-												</TouchableOpacity>
-											)}
-											{post.userId === props.currentDBUser.id && (
-												<TouchableOpacity onPress={handleDeletePost}>
-													<View style={{ marginRight: 10 }}>
-														{vectorIcon('AntDesign', 'delete', 22)}
-													</View>
-												</TouchableOpacity>
-											)}
-											<Text>
-												{dateTime.toLocaleDateString()}, {dateTime.toLocaleTimeString()}
-											</Text>
-										</View>
-									</View>
-								</View>
-							</View>
-							<View style={{ paddingHorizontal: 0, paddingTop: 4, marginVertical: 6 }}>
-								<Text style={{ marginBottom: 10 }}>{post.description}</Text>
-							</View>
-							{post.attachment && (
-								<View style={{ marginBottom: 16 }}>
-									<CacheImage
-										style={{ width: containerWidth, height: containerWidth }}
-										uri={post.attachment}
-									/>
-								</View>
-							)}
-							<View
-								style={{
-									flex: 1,
-									flexDirection: 'row',
-									justifyContent: 'flex-end',
-									alignItems: 'center',
-									marginBottom: 10
-								}}
-							>
-								<TouchableOpacity onPress={handleLike}>
-									<View style={{ marginRight: 10 }}>
-										{vectorIcon('AntDesign', hasUserLiked ? 'like1' : 'like2', 24)}
-									</View>
-								</TouchableOpacity>
-								<Text style={{ marginRight: 26 }}>{post.likes.length}</Text>
-
-								<View style={{ marginRight: 10 }}>
-									{vectorIcon('MaterialCommunityIcons', 'comment-multiple-outline', 22)}
-								</View>
-								<Text style={{ marginRight: 10 }}>{post.comments.length}</Text>
-							</View>
-							<Divider />
+						<View style={{ paddingHorizontal: 0, paddingVertical: 4 }}>
+							<Text style={{ fontSize: 18, fontWeight: 'bold' }}>{post.title}</Text>
 							<View
 								style={{
 									flex: 1,
 									flexDirection: 'row',
 									justifyContent: 'space-between',
-									alignItems: 'center',
-									maxWidth: Constants.window.width - 62
+									width: '100%',
+									marginRight: 'auto'
 								}}
 							>
-								<Input
-									placeholder="Add a comment..."
-									value={comment}
-									multiline
-									numberOfLines={2}
-									containerStyle={{
-										padding: 0,
-										marginBottom: 0
-									}}
-									inputContainerStyle={{
-										borderBottomColor: 'transparent',
-										borderBottomWidth: 0
-									}}
-									inputStyle={{ textAlignVertical: 'top', paddingVertical: 4 }}
-									onChangeText={(text) => setComment(text)}
-								/>
-								<TouchableOpacity onPress={handleAddComment}>
-									<View style={{ marginRight: 10 }}>{vectorIcon('Feather', 'plus-circle', 34)}</View>
-								</TouchableOpacity>
+								<Text>{post.userName}</Text>
+								<View>
+									<View style={{ flex: 1, flexDirection: 'row' }}>
+										<TouchableOpacity onPress={refresh}>
+											<View style={{ marginHorizontal: 10 }}>
+												{vectorIcon('FrontAwesome', 'refresh', 22)}
+											</View>
+										</TouchableOpacity>
+										{post.userId === props.currentDBUser.id && (
+											<TouchableOpacity onPress={toEditPage}>
+												<View style={{ marginRight: 12 }}>
+													{vectorIcon('AntDesign', 'edit', 22)}
+												</View>
+											</TouchableOpacity>
+										)}
+										{post.userId === props.currentDBUser.id && (
+											<TouchableOpacity onPress={handleDeletePost}>
+												<View style={{ marginRight: 10 }}>
+													{vectorIcon('AntDesign', 'delete', 22)}
+												</View>
+											</TouchableOpacity>
+										)}
+										<Text>
+											{dateTime.toLocaleDateString()}, {dateTime.toLocaleTimeString()}
+										</Text>
+									</View>
+								</View>
 							</View>
-							{post.comments.map((c, i) => {
-								const dateTime = new Date(c.createdAt);
-								return (
-									<View key={i}>
-										<Divider />
-										<View
-											style={{
-												flex: 1,
-												flexDirection: 'row',
-												alignItems: 'center',
-												paddingHorizontal: 6,
-												paddingVertical: 8
-											}}
-										>
+						</View>
+						<View style={{ paddingHorizontal: 0, paddingTop: 4, marginVertical: 6 }}>
+							<Text style={{ marginBottom: 10 }}>{post.description}</Text>
+						</View>
+						{post.attachment && (
+							<View style={{ marginBottom: 16 }}>
+								<CacheImage
+									style={{ width: containerWidth, height: containerWidth }}
+									uri={post.attachment}
+								/>
+							</View>
+						)}
+						<View
+							style={{
+								flex: 1,
+								flexDirection: 'row',
+								justifyContent: 'flex-end',
+								alignItems: 'center',
+								marginBottom: 10
+							}}
+						>
+							<TouchableOpacity onPress={handleLike}>
+								<View style={{ marginRight: 10 }}>
+									{vectorIcon('AntDesign', hasUserLiked ? 'like1' : 'like2', 24)}
+								</View>
+							</TouchableOpacity>
+							<Text style={{ marginRight: 26 }}>{post.likes.length}</Text>
+
+							<View style={{ marginRight: 10 }}>
+								{vectorIcon('MaterialCommunityIcons', 'comment-multiple-outline', 22)}
+							</View>
+							<Text style={{ marginRight: 10 }}>{post.comments.length}</Text>
+						</View>
+						<Divider />
+						<View
+							style={{
+								flex: 1,
+								flexDirection: 'row',
+								justifyContent: 'space-between',
+								alignItems: 'center',
+								maxWidth: Constants.window.width - 62
+							}}
+						>
+							<Input
+								placeholder="Add a comment..."
+								value={comment}
+								multiline
+								numberOfLines={2}
+								containerStyle={{
+									padding: 0,
+									marginBottom: 0
+								}}
+								inputContainerStyle={{
+									borderBottomColor: 'transparent',
+									borderBottomWidth: 0
+								}}
+								inputStyle={{ textAlignVertical: 'top', paddingVertical: 4 }}
+								onChangeText={(text) => setComment(text)}
+							/>
+							<TouchableOpacity onPress={handleAddComment}>
+								<View style={{ marginRight: 10 }}>{vectorIcon('Feather', 'plus-circle', 34)}</View>
+							</TouchableOpacity>
+						</View>
+						{post.comments.map((c, i) => {
+							const dateTime = new Date(c.createdAt);
+							return (
+								<View key={i}>
+									<Divider />
+									<View
+										style={{
+											flex: 1,
+											flexDirection: 'row',
+											alignItems: 'center',
+											paddingHorizontal: 6,
+											paddingVertical: 8
+										}}
+									>
+										<TouchableOpacity onPress={() => handleModalOpen(c.userId)}>
 											<View style={{ paddingRight: 8 }}>
 												{c.userAvatar ? (
 													<Avatar
@@ -426,48 +434,55 @@ const PostInfo = (props) => {
 													/>
 												)}
 											</View>
-											<View style={{ width: Constants.window.width - 60 }}>
-												<View
-													style={{
-														flex: 1,
-														flexDirection: 'row',
-														justifyContent: 'space-between'
-													}}
-												>
+										</TouchableOpacity>
+										<View style={{ width: Constants.window.width - 60 }}>
+											<View
+												style={{
+													flex: 1,
+													flexDirection: 'row',
+													justifyContent: 'space-between'
+												}}
+											>
+												<TouchableOpacity onPress={() => handleModalOpen(c.userId)}>
 													<Text style={{ fontSize: 16, fontWeight: 'bold' }}>
 														{c.userName}
 													</Text>
+												</TouchableOpacity>
 
-													<View>
-														<View style={{ flex: 1, flexDirection: 'row' }}>
-															{c.userId === props.currentDBUser.id && (
-																<TouchableOpacity
-																	onPress={() => handleDeleteComment(c.id)}
-																>
-																	<View style={{ marginRight: 10, marginTop: 2 }}>
-																		{vectorIcon('AntDesign', 'delete', 16)}
-																	</View>
-																</TouchableOpacity>
-															)}
-															<Text>
-																{dateTime.toLocaleDateString()},{' '}
-																{dateTime.toLocaleTimeString()}
-															</Text>
-														</View>
+												<View>
+													<View style={{ flex: 1, flexDirection: 'row' }}>
+														{c.userId === props.currentDBUser.id && (
+															<TouchableOpacity onPress={() => handleDeleteComment(c.id)}>
+																<View style={{ marginRight: 10, marginTop: 2 }}>
+																	{vectorIcon('AntDesign', 'delete', 16)}
+																</View>
+															</TouchableOpacity>
+														)}
+														<Text>
+															{dateTime.toLocaleDateString()},{' '}
+															{dateTime.toLocaleTimeString()}
+														</Text>
 													</View>
 												</View>
-												<View>
-													<Text>{c.description}</Text>
-												</View>
+											</View>
+											<View>
+												<Text>{c.description}</Text>
 											</View>
 										</View>
 									</View>
-								);
-							})}
-							<Divider />
-						</View>
-					</ScrollView>
-				</KeyboardAvoidingView>
+								</View>
+							);
+						})}
+						<Divider />
+					</View>
+				</ScrollView>
+				<KeyboardSpacer topSpacing={Constants.platform.ios ? 0 : 50} />
+				<UserInfoModal
+					showModal={showUserModal}
+					user={modalUser}
+					closeModal={closeModal}
+					navigation={props.navigation}
+				/>
 			</View>
 		</View>
 	);
