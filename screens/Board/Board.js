@@ -258,9 +258,7 @@ class Board extends Component {
 		headerShown: false
 	});
 
-	render() {
-		const { currentTab = 0, currentPage = 1, posts = [], searchTerm = '', isFetching, currentMenu } = this.state;
-
+	checkShouldRedirect = () => {
 		if (this.props.navigation.getParam('toSpecificPost')) {
 			const item = this.props.navigation.getParam('toSpecificPost');
 			const type = this.props.navigation.getParam('postType');
@@ -268,6 +266,12 @@ class Board extends Component {
 			this.handleTabPress(type);
 			this.toPostInfo(item);
 		}
+	};
+
+	render() {
+		const { currentTab = 0, currentPage = 1, posts = [], searchTerm = '', isFetching, currentMenu } = this.state;
+
+		this.checkShouldRedirect();
 
 		return (
 			<View style={{ flex: 1 }}>

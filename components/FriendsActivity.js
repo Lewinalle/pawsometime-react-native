@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ScrollView, StyleSheet, Text, TouchableHighlight, View, Linking, RefreshControl } from 'react-native';
+import { ScrollView, StyleSheet, Text, TouchableHighlight, View, Linking, RefreshControl, Alert } from 'react-native';
 import { Input, Button, ListItem, Card, Divider, ButtonGroup } from 'react-native-elements';
 import { connect } from 'react-redux';
 import { fetchFriendsActivity } from '../redux/actions/others.actions';
@@ -56,11 +56,37 @@ const FriendsActivity = (props) => {
 		switch (item.resource) {
 			case 'meetup':
 				await fetchMeetupInfo(item.resourceId).then((res) => {
+					if (!res) {
+						Alert.alert(
+							'Not found',
+							'The meetup was deleted.',
+							[
+								{
+									text: 'OK'
+								}
+							],
+							{ cancelable: false }
+						);
+						return;
+					}
 					props.navigation.navigate('Meetup', { toSpecificMeetup: res });
 				});
 				return;
 			case 'post':
 				await fetchPostInfo(item.resourceId, item.resourceType).then((res) => {
+					if (!res) {
+						Alert.alert(
+							'Not found',
+							'The post was deleted.',
+							[
+								{
+									text: 'OK'
+								}
+							],
+							{ cancelable: false }
+						);
+						return;
+					}
 					const typeIndex = boardTypes.findIndex((i) => i === item.resourceType);
 					props.navigation.navigate('Board', {
 						toSpecificPost: res,

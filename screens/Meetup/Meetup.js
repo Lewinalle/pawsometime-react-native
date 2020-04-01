@@ -161,6 +161,20 @@ class Meetup extends Component {
 		this.setState({ showModal: false });
 	};
 
+	checkShouldRedirect = () => {
+		if (this.props.navigation.getParam('myMeetups')) {
+			const items = this.props.navigation.getParam('myMeetups');
+			this.props.navigation.setParams({ myMeetups: undefined });
+			this.setState({ meetups: items, currentMenu: 1 });
+		}
+
+		if (this.props.navigation.getParam('toSpecificMeetup')) {
+			const item = this.props.navigation.getParam('toSpecificMeetup');
+			this.props.navigation.setParams({ toSpecificMeetup: undefined });
+			this.handleCardSelect(item);
+		}
+	};
+
 	render() {
 		const {
 			selected,
@@ -179,17 +193,7 @@ class Meetup extends Component {
 			return null;
 		}
 
-		if (this.props.navigation.getParam('myMeetups')) {
-			const items = this.props.navigation.getParam('myMeetups');
-			this.props.navigation.setParams({ myMeetups: undefined });
-			this.setState({ meetups: items, currentMenu: 1 });
-		}
-
-		if (this.props.navigation.getParam('toSpecificMeetup')) {
-			const item = this.props.navigation.getParam('toSpecificMeetup');
-			this.props.navigation.setParams({ toSpecificMeetup: undefined });
-			this.handleCardSelect(item);
-		}
+		this.checkShouldRedirect();
 
 		return (
 			<View style={styles.container}>

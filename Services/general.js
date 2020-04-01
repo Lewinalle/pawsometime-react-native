@@ -9,9 +9,14 @@ export const getNews = async () => {
 		url: `${Config.OTHERS_API_URL}/news`
 	};
 
-	const res = await axios(options);
+	try {
+		const res = await axios(options);
 
-	return res.data;
+		return res.data;
+	} catch (err) {
+		console.log('Error! ', err, options);
+		return null;
+	}
 };
 
 // if already liked, it will revert the like
@@ -27,9 +32,14 @@ export const likeResource = async (resourceId, data) => {
 		data
 	};
 
-	const res = await axios(options);
+	try {
+		const res = await axios(options);
 
-	return res.data;
+		return res.data;
+	} catch (err) {
+		console.log('Error! ', err, options);
+		return null;
+	}
 };
 
 export const addComment = async (resourceId, data) => {
@@ -44,9 +54,14 @@ export const addComment = async (resourceId, data) => {
 		data
 	};
 
-	const res = await axios(options);
+	try {
+		const res = await axios(options);
 
-	return res.data;
+		return res.data;
+	} catch (err) {
+		console.log('Error! ', err, options);
+		return null;
+	}
 };
 
 export const deleteComment = async (resourceId, commentId, data) => {
@@ -61,9 +76,14 @@ export const deleteComment = async (resourceId, commentId, data) => {
 		data
 	};
 
-	const res = await axios(options);
+	try {
+		const res = await axios(options);
 
-	return res.data;
+		return res.data;
+	} catch (err) {
+		console.log('Error! ', err, options);
+		return null;
+	}
 };
 
 export const S3UploadUrl = async (data) => {
@@ -78,9 +98,14 @@ export const S3UploadUrl = async (data) => {
 		data
 	};
 
-	const res = await axios(options);
+	try {
+		const res = await axios(options);
 
-	return res.data;
+		return res.data;
+	} catch (err) {
+		console.log('Error! ', err, options);
+		return null;
+	}
 };
 
 export const getHistory = async (params) => {
@@ -97,9 +122,14 @@ export const getHistory = async (params) => {
 		url: `${Config.OTHERS_API_URL}/history?${query ? query : ''}`
 	};
 
-	const res = await axios(options);
+	try {
+		const res = await axios(options);
 
-	return res.data;
+		return res.data;
+	} catch (err) {
+		console.log('Error! ', err, options);
+		return null;
+	}
 };
 
 export const fetchHistoryInfo = async (id) => {
@@ -108,9 +138,14 @@ export const fetchHistoryInfo = async (id) => {
 		url: `${Config.OTHERS_API_URL}/history/${id}`
 	};
 
-	const res = await axios(options);
+	try {
+		const res = await axios(options);
 
-	return res.data;
+		return res.data;
+	} catch (err) {
+		console.log('Error! ', err, options);
+		return null;
+	}
 };
 
 export const testGet = async () => {
@@ -119,7 +154,12 @@ export const testGet = async () => {
 		url: `${Config.OTHERS_API_URL}/test/get`
 	};
 
-	const res = await axios(options);
+	try {
+		const res = await axios(options);
 
-	return res.data;
+		return res.data;
+	} catch (err) {
+		console.log('Error! ', err, options);
+		return null;
+	}
 };

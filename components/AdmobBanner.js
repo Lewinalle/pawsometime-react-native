@@ -8,7 +8,7 @@ const UNIT_ID = Platform.OS === 'ios' ? Config.ADMOB_UNIT_ID_IOS : Config.ADMOB_
 
 class AdmobBanner extends Component {
 	async componentDidMount() {
-		AdMobInterstitial.setAdUnitID(UNIT_ID);
+		AdMobInterstitial.setAdUnitID('ca-app-pub-3940256099942544/6300978111'); // replace to real one
 		await setTestDeviceIDAsync('EMULATOR');
 	}
 
@@ -19,7 +19,7 @@ class AdmobBanner extends Component {
 			<View>
 				<AdMobBanner
 					bannerSize={bannerSize}
-					adUnitID={UNIT_ID}
+					adUnitID="ca-app-pub-3940256099942544/6300978111" // replace to real one
 					servePersonalizedAds // true or false
 					onDidFailToReceiveAdWithError={this.bannerError}
 				/>

@@ -7,7 +7,7 @@
 		"platforms": [ "ios", "android", "web" ],
 		"version": "1.0.0",
 		"orientation": "portrait",
-		"icon": "./assets/images/icon.png",
+		"icon": "./assets/images/logo-ios.png",
 		"splash": {
 			"image": "./assets/images/splash-image.png",
 			"resizeMode": "cover",
@@ -20,13 +20,21 @@
 		"ios": {
 			"supportsTablet": true,
 			"config": {
-				"googleMobileAdsAppId": "ca-app-pub-4691745324255938~6440277238"
-			}
+				"googleMobileAdsAppId": "ca-app-pub-4691745324255938~6440277238",
+				"googleMapsApiKey": "AIzaSyDMNQ3ObCFdeQufDMBRY74Hk97chG6EX3o"
+			},
+			"bundleIdentifier": "com.lewis.pawsometime",
+			"buildNumber": "1.0.0"
 		},
 		"android": {
 			"config": {
-				"googleMobileAdsAppId": "ca-app-pub-4691745324255938~6443312516"
-			}
+				"googleMobileAdsAppId": "ca-app-pub-4691745324255938~6443312516",
+				"googleMaps": {
+					"apiKey": "AIzaSyCRzROOW57xpsnNaIGxU7htYpwZAvnrQRw"
+				}
+			},
+			"package": "com.lewis.pawsometime",
+			"versionCode": 1
 		}
 	}
 }

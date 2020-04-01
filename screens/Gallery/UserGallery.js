@@ -8,6 +8,7 @@ import Config from '../../config';
 import GalleryItem from '../../components/GalleryItem';
 import Colors from '../../constants/Colors';
 import NoContent from '../../components/NoContent';
+import Constants from '../../constants/Layout';
 
 const PAGE_SIZE = 10;
 

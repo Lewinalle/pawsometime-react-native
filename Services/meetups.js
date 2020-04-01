@@ -17,9 +17,14 @@ export const getMeetups = async (params) => {
 		url: `${Config.MEETUPS_API_URL}/meetups?${query ? query : ''}`
 	};
 
-	const res = await axios(options);
+	try {
+		const res = await axios(options);
 
-	return res.data;
+		return res.data;
+	} catch (err) {
+		console.log('Error! ', err, options);
+		return null;
+	}
 };
 
 export const fetchMeetupInfo = async (id) => {
@@ -28,9 +33,14 @@ export const fetchMeetupInfo = async (id) => {
 		url: `${Config.MEETUPS_API_URL}/meetups/${id}`
 	};
 
-	const res = await axios(options);
+	try {
+		const res = await axios(options);
 
-	return res.data;
+		return res.data;
+	} catch (err) {
+		console.log('Error! ', err, options);
+		return null;
+	}
 };
 
 export const createMeetup = async (data) => {
@@ -45,9 +55,14 @@ export const createMeetup = async (data) => {
 		data
 	};
 
-	const res = await axios(options);
+	try {
+		const res = await axios(options);
 
-	return res.data;
+		return res.data;
+	} catch (err) {
+		console.log('Error! ', err, options);
+		return null;
+	}
 };
 
 export const updateMeetup = async (id, data) => {
@@ -62,9 +77,14 @@ export const updateMeetup = async (id, data) => {
 		data
 	};
 
-	const res = await axios(options);
+	try {
+		const res = await axios(options);
 
-	return res.data;
+		return res.data;
+	} catch (err) {
+		console.log('Error! ', err, options);
+		return null;
+	}
 };
 
 export const deleteMeetup = async (id) => {
@@ -77,9 +97,14 @@ export const deleteMeetup = async (id) => {
 		}
 	};
 
-	const res = await axios(options);
+	try {
+		const res = await axios(options);
 
-	return res.data;
+		return res.data;
+	} catch (err) {
+		console.log('Error! ', err, options);
+		return null;
+	}
 };
 
 export const autoJoin = async (id, data) => {
@@ -94,9 +119,14 @@ export const autoJoin = async (id, data) => {
 		data
 	};
 
-	const res = await axios(options);
+	try {
+		const res = await axios(options);
 
-	return res.data;
+		return res.data;
+	} catch (err) {
+		console.log('Error! ', err, options);
+		return null;
+	}
 };
 
 export const requestJoin = async (id, data) => {
@@ -111,9 +141,14 @@ export const requestJoin = async (id, data) => {
 		data
 	};
 
-	const res = await axios(options);
+	try {
+		const res = await axios(options);
 
-	return res.data;
+		return res.data;
+	} catch (err) {
+		console.log('Error! ', err, options);
+		return null;
+	}
 };
 
 export const acceptJoin = async (id, data) => {
@@ -128,9 +163,14 @@ export const acceptJoin = async (id, data) => {
 		data
 	};
 
-	const res = await axios(options);
+	try {
+		const res = await axios(options);
 
-	return res.data;
+		return res.data;
+	} catch (err) {
+		console.log('Error! ', err, options);
+		return null;
+	}
 };
 
 export const rejectJoin = async (id, data) => {
@@ -145,9 +185,14 @@ export const rejectJoin = async (id, data) => {
 		data
 	};
 
-	const res = await axios(options);
+	try {
+		const res = await axios(options);
 
-	return res.data;
+		return res.data;
+	} catch (err) {
+		console.log('Error! ', err, options);
+		return null;
+	}
 };
 
 export const cancelJoin = async (id, data) => {
@@ -162,7 +207,12 @@ export const cancelJoin = async (id, data) => {
 		data
 	};
 
-	const res = await axios(options);
+	try {
+		const res = await axios(options);
 
-	return res.data;
+		return res.data;
+	} catch (err) {
+		console.log('Error! ', err, options);
+		return null;
+	}
 };

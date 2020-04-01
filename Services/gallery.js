@@ -17,9 +17,14 @@ export const getGalleries = async (params) => {
 		url: `${Config.GALLERY_API_URL}/gallery?${query ? query : ''}`
 	};
 
-	const res = await axios(options);
+	try {
+		const res = await axios(options);
 
-	return res.data;
+		return res.data;
+	} catch (err) {
+		console.log('Error! ', err, options);
+		return null;
+	}
 };
 
 export const fetchGalleryInfo = async (id) => {
@@ -28,9 +33,14 @@ export const fetchGalleryInfo = async (id) => {
 		url: `${Config.GALLERY_API_URL}/gallery/${id}`
 	};
 
-	const res = await axios(options);
+	try {
+		const res = await axios(options);
 
-	return res.data;
+		return res.data;
+	} catch (err) {
+		console.log('Error! ', err, options);
+		return null;
+	}
 };
 
 export const createGallery = async (data) => {
@@ -45,9 +55,14 @@ export const createGallery = async (data) => {
 		data
 	};
 
-	const res = await axios(options);
+	try {
+		const res = await axios(options);
 
-	return res.data;
+		return res.data;
+	} catch (err) {
+		console.log('Error! ', err, options);
+		return null;
+	}
 };
 
 export const updateGallery = async (id, data) => {
@@ -62,9 +77,14 @@ export const updateGallery = async (id, data) => {
 		data
 	};
 
-	const res = await axios(options);
+	try {
+		const res = await axios(options);
 
-	return res.data;
+		return res.data;
+	} catch (err) {
+		console.log('Error! ', err, options);
+		return null;
+	}
 };
 
 export const deleteGallery = async (id) => {
@@ -77,7 +97,12 @@ export const deleteGallery = async (id) => {
 		}
 	};
 
-	const res = await axios(options);
+	try {
+		const res = await axios(options);
 
-	return res.data;
+		return res.data;
+	} catch (err) {
+		console.log('Error! ', err, options);
+		return null;
+	}
 };

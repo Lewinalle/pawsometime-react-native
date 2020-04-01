@@ -34,8 +34,8 @@ export const getPosts = async (params) => {
 
 		return res.data;
 	} catch (error) {
-		console.log(error);
-		return [];
+		console.log('Error! ', error, options);
+		return null;
 	}
 	// } else {
 	// 	console.log('reading from cache!');
@@ -49,9 +49,14 @@ export const fetchPostInfo = async (id, type) => {
 		url: `${Config.POSTS_API_URL}/posts/${id}?type=${type}`
 	};
 
-	const res = await axios(options);
+	try {
+		const res = await axios(options);
 
-	return res.data;
+		return res.data;
+	} catch (err) {
+		console.log('Error! ', err, options);
+		return null;
+	}
 };
 
 export const createPost = async (data) => {
@@ -66,9 +71,14 @@ export const createPost = async (data) => {
 		data
 	};
 
-	const res = await axios(options);
+	try {
+		const res = await axios(options);
 
-	return res.data;
+		return res.data;
+	} catch (err) {
+		console.log('Error! ', err, options);
+		return null;
+	}
 };
 
 export const updatePost = async (id, data) => {
@@ -83,9 +93,14 @@ export const updatePost = async (id, data) => {
 		data
 	};
 
-	const res = await axios(options);
+	try {
+		const res = await axios(options);
 
-	return res.data;
+		return res.data;
+	} catch (err) {
+		console.log('Error! ', err, options);
+		return null;
+	}
 };
 
 export const deletePost = async (id, type) => {
@@ -98,7 +113,12 @@ export const deletePost = async (id, type) => {
 		}
 	};
 
-	const res = await axios(options);
+	try {
+		const res = await axios(options);
 
-	return res.data;
+		return res.data;
+	} catch (err) {
+		console.log('Error! ', err, options);
+		return null;
+	}
 };

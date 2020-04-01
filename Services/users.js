@@ -22,7 +22,8 @@ export const getUsers = async (params) => {
 
 		return res.data;
 	} catch (err) {
-		console.log(err);
+		console.log('Error! ', err, options);
+		return null;
 	}
 };
 
@@ -37,7 +38,8 @@ export const fetchUserInfo = async (id) => {
 
 		return res.data;
 	} catch (err) {
-		console.log(err);
+		console.log('Error! ', err, options);
+		return null;
 	}
 };
 
@@ -58,7 +60,8 @@ export const updateUser = async (id, data) => {
 
 		return res.data;
 	} catch (err) {
-		console.log(err);
+		console.log('Error! ', err, options);
+		return null;
 	}
 };
 
@@ -79,7 +82,8 @@ export const requestFriend = async (data) => {
 
 		return res.data;
 	} catch (err) {
-		console.log(err);
+		console.log('Error! ', err, options);
+		return null;
 	}
 };
 
@@ -100,7 +104,8 @@ export const acceptFriend = async (data) => {
 
 		return res.data;
 	} catch (err) {
-		console.log(err);
+		console.log('Error! ', err, options);
+		return null;
 	}
 };
 
@@ -121,7 +126,8 @@ export const rejectFriend = async (data) => {
 
 		return res.data;
 	} catch (err) {
-		console.log(err);
+		console.log('Error! ', err, options);
+		return null;
 	}
 };
 
@@ -142,7 +148,8 @@ export const cancelFriend = async (data) => {
 
 		return res.data;
 	} catch (err) {
-		console.log(err);
+		console.log('Error! ', err, options);
+		return null;
 	}
 };
 
@@ -163,7 +170,8 @@ export const removeFriend = async (data) => {
 
 		return res.data;
 	} catch (err) {
-		console.log(err);
+		console.log('Error! ', err, options);
+		return null;
 	}
 };
 
@@ -183,6 +191,7 @@ export const deleteUser = async (id) => {
 
 		return res.data;
 	} catch (err) {
-		console.log(err);
+		console.log('Error! ', err, options);
+		return null;
 	}
 };
