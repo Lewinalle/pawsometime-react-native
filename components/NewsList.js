@@ -63,7 +63,7 @@ const NewsList = (props) => {
 
 	return (
 		<View style={{ flex: 1 }}>
-			<View
+			{/* <View
 				style={{
 					flex: 1,
 					flexDirection: 'row',
@@ -115,7 +115,23 @@ const NewsList = (props) => {
 						</Text>
 					</View>
 				</TouchableOpacity>
-			</View>
+			</View> */}
+			<ButtonGroup
+				onPress={handleTypeChange}
+				selectedIndex={currentType}
+				buttons={NEWS_TYPES}
+				containerStyle={{
+					height: 40,
+					minWidth: 250,
+					marginTop: 10,
+					marginBottom: 20,
+					marginLeft: 10,
+					marginRight: 10,
+					borderWidth: 0
+				}}
+				textStyle={{ fontSize: 15 }}
+				selectedButtonStyle={{ backgroundColor: Colors.primaryColor }}
+			/>
 			<ScrollView
 				style={{ flex: 1 }}
 				refreshControl={<RefreshControl refreshing={isFetching} onRefresh={refresh} />}

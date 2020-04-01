@@ -10,6 +10,7 @@ import AdmobBanner from '../../components/AdmobBanner';
 import Colors from '../../constants/Colors';
 import Constants from '../../constants/Layout';
 import KeyboardSpacer from 'react-native-keyboard-spacer';
+import NoContent from '../../components/NoContent';
 
 const PAGE_SIZE = 2;
 
@@ -130,7 +131,16 @@ class Gallery extends Component {
 								justifyContent: 'center'
 							}}
 						>
-							<Text style={{ fontSize: 20, fontWeight: 'bold', color: 'black' }}>
+							<Text
+								style={{
+									fontSize: 20,
+									fontWeight: 'bold',
+									color: 'black',
+									width: Constants.window.width - 125,
+									paddingLeft: 10
+								}}
+								numberOfLines={1}
+							>
 								{this.props.currentDBUser.username}'s Gallery
 							</Text>
 						</View>
@@ -164,6 +174,9 @@ class Gallery extends Component {
 					</View>
 				</View>
 				<Divider style={{ marginBottom: 10, height: 1.5, backgroundColor: Colors.primaryColor }} />
+				{(!photos || photos.length === 0) && (
+					<NoContent title="Empty Gallery" message="Try adding photos to your gallery!" />
+				)}
 				<FlatList
 					ref={(ref) => (this.flatListRef = ref)}
 					style={{}}

@@ -13,6 +13,7 @@ import { fetchMeetups, fetchUserMeetups } from '../../redux/actions/meetups.acti
 import AdmobBanner from '../../components/AdmobBanner';
 import { searchCity } from '../../helpers/GeoDBHelper';
 import Colors from '../../constants/Colors';
+import NoContent from '../../components/NoContent';
 
 const MAX_TITLE_LENGTH = 30;
 const MAP_WIDTH = dimensions.window.width - 32;
@@ -36,8 +37,7 @@ class Meetup extends Component {
 		citySearchTerm: '',
 		citySearchResult: [],
 		isCitySearching: false,
-		currentMenu: 0,
-		isMultiTouch: false
+		currentMenu: 0
 	};
 	markerRefs = {};
 	scrollviewRef = null;
@@ -159,19 +159,6 @@ class Meetup extends Component {
 
 	closeModal = () => {
 		this.setState({ showModal: false });
-	};
-
-	onStartShouldSetResponder = (e) => {
-		if (e.nativeEvent.touches.length > 1) {
-			this.setState({ isMultiTouch: true });
-			return true;
-		}
-		this.setState({ isMultiTouch: false });
-		return false;
-	};
-
-	onResponderRelease = (e) => {
-		this.setState({ isMultiTouch: false });
 	};
 
 	render() {
@@ -353,56 +340,50 @@ class Meetup extends Component {
 					searchResult={citySearchResult}
 					handleCitySelect={(city) => this.handleCitySelect(city)}
 				/>
-				<View
-					onStartShouldSetResponder={this.onStartShouldSetResponder}
-					onResponderRelease={this.onResponderRelease}
-				>
-					<MapView
-						ref={(el) => (this.mapRef = el)}
-						style={styles.map}
-						initialRegion={{
-							latitude: this.props.currentLocation.lat,
-							longitude: this.props.currentLocation.lon,
-							latitudeDelta: lat_offset,
-							longitudeDelta: lon_offset
-						}}
-						onRegionChange={(region) =>
-							this.setState({
-								centerLat: region.latitude,
-								centerLon: region.longitude,
-								lat_offset: region.latitudeDelta,
-								lon_offset: region.longitudeDelta
-							})}
-						scrollEnabled={this.state.isMultiTouch}
-						pitchEnabled={false}
-					>
-						{meetups.map((item, index) => {
-							let titleTruncated =
-								item.title.length > MAX_TITLE_LENGTH + 5
-									? item.title.substring(0, MAX_TITLE_LENGTH) + '...'
-									: item.title;
-							return (
-								<Marker
-									key={index}
-									ref={(el) => (this.markerRefs[item.id] = el)}
-									coordinate={{
-										latitude: item.latlon.lat,
-										longitude: item.latlon.lon
-									}}
-									title={titleTruncated}
-									onPress={() => this.handleMarkerSelect(item)}
-								>
-									<Callout>
-										<Text>{titleTruncated}</Text>
-									</Callout>
-								</Marker>
-							);
+				<MapView
+					ref={(el) => (this.mapRef = el)}
+					style={styles.map}
+					initialRegion={{
+						latitude: this.props.currentLocation.lat,
+						longitude: this.props.currentLocation.lon,
+						latitudeDelta: lat_offset,
+						longitudeDelta: lon_offset
+					}}
+					onRegionChange={(region) =>
+						this.setState({
+							centerLat: region.latitude,
+							centerLon: region.longitude,
+							lat_offset: region.latitudeDelta,
+							lon_offset: region.longitudeDelta
 						})}
-					</MapView>
-					<Text style={{ textAlign: 'right', marginRight: 20, fontSize: 11, color: 'grey', bottom: 5 }}>
-						Use two fingers to drag
-					</Text>
-				</View>
+				>
+					{meetups.map((item, index) => {
+						let titleTruncated =
+							item.title.length > MAX_TITLE_LENGTH + 5
+								? item.title.substring(0, MAX_TITLE_LENGTH) + '...'
+								: item.title;
+						return (
+							<Marker
+								key={index}
+								ref={(el) => (this.markerRefs[item.id] = el)}
+								coordinate={{
+									latitude: item.latlon.lat,
+									longitude: item.latlon.lon
+								}}
+								title={titleTruncated}
+								onPress={() => this.handleMarkerSelect(item)}
+							>
+								<Callout>
+									<Text>{titleTruncated}</Text>
+								</Callout>
+							</Marker>
+						);
+					})}
+				</MapView>
+				<Text style={{ textAlign: 'left', marginLeft: 16, fontSize: 11, color: 'grey', bottom: 5 }}>
+					** Refresh to get list of meetups on the map
+				</Text>
+				{(!meetups || meetups.length === 0) && <NoContent message="Try hosting a meetup in this location!" />}
 				<ScrollView
 					ref={(el) => (this.scrollviewRef = el)}
 					style={{

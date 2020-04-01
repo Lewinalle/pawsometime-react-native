@@ -19,8 +19,9 @@ import { fetchPosts, fetchUserPosts } from '../../redux/actions/posts.actions';
 import { fetchPostsHelper, fetchUserPostsHelper } from '../../Utils/FetchPostsHelper';
 import AdmobBanner from '../../components/AdmobBanner';
 import Colors from '../../constants/Colors';
+import NoContent from '../../components/NoContent';
 
-const PAGE_SIZE = 5;
+const PAGE_SIZE = 10;
 const boardTabs = [ 'General', 'Questions', 'Tips', 'Trade' ];
 const boardTypes = [ 'general', 'qna', 'tips', 'trade' ];
 
@@ -45,7 +46,7 @@ class Board extends Component {
 
 		this.props.navigation.setParams({
 			refresh: this.handleRefreshBtn,
-			onCreateBack: (type) => this.onCreateBack(type),
+			onCreateBack: (type) => this.handleTabPress(type),
 			myPostsBtn: this.myPostsBtn
 		});
 	}
@@ -91,6 +92,7 @@ class Board extends Component {
 	};
 
 	onCreateBack(type) {
+		console.log(this.handleTabPress, this.toPostInfo, this.onSearchTermChange);
 		this.handleTabPress(boardTypes.findIndex((val) => val === type));
 	}
 
@@ -99,7 +101,7 @@ class Board extends Component {
 		navigation.navigate('PostInfo', {
 			post: clickedPost,
 			postType: boardTypes[this.state.currentTab],
-			onCreateBack: (type) => this.onCreateBack(type),
+			onCreateBack: (type) => this.handleTabPress(type),
 			handlePostInfoAction: (postId, actionType, reference) =>
 				this.handlePostInfoAction(postId, actionType, reference)
 		});
@@ -135,7 +137,7 @@ class Board extends Component {
 		this.setState({ posts: newPosts });
 	}
 
-	async handleTabPress(i) {
+	handleTabPress = async (i) => {
 		const { fetchPosts, fetchUserPosts, currentDBUser } = this.props;
 
 		this.setState({ currentTab: i, currentPage: 1 });
@@ -144,7 +146,7 @@ class Board extends Component {
 		await fetchUserPostsHelper(fetchUserPosts, currentDBUser.id, { type: i });
 
 		this.resetList();
-	}
+	};
 
 	resetList() {
 		const { generalPosts = [], questionPosts = [], tipPosts = [], tradePosts = [] } = this.props;
@@ -216,7 +218,10 @@ class Board extends Component {
 
 		this.setState({ isFetching: true });
 
-		if (true) {
+		if (
+			currentPage * PAGE_SIZE >= Config.DEFAULT_DATA_SIZE &&
+			(currentPage * PAGE_SIZE) % Config.DEFAULT_DATA_SIZE === 0
+		) {
 			await fetchPostsHelper(fetchPosts, { type: currentTab, page: types[boardTypes[currentTab]] + 1 });
 			let newTypes = types;
 			newTypes[boardTypes[currentTab]]++;
@@ -338,7 +343,7 @@ class Board extends Component {
 							<TouchableOpacity
 								onPress={() => {
 									this.props.navigation.navigate('CreatePost', {
-										onCreateBack: this.onCreateBack
+										onCreateBack: this.handleTabPress
 									});
 								}}
 							>
@@ -367,13 +372,16 @@ class Board extends Component {
 							selectedButtonStyle={{ backgroundColor: Colors.primaryColor }}
 						/>
 					</View>
-					<View style={{ marginTop: 10 }}>
+					<View style={{ marginTop: 10, marginBottom: !posts || posts.length === 0 ? 50 : 0 }}>
 						<BoardSearch
 							handleSearchSubmit={this.handleSearchSubmit}
 							onValueChange={this.onSearchTermChange}
 							value={searchTerm}
 						/>
 					</View>
+					{(!posts || posts.length === 0) && (
+						<NoContent message="Try creating a post!" containerStyle={{ marginTop: 0 }} />
+					)}
 					<FlatList
 						ref={(ref) => (this.flatListRef = ref)}
 						style={{ marginTop: 35, marginBottom: 12 }}

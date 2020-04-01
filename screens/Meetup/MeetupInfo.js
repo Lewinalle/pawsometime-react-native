@@ -29,7 +29,6 @@ const MeetupInfo = (props) => {
 	const [ showUserListModal, setShowUserListModal ] = useState(false);
 	const [ joinedUsers, setJoinedUsers ] = useState([]);
 	const [ pendingUsers, setPendingUsers ] = useState([]);
-	const [ isMultiTouch, setIsMultiTouch ] = useState(false);
 
 	const containerRef = useRef(null);
 
@@ -170,6 +169,7 @@ const MeetupInfo = (props) => {
 
 	const handleLike = async () => {
 		if (isSubmitting) {
+			console.log('liking, waiting for current liking');
 			return;
 		}
 
@@ -205,6 +205,8 @@ const MeetupInfo = (props) => {
 		if (!isSubmitting) {
 			setIsSubmitting(true);
 
+			console.log('Not Submitting, adding a comment.');
+
 			const body = {
 				resource: 'meetups',
 				description: comment,
@@ -235,11 +237,13 @@ const MeetupInfo = (props) => {
 				{ cancelable: false }
 			);
 		} else {
+			console.log('Already Submitting, waiting for current submit');
 		}
 	};
 
 	const handleDeleteComment = async (commentId) => {
 		if (isSubmitting) {
+			console.log('already submitting, wait!');
 			return;
 		}
 
@@ -290,6 +294,7 @@ const MeetupInfo = (props) => {
 
 	const handleDeleteMeetup = async () => {
 		if (isSubmitting) {
+			console.log('already submitting, wait!');
 			return;
 		}
 
@@ -451,19 +456,6 @@ const MeetupInfo = (props) => {
 		setShowUserListModal(false);
 	};
 
-	const onStartShouldSetResponder = (e) => {
-		if (e.nativeEvent.touches.length > 1) {
-			setIsMultiTouch(true);
-			return true;
-		}
-		setIsMultiTouch(false);
-		return false;
-	};
-
-	const onResponderRelease = (e) => {
-		setIsMultiTouch(false);
-	};
-
 	return (
 		<View style={{ flex: 1 }}>
 			<MeetupUserListModal
@@ -486,7 +478,7 @@ const MeetupInfo = (props) => {
 				}}
 			>
 				<TouchableOpacity onPress={() => props.navigation.goBack()}>
-					<View style={{ top: 2, paddingRight: 34 }}>
+					<View style={{ top: 2, paddingRight: 32 }}>
 						{vectorIcon('Ionicons', 'ios-arrow-back', 40, Colors.primaryColor)}
 					</View>
 				</TouchableOpacity>
@@ -592,6 +584,26 @@ const MeetupInfo = (props) => {
 									</View>
 								</View>
 							</View>
+							<MapView
+								style={{
+									width: containerWidth,
+									height: MAP_HEIGHT,
+									marginVertical: 8
+								}}
+								initialRegion={{
+									latitude: meetup.latlon.lat,
+									longitude: meetup.latlon.lon,
+									latitudeDelta: LAT_DELTA,
+									longitudeDelta: LON_DELTA
+								}}
+							>
+								<Marker
+									coordinate={{
+										latitude: meetup.latlon.lat,
+										longitude: meetup.latlon.lon
+									}}
+								/>
+							</MapView>
 							<View style={{ paddingTop: 10, paddingBottom: 4 }}>
 								<View>
 									<Text style={{ marginBottom: 10 }}>{meetup.description}</Text>
@@ -605,44 +617,6 @@ const MeetupInfo = (props) => {
 									/>
 								</View>
 							)}
-							<View
-								onStartShouldSetResponder={onStartShouldSetResponder}
-								onResponderRelease={onResponderRelease}
-							>
-								<MapView
-									style={{
-										width: containerWidth,
-										height: MAP_HEIGHT,
-										marginVertical: 8
-									}}
-									initialRegion={{
-										latitude: meetup.latlon.lat,
-										longitude: meetup.latlon.lon,
-										latitudeDelta: LAT_DELTA,
-										longitudeDelta: LON_DELTA
-									}}
-									scrollEnabled={isMultiTouch}
-									pitchEnabled={false}
-								>
-									<Marker
-										coordinate={{
-											latitude: meetup.latlon.lat,
-											longitude: meetup.latlon.lon
-										}}
-									/>
-								</MapView>
-								<Text
-									style={{
-										textAlign: 'right',
-										marginRight: 4,
-										fontSize: 11,
-										color: 'grey',
-										bottom: 10
-									}}
-								>
-									Use two fingers to drag
-								</Text>
-							</View>
 							<View>
 								<View
 									style={{
@@ -650,7 +624,8 @@ const MeetupInfo = (props) => {
 										flexDirection: 'row',
 										justifyContent: 'flex-end',
 										alignItems: 'center',
-										marginVertical: 8
+										marginVertical: 8,
+										marginTop: 12
 									}}
 								>
 									<TouchableOpacity onPress={handleLike}>
@@ -666,41 +641,11 @@ const MeetupInfo = (props) => {
 									<Text style={{ marginRight: 10 }}>{meetup.comments.length}</Text>
 								</View>
 							</View>
-							<Divider />
-							<View
-								style={{
-									flex: 1,
-									flexDirection: 'row',
-									justifyContent: 'space-between',
-									alignItems: 'center',
-									maxWidth: Constants.window.width - 62
-								}}
-							>
-								<Input
-									placeholder="Add a comment..."
-									value={comment}
-									multiline
-									numberOfLines={2}
-									containerStyle={{
-										padding: 0,
-										marginBottom: 0
-									}}
-									inputContainerStyle={{
-										borderBottomColor: 'transparent',
-										borderBottomWidth: 0
-									}}
-									inputStyle={{ textAlignVertical: 'top', paddingVertical: 4 }}
-									onChangeText={(text) => setComment(text)}
-								/>
-								<TouchableOpacity onPress={handleAddComment}>
-									<View style={{ marginRight: 10 }}>{vectorIcon('Feather', 'plus-circle', 34)}</View>
-								</TouchableOpacity>
-							</View>
 							{meetup.comments.map((c, i) => {
 								const dateTime = new Date(c.createdAt);
 								return (
 									<View key={i}>
-										<Divider />
+										{i !== 0 && <Divider />}
 										<View
 											style={{
 												flex: 1,
@@ -769,6 +714,39 @@ const MeetupInfo = (props) => {
 									</View>
 								);
 							})}
+							<Divider />
+							<View
+								style={{
+									flex: 1,
+									flexDirection: 'row',
+									justifyContent: 'space-between',
+									alignItems: 'center',
+									maxWidth: Constants.window.width - 62,
+									paddingRight: 10
+								}}
+							>
+								<Input
+									placeholder="Add a comment..."
+									value={comment}
+									multiline
+									numberOfLines={2}
+									containerStyle={{
+										padding: 0,
+										marginBottom: 0
+									}}
+									inputContainerStyle={{
+										borderBottomColor: 'transparent',
+										borderBottomWidth: 0
+									}}
+									inputStyle={{ textAlignVertical: 'center', paddingVertical: 4 }}
+									onChangeText={(text) => setComment(text)}
+								/>
+								<TouchableOpacity onPress={handleAddComment}>
+									<View style={{ marginRight: 14 }}>
+										<Text style={{ color: Colors.primaryColor, fontSize: 18 }}>post</Text>
+									</View>
+								</TouchableOpacity>
+							</View>
 							<Divider />
 							<View style={{ marginBottom: 20 }}>{renderJoinButton()}</View>
 						</View>

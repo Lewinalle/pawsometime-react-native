@@ -11,6 +11,7 @@ import { fetchUserInfo } from '../Services/users';
 import UserInfoModal from '../components/UserInfoModal';
 import _ from 'lodash';
 import ActivityIndicator from '../components/ActivityIndicator';
+import Colors from '../constants/Colors';
 
 class GalleryItem extends Component {
 	state = {
@@ -415,7 +416,8 @@ class GalleryItem extends Component {
 								flexDirection: 'row',
 								justifyContent: 'space-between',
 								alignItems: 'center',
-								maxWidth: Constants.window.width - 45
+								maxWidth: Constants.window.width - 45,
+								paddingRight: 20
 							}}
 						>
 							<Input
@@ -432,15 +434,15 @@ class GalleryItem extends Component {
 									borderBottomWidth: 0
 								}}
 								inputStyle={{
-									textAlignVertical: 'top',
+									textAlignVertical: 'center',
 									paddingVertical: 4,
-									fontSize: 14,
+									fontSize: 16,
 									alignSelf: 'center'
 								}}
 								onChangeText={(text) => this.setState({ comment: text })}
 							/>
 							<TouchableOpacity onPress={this.handleAddComment}>
-								<View style={{ marginRight: 10 }}>{vectorIcon('Feather', 'plus-circle', 26)}</View>
+								<Text style={{ color: Colors.primaryColor, fontSize: 18 }}>post</Text>
 							</TouchableOpacity>
 						</View>
 						<Button

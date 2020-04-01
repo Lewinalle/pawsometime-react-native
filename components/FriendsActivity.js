@@ -10,6 +10,7 @@ import { fetchUserGallery } from '../redux/actions/gallery.actions';
 import { fetchUserInfo } from '../Services/users';
 import { fetchPostInfo } from '../Services/posts';
 import Colors from '../constants/Colors';
+import NoContent from './NoContent';
 
 const STACKSIZE = 10;
 const boardTypes = [ 'general', 'qna', 'tips', 'trade' ];
@@ -167,6 +168,12 @@ const FriendsActivity = (props) => {
 
 	return (
 		<View style={{ flex: 1, marginTop: 10 }}>
+			{(!activities || activities.length === 0) && (
+				<NoContent
+					title="No Friends Activities"
+					message="Come back later to check your friends activities once again!"
+				/>
+			)}
 			<ScrollView
 				style={{ flex: 1 }}
 				refreshControl={<RefreshControl refreshing={isFetching} onRefresh={refresh} />}

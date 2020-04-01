@@ -72,7 +72,7 @@ const Register = (props) => {
 				? (err = { message: error })
 				: error.code === 'InvalidLambdaResponseException'
 					? (err = 'Username has already been taken.')
-					: (err = error);
+					: (err = 'Error occurred!');
 			console.log(err);
 			setIsRegistering(false);
 			setErrors({ ...errors, cognito: err });
@@ -103,14 +103,14 @@ const Register = (props) => {
 					setErrors({
 						...errors,
 						password:
-							'Password must be at least 8 characters and contain: 1+ upper-case, 1+ lower-case and 1+ number.',
+							'Password must be at least 8 characters and contain: upper-case, lower-case and number.',
 						passwordmatch: false
 					});
 				} else {
 					setErrors({
 						...errors,
 						password:
-							'Password must be at least 8 characters and contain: 1+ upper-case, 1+ lower-case and 1+ number.'
+							'Password must be at least 8 characters and contain: upper-case, lower-case and number.'
 					});
 				}
 			} else {

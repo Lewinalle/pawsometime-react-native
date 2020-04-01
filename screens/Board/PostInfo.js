@@ -372,41 +372,11 @@ const PostInfo = (props) => {
 							</View>
 							<Text style={{ marginRight: 10 }}>{post.comments.length}</Text>
 						</View>
-						<Divider />
-						<View
-							style={{
-								flex: 1,
-								flexDirection: 'row',
-								justifyContent: 'space-between',
-								alignItems: 'center',
-								maxWidth: Constants.window.width - 62
-							}}
-						>
-							<Input
-								placeholder="Add a comment..."
-								value={comment}
-								multiline
-								numberOfLines={2}
-								containerStyle={{
-									padding: 0,
-									marginBottom: 0
-								}}
-								inputContainerStyle={{
-									borderBottomColor: 'transparent',
-									borderBottomWidth: 0
-								}}
-								inputStyle={{ textAlignVertical: 'top', paddingVertical: 4 }}
-								onChangeText={(text) => setComment(text)}
-							/>
-							<TouchableOpacity onPress={handleAddComment}>
-								<View style={{ marginRight: 10 }}>{vectorIcon('Feather', 'plus-circle', 34)}</View>
-							</TouchableOpacity>
-						</View>
 						{post.comments.map((c, i) => {
 							const dateTime = new Date(c.createdAt);
 							return (
 								<View key={i}>
-									<Divider />
+									{i !== 0 && <Divider />}
 									<View
 										style={{
 											flex: 1,
@@ -474,6 +444,43 @@ const PostInfo = (props) => {
 							);
 						})}
 						<Divider />
+						<View
+							style={{
+								marginBottom: 6
+							}}
+						>
+							<View
+								style={{
+									flex: 1,
+									flexDirection: 'row',
+									justifyContent: 'space-between',
+									alignItems: 'center',
+									maxWidth: Constants.window.width - 62,
+									paddingRight: 10
+								}}
+							>
+								<Input
+									placeholder="Add a comment..."
+									value={comment}
+									multiline
+									numberOfLines={2}
+									containerStyle={{
+										padding: 0,
+										marginBottom: 0
+									}}
+									inputContainerStyle={{
+										borderBottomColor: 'transparent',
+										borderBottomWidth: 0
+									}}
+									inputStyle={{ textAlignVertical: 'center', paddingVertical: 4 }}
+									onChangeText={(text) => setComment(text)}
+								/>
+								<TouchableOpacity onPress={handleAddComment}>
+									<Text style={{ color: Colors.primaryColor, fontSize: 18 }}>post</Text>
+								</TouchableOpacity>
+							</View>
+							<Divider />
+						</View>
 					</View>
 				</ScrollView>
 				<KeyboardSpacer topSpacing={Constants.platform.ios ? 0 : 50} />

@@ -148,11 +148,9 @@ const CreatePost = (props) => {
 
 	const handleAfterSubmit = async () => {
 		const handleBack = props.navigation.getParam('onCreateBack');
-		await handleBack(type);
+		await handleBack(boardTypes.findIndex((val) => val === type));
 		props.navigation.navigate('Board');
 	};
-
-	console.log(imageUri);
 
 	return (
 		<View style={{ flex: 1 }}>

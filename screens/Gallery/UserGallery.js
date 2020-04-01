@@ -7,6 +7,7 @@ import { vectorIcon } from '../../Utils/Icon';
 import Config from '../../config';
 import GalleryItem from '../../components/GalleryItem';
 import Colors from '../../constants/Colors';
+import NoContent from '../../components/NoContent';
 
 const PAGE_SIZE = 10;
 
@@ -110,8 +111,17 @@ class UserGallery extends Component {
 					</TouchableOpacity>
 					<View style={{}}>
 						<View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center' }}>
-							<Text style={{ fontSize: 20, fontWeight: 'bold', color: 'black' }}>
-								{galleryUser.username}'s Gallery
+							<Text
+								style={{
+									fontSize: 20,
+									fontWeight: 'bold',
+									color: 'black',
+									width: Constants.window.width - 125,
+									paddingLeft: 10
+								}}
+								numberOfLines={1}
+							>
+								{this.props.currentDBUser.username}'s Gallery
 							</Text>
 						</View>
 					</View>
@@ -135,6 +145,9 @@ class UserGallery extends Component {
 					</View>
 				</View>
 				<Divider style={{ marginBottom: 10, height: 1.5, backgroundColor: Colors.primaryColor }} />
+				{(!photos || photos.length === 0) && (
+					<NoContent title="Empty Gallery" message="This user has not added photos yet!" />
+				)}
 				<FlatList
 					ref={(ref) => (this.flatListRef = ref)}
 					style={{}}

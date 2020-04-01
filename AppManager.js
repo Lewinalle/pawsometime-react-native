@@ -80,7 +80,6 @@ const AppManager = (props) => {
 		persistUserAuth();
 	}, []);
 
-	// TODO: UNCOMMENT AND REPLACE WITH BELOW
 	if (
 		authCheckingStatus === 1 &&
 		isSplashOpen &&

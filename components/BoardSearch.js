@@ -102,7 +102,7 @@ export const BoardSearch = (props) => {
 
 			<View style={{ height: 0, flex: 1, flexDirection: 'row' }}>
 				<View style={{ marginRight: 8, marginLeft: 6 }}>
-					<Text style={{ top: 6, fontSize: 12, color: Colors.primaryColor }}>Search For</Text>
+					<Text style={{ top: 6, fontSize: 12, color: Colors.primaryColor, height: 50 }}>Search For</Text>
 				</View>
 				<ButtonGroup
 					onPress={(index) => handleSearchBySelect(index)}
