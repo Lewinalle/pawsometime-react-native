@@ -20,6 +20,7 @@ import Constants from '../../constants/Layout';
 import _ from 'lodash';
 import { ScrollView, TouchableOpacity } from 'react-native-gesture-handler';
 import Colors from '../../constants/Colors';
+import { sleep } from '../../Utils/Sleep';
 
 const Login = (props) => {
 	const [ email, setEmail ] = useState(null);
@@ -29,6 +30,8 @@ const Login = (props) => {
 		blankfield: false
 	});
 	const [ isLoggingin, setIsLoggingin ] = useState(false);
+	const [ isFirstLogin, setIsFirstLogin ] = useState(false);
+	const [ hasLoggedIn, setHasLoggedIn ] = useState(false);
 
 	const clearErrorState = () => {
 		setErrors({
@@ -55,6 +58,9 @@ const Login = (props) => {
 			});
 
 			await props.setAuthStatus(true);
+
+			setHasLoggedIn(true);
+
 			await props.setCognitoUser(user);
 			await AsyncStorage.setItem('user_id', user.attributes.sub);
 
@@ -102,17 +108,19 @@ const Login = (props) => {
 					});
 				}
 
-				setIsLoggingin(false);
+				// setIsLoggingin(false);
 
 				if (updatedUser) {
 					Alert.alert(
 						'Wecome to Pawsometime!',
 						'You can set your greetings and profile picture in Profile tab.',
-						[ { text: 'OK', onPress: () => props.navigation.navigate('Main') } ],
+						[ { text: 'OK' } ],
 						{ cancelable: false }
 					);
+					setIsFirstLogin(true);
 				} else {
-					props.navigation.navigate('Main');
+					// props.navigation.navigate('Main');
+					setIsFirstLogin(false);
 				}
 			} catch (err) {
 				console.log(err);
@@ -137,6 +145,36 @@ const Login = (props) => {
 			setPassword(text);
 		}
 	};
+
+	const checkDataFetched = () => {
+		if (hasLoggedIn) {
+			if (
+				props.news.dogs.length > 0 &&
+				props.friendsActivity &&
+				props.meetups &&
+				props.userMeetups &&
+				props.generalPosts &&
+				props.userGeneralPosts &&
+				props.gallery
+			) {
+				if (isFirstLogin) {
+					Alert.alert(
+						'Wecome to Pawsometime!',
+						'You can set your greetings and profile picture in Profile tab.',
+						[ { text: 'OK', onPress: () => props.navigation.navigate('Main') } ],
+						{ cancelable: false }
+					);
+				} else {
+					props.navigation.navigate('Main');
+					sleep(1000);
+				}
+			} else {
+				sleep(200);
+			}
+		}
+	};
+
+	checkDataFetched();
 
 	return (
 		<ImageBackground
@@ -182,14 +220,19 @@ const Login = (props) => {
 						/>
 
 						{errors.blankfield && (
-							<Text style={{ marginBottom: 15, paddingHorizontal: 10, color: '#f73325' }}>
+							<Text style={{ marginBottom: 10, paddingHorizontal: 10, color: '#f73325' }}>
 								Email and Password must be provided
 							</Text>
 						)}
 						{errors.cognito &&
 						errors.cognito.message && (
-							<Text style={{ marginBottom: 15, paddingHorizontal: 10, color: '#f73325' }}>
+							<Text style={{ marginBottom: 10, paddingHorizontal: 10, color: '#f73325' }}>
 								{errors.cognito.message}
+							</Text>
+						)}
+						{isLoggingin && (
+							<Text style={{ marginBottom: 10, paddingHorizontal: 10, color: Colors.primaryColor }}>
+								First login could take up to 30 seconds...
 							</Text>
 						)}
 						<Button

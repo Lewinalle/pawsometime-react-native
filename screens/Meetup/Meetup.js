@@ -20,7 +20,7 @@ const MAP_WIDTH = dimensions.window.width - 32;
 const MAP_HEIGHT = 200;
 const DEFAULT_SCROLLVIEW_POSITION = 30;
 const LAT_DELTA = 0.08;
-const LON_DELTA = 0.08;
+const LON_DELTA = 0.23;
 
 class Meetup extends Component {
 	state = {
@@ -175,30 +175,33 @@ class Meetup extends Component {
 		}
 	};
 
+	debounceFetch = _.throttle(
+		async () => {
+			this.setState({ isFetching: true });
+			await this.props.fetchMeetups({
+				lat: this.state.centerLat,
+				lon: this.state.centerLon,
+				offset: (this.state.lat_offset + this.state.lon_offset) / 2
+			});
+			this.setState({ meetups: this.props.meetups, isFetching: false });
+		},
+		2500,
+		{ leading: false, trailing: true }
+	);
+
 	handleRegionChange = (region) => {
-		const { centerLat, centerLon, lat_offset, currentMenu } = this.state;
-		if (currentMenu !== 1) {
-			_.debounce(
-				async () => {
-					this.setState({ isFetching: true });
-					await fetchMeetups({
-						lat: centerLat,
-						lon: centerLon,
-						offset: lat_offset
-					}).then(() => {
-						this.setState({ meetups: this.props.meetups, isFetching: false });
-					});
-				},
-				2000,
-				{ leading: true }
-			);
-		}
+		const { currentMenu } = this.state;
+
 		this.setState({
 			centerLat: region.latitude,
 			centerLon: region.longitude,
 			lat_offset: region.latitudeDelta,
 			lon_offset: region.longitudeDelta
 		});
+
+		if (currentMenu !== 1) {
+			this.debounceFetch();
+		}
 	};
 
 	render() {
