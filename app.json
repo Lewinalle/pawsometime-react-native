@@ -34,7 +34,8 @@
 				}
 			},
 			"package": "com.lewis.pawsometime",
-			"versionCode": 1
+			"versionCode": 1,
+			"icon": "./assets/images/logo.png"
 		}
 	}
 }

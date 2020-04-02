@@ -19,8 +19,8 @@ const MAX_TITLE_LENGTH = 30;
 const MAP_WIDTH = dimensions.window.width - 32;
 const MAP_HEIGHT = 200;
 const DEFAULT_SCROLLVIEW_POSITION = 30;
-const LAT_DELTA = 0.13;
-const LON_DELTA = 0.13;
+const LAT_DELTA = 0.08;
+const LON_DELTA = 0.08;
 
 class Meetup extends Component {
 	state = {
@@ -175,6 +175,32 @@ class Meetup extends Component {
 		}
 	};
 
+	handleRegionChange = (region) => {
+		const { centerLat, centerLon, lat_offset, currentMenu } = this.state;
+		if (currentMenu !== 1) {
+			_.debounce(
+				async () => {
+					this.setState({ isFetching: true });
+					await fetchMeetups({
+						lat: centerLat,
+						lon: centerLon,
+						offset: lat_offset
+					}).then(() => {
+						this.setState({ meetups: this.props.meetups, isFetching: false });
+					});
+				},
+				2000,
+				{ leading: true }
+			);
+		}
+		this.setState({
+			centerLat: region.latitude,
+			centerLon: region.longitude,
+			lat_offset: region.latitudeDelta,
+			lon_offset: region.longitudeDelta
+		});
+	};
+
 	render() {
 		const {
 			selected,
@@ -216,6 +242,7 @@ class Meetup extends Component {
 								onPress={() => {
 									this.setState({ currentMenu: 0, meetups: this.props.meetups });
 								}}
+								disabled={isFetching}
 							>
 								<View style={{ marginRight: 25 }}>
 									<Text
@@ -234,6 +261,7 @@ class Meetup extends Component {
 									this.myMeetupBtn();
 									this.setState({ currentMenu: 1 });
 								}}
+								disabled={isFetching}
 							>
 								<View>
 									<Text
@@ -353,13 +381,7 @@ class Meetup extends Component {
 						latitudeDelta: lat_offset,
 						longitudeDelta: lon_offset
 					}}
-					onRegionChange={(region) =>
-						this.setState({
-							centerLat: region.latitude,
-							centerLon: region.longitude,
-							lat_offset: region.latitudeDelta,
-							lon_offset: region.longitudeDelta
-						})}
+					onRegionChange={(region) => this.handleRegionChange(region)}
 				>
 					{meetups.map((item, index) => {
 						let titleTruncated =
