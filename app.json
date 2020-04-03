@@ -18,13 +18,12 @@
 		},
 		"assetBundlePatterns": [ "**/*" ],
 		"ios": {
-			"supportsTablet": true,
 			"config": {
 				"googleMobileAdsAppId": "ca-app-pub-4691745324255938~6440277238",
 				"googleMapsApiKey": "AIzaSyDMNQ3ObCFdeQufDMBRY74Hk97chG6EX3o"
 			},
 			"bundleIdentifier": "com.lewis.pawsometime",
-			"buildNumber": "1.0.4"
+			"buildNumber": "1.0.5"
 		},
 		"android": {
 			"config": {
@@ -34,7 +33,7 @@
 				}
 			},
 			"package": "com.lewis.pawsometime",
-			"versionCode": 4,
+			"versionCode": 5,
 			"icon": "./assets/images/logo.png"
 		}
 	}
