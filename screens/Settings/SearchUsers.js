@@ -112,6 +112,38 @@ const SearchUsers = (props) => {
 							dividerStyle={{ paddingTop: 0 }}
 							containerStyle={{ margin: 0, padding: 5, borderRadius: 8, borderWidth: 1, elevation: 2 }}
 						>
+							{users.length === 0 && (
+								<TouchableOpacity
+									onPress={() => {
+										setModalOpenId(user.id);
+									}}
+								>
+									<View style={{ paddingTop: 30, paddingBottom: 40, paddingHorizontal: 40 }}>
+										<View>
+											<Text
+												style={{
+													fontSize: 18,
+													textAlign: 'center',
+													color: Colors.primaryColor
+												}}
+											>
+												Users not found. {'\n'}
+											</Text>
+										</View>
+										<View>
+											<Text
+												style={{
+													fontSize: 18,
+													textAlign: 'center',
+													color: 'grey'
+												}}
+											>
+												Try searching with username or description.
+											</Text>
+										</View>
+									</View>
+								</TouchableOpacity>
+							)}
 							{users.map((user, i) => {
 								return (
 									<TouchableOpacity
