@@ -24,7 +24,7 @@
 				"googleMapsApiKey": "AIzaSyDMNQ3ObCFdeQufDMBRY74Hk97chG6EX3o"
 			},
 			"bundleIdentifier": "com.lewis.pawsometime",
-			"buildNumber": "1.0.2"
+			"buildNumber": "1.0.4"
 		},
 		"android": {
 			"config": {
@@ -34,7 +34,7 @@
 				}
 			},
 			"package": "com.lewis.pawsometime",
-			"versionCode": 2,
+			"versionCode": 4,
 			"icon": "./assets/images/logo.png"
 		}
 	}

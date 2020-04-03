@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, StyleSheet, Alert, AsyncStorage } from 'react-native';
+import { View, StyleSheet, Alert, AsyncStorage, Linking } from 'react-native';
 import { SettingsListItem } from '../../components/SettingsListItem';
 import { connect } from 'react-redux';
 import { signOut } from '../../redux/actions/auth.actions';
@@ -8,6 +8,7 @@ import AdmobBanner from '../../components/AdmobBanner';
 import { fetchUserPosts } from '../../redux/actions/posts.actions';
 import { fetchUserMeetups } from '../../redux/actions/meetups.actions';
 import store from '../../redux/store';
+import Config from '../../config';
 
 const settingItems = [
 	{
@@ -19,7 +20,7 @@ const settingItems = [
 	},
 	{
 		title: 'Friends',
-		description: 'Find and add friends',
+		description: 'View and manage friends list',
 		icon: 'FontAwesome5.user-friends',
 		iconSize: 21,
 		to: 'Friends'
@@ -33,7 +34,7 @@ const settingItems = [
 	},
 	{
 		title: 'My Meetups',
-		description: 'Check and manage my meetups',
+		description: 'View and manage my meetups',
 		icon: 'FontAwesome.meetup',
 		iconSize: 26,
 		to: 'Meetup'
@@ -51,6 +52,13 @@ const settingItems = [
 		icon: 'Feather.info',
 		iconSize: 28,
 		to: 'About'
+	},
+	{
+		title: 'Privacy Policy',
+		description: 'View privacy policy',
+		icon: 'MaterialCommunityIcons.file-document-outline',
+		iconSize: 28,
+		to: ''
 	}
 ];
 
@@ -68,6 +76,9 @@ const Settings = (props) => {
 							myMeetups: props.userMeetups
 						})
 					);
+				return;
+			case 'Privacy Policy':
+				Linking.openURL(Config.PRIVACY_POLICY_URL);
 				return;
 			default:
 				props.navigation.navigate(item.to);

@@ -26,6 +26,8 @@
 // const ADMOB_UNIT_ID_ANDROID = 'ca-app-pub-4691745324255938/5396704591';
 // const ADMOB_UNIT_ID_IOS = 'ca-app-pub-4691745324255938/3814113891';
 
+// const PRIVACY_POLICY_URL = 'https://www.termsfeed.com/privacy-policy/fa68054aa0c1a58b9c79690fba404541';
+
 // PROD
 const POSTS_API_URL = 'https://3jqwhofcbe.execute-api.us-west-2.amazonaws.com/production';
 const MEETUPS_API_URL = 'https://18fjg0hz27.execute-api.us-west-2.amazonaws.com/production';
@@ -54,6 +56,8 @@ const DEFAULT_DATA_SIZE = 200;
 const ADMOB_UNIT_ID_ANDROID = 'ca-app-pub-4691745324255938/5396704591';
 const ADMOB_UNIT_ID_IOS = 'ca-app-pub-4691745324255938/3814113891';
 
+const PRIVACY_POLICY_URL = 'https://www.termsfeed.com/privacy-policy/fa68054aa0c1a58b9c79690fba404541';
+
 export default {
 	POSTS_API_URL,
 	MEETUPS_API_URL,
@@ -73,5 +77,6 @@ export default {
 	DEFAULT_LON,
 	DEFAULT_DATA_SIZE,
 	ADMOB_UNIT_ID_ANDROID,
-	ADMOB_UNIT_ID_IOS
+	ADMOB_UNIT_ID_IOS,
+	PRIVACY_POLICY_URL
 };
