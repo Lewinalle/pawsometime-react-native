@@ -23,7 +23,11 @@
 				"googleMapsApiKey": "AIzaSyDMNQ3ObCFdeQufDMBRY74Hk97chG6EX3o"
 			},
 			"bundleIdentifier": "com.lewis.pawsometime",
-			"buildNumber": "1.0.6"
+			"buildNumber": "1.0.7",
+			"infoPlist": {
+				"NSCameraUsageDescription": "This app uses the camera in order for users to select their photos to post.",
+				"NSLocationWhenInUseUsageDescription": "This app uses users' location to serve better by showing their location on the meetup map by default."
+			}
 		},
 		"android": {
 			"config": {
