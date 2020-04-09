@@ -10,7 +10,12 @@ import { fetchUserInfo, updateUser } from '../../Services/users';
 import { fetchMeetups, fetchUserMeetups } from '../../redux/actions/meetups.actions';
 import { fetchPosts, fetchUserPosts } from '../../redux/actions/posts.actions';
 import { fetchUserGallery } from '../../redux/actions/gallery.actions';
-import { setCurrentLocation, fetchNews, fetchFriendsActivity } from '../../redux/actions/others.actions';
+import {
+	setCurrentLocation,
+	fetchNews,
+	fetchFriendsActivity,
+	fetchDataLogin
+} from '../../redux/actions/others.actions';
 import { formatUsersIdsParams } from '../../Utils/FormatParams';
 
 import dimensions from '../../constants/Layout';
@@ -337,7 +342,8 @@ const mapDispatchToProps = {
 	fetchUserGallery,
 	setCurrentLocation,
 	fetchNews,
-	fetchFriendsActivity
+	fetchFriendsActivity,
+	fetchDataLogin
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(Login);

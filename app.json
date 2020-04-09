@@ -23,7 +23,7 @@
 				"googleMapsApiKey": "AIzaSyDMNQ3ObCFdeQufDMBRY74Hk97chG6EX3o"
 			},
 			"bundleIdentifier": "com.lewis.pawsometime",
-			"buildNumber": "1.0.9",
+			"buildNumber": "1.0.10",
 			"infoPlist": {
 				"NSCameraUsageDescription": "This app uses the camera in order for users to select their photos to post.",
 				"NSPhotoLibraryUsageDescription": "This app needs access to users' photo library in order for users to select their photos to post.",
@@ -38,7 +38,7 @@
 				}
 			},
 			"package": "com.lewis.pawsometime",
-			"versionCode": 7,
+			"versionCode": 8,
 			"icon": "./assets/images/logo.png"
 		}
 	}
