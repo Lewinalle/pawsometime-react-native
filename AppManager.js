@@ -9,7 +9,7 @@ import { fetchUserInfo } from './Services/users';
 import { fetchMeetups, fetchUserMeetups } from './redux/actions/meetups.actions';
 import { fetchPosts, fetchUserPosts } from './redux/actions/posts.actions';
 import { fetchUserGallery } from './redux/actions/gallery.actions';
-import { setCurrentLocation, fetchNews, fetchFriendsActivity } from './redux/actions/others.actions';
+import { setCurrentLocation, fetchNews, fetchFriendsActivity, fetchDataLogin } from './redux/actions/others.actions';
 import { formatUsersIdsParams } from './Utils/FormatParams';
 
 const postTypes = [ 'general', 'qna', 'tips', 'trade' ];
@@ -33,12 +33,9 @@ const AppManager = (props) => {
 				const session = await Auth.currentSession();
 				await props.setAuthStatus(true);
 				const user = await Auth.currentAuthenticatedUser();
-				await props.setCognitoUser(user);
-				await props.setAuthStatus(true);
-				const DBUser = await fetchUserInfo(user.attributes.sub);
-				await props.setDBUser(DBUser);
-				console.log(await (await Auth.currentSession()).getIdToken().getJwtToken());
 				await AsyncStorage.setItem('user_id', user.attributes.sub);
+				await props.setCognitoUser(user);
+				console.log(await (await Auth.currentSession()).getIdToken().getJwtToken());
 				if (user) {
 					let currentLocation;
 					await navigator.geolocation.getCurrentPosition(
@@ -47,29 +44,13 @@ const AppManager = (props) => {
 								lat: position.coords.latitude,
 								lon: position.coords.longitude
 							};
-							await props.setCurrentLocation(currentLocation);
-							await props.fetchMeetups({
-								lat: currentLocation.lat,
-								lon: currentLocation.lon
-							});
-							await props.fetchUserMeetups(user.attributes.sub, {
-								lat: currentLocation.lat,
-								lon: currentLocation.lon
-							});
+							await props.fetchDataLogin(user.attributes.sub, currentLocation.lat, currentLocation.lon);
 						},
 						async (error) => {
-							await props.fetchMeetups();
-							await props.fetchUserMeetups(user.attributes.sub);
+							await props.fetchDataLogin(user.attributes.sub, Config.DEFAULT_LAT, Config.DEFAULT_LON);
 						},
 						{ enableHighAccuracy: true, timeout: 10000, maximumAge: 1000 }
 					);
-					await props.fetchUserGallery(user.attributes.sub, 0);
-					await props.fetchPosts({ type: 'general' });
-					await props.fetchUserPosts(user.attributes.sub, { type: 'general' });
-					await props.fetchNews();
-					await props.fetchFriendsActivity(DBUser.id, {
-						friendsActivity: formatUsersIdsParams(DBUser.friends.friends)
-					});
 					setAuthCheckingStatus(1);
 				}
 			} catch (err) {
@@ -77,6 +58,55 @@ const AppManager = (props) => {
 				setAuthCheckingStatus(2);
 			}
 		};
+		// const persistUserAuth = async () => {
+		// 	try {
+		// 		const session = await Auth.currentSession();
+		// 		await props.setAuthStatus(true);
+		// 		const user = await Auth.currentAuthenticatedUser();
+		// 		await props.setCognitoUser(user);
+		// 		await props.setAuthStatus(true);
+		// 		const DBUser = await fetchUserInfo(user.attributes.sub);
+		// 		await props.setDBUser(DBUser);
+		// 		console.log(await (await Auth.currentSession()).getIdToken().getJwtToken());
+		// 		await AsyncStorage.setItem('user_id', user.attributes.sub);
+		// 		if (user) {
+		// 			let currentLocation;
+		// 			await navigator.geolocation.getCurrentPosition(
+		// 				async (position) => {
+		// 					currentLocation = {
+		// 						lat: position.coords.latitude,
+		// 						lon: position.coords.longitude
+		// 					};
+		// 					await props.setCurrentLocation(currentLocation);
+		// 					await props.fetchMeetups({
+		// 						lat: currentLocation.lat,
+		// 						lon: currentLocation.lon
+		// 					});
+		// 					await props.fetchUserMeetups(user.attributes.sub, {
+		// 						lat: currentLocation.lat,
+		// 						lon: currentLocation.lon
+		// 					});
+		// 				},
+		// 				async (error) => {
+		// 					await props.fetchMeetups();
+		// 					await props.fetchUserMeetups(user.attributes.sub);
+		// 				},
+		// 				{ enableHighAccuracy: true, timeout: 10000, maximumAge: 1000 }
+		// 			);
+		// 			await props.fetchUserGallery(user.attributes.sub, 0);
+		// 			await props.fetchPosts({ type: 'general' });
+		// 			await props.fetchUserPosts(user.attributes.sub, { type: 'general' });
+		// 			await props.fetchNews();
+		// 			await props.fetchFriendsActivity(DBUser.id, {
+		// 				friendsActivity: formatUsersIdsParams(DBUser.friends.friends)
+		// 			});
+		// 			setAuthCheckingStatus(1);
+		// 		}
+		// 	} catch (err) {
+		// 		console.log(err);
+		// 		setAuthCheckingStatus(2);
+		// 	}
+		// };
 		persistUserAuth();
 	}, []);
 
@@ -128,7 +158,8 @@ const mapDispatchToProps = {
 	fetchUserGallery,
 	setCurrentLocation,
 	fetchNews,
-	fetchFriendsActivity
+	fetchFriendsActivity,
+	fetchDataLogin
 };
 
 export default connect(mapStateToProps, mapDispatchToProps)(AppManager);

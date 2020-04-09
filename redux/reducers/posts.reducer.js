@@ -6,7 +6,8 @@ import {
 	FETCH_USER_GENERAL_POSTS,
 	FETCH_USER_QUESTION_POSTS,
 	FETCH_USER_TIP_POSTS,
-	FETCH_USER_TRADE_POSTS
+	FETCH_USER_TRADE_POSTS,
+	FETCH_LOGIN
 } from '../actions/index.actions';
 
 const initialState = {
@@ -61,6 +62,12 @@ const postsReducer = (state = initialState, action = {}) => {
 			return {
 				...state,
 				userTradePosts: action.payload.data
+			};
+		case FETCH_LOGIN:
+			return {
+				...state,
+				generalPosts: action.payload.posts,
+				userGeneralPosts: action.payload.userPosts
 			};
 		default:
 			return state;

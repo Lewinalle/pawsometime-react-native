@@ -1,4 +1,4 @@
-import { SET_AUTH_STATUS, SET_COGNITO_USER, SET_DB_USER, SIGN_OUT } from '../actions/index.actions';
+import { SET_AUTH_STATUS, SET_COGNITO_USER, SET_DB_USER, SIGN_OUT, FETCH_LOGIN } from '../actions/index.actions';
 
 const initialState = {
 	isAuthenticated: false,
@@ -29,6 +29,11 @@ const authReducer = (state = initialState, action = {}) => {
 				isAuthenticated: false,
 				currentCognitoUser: null,
 				currentDBUser: {}
+			};
+		case FETCH_LOGIN:
+			return {
+				...state,
+				currentDBUser: action.payload.DBUser
 			};
 		default:
 			return state;

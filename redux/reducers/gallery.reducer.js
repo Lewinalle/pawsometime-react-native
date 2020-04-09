@@ -1,4 +1,4 @@
-import { FETCH_GALLERY, FETCH_USER_GALLERY } from '../actions/index.actions';
+import { FETCH_GALLERY, FETCH_USER_GALLERY, FETCH_LOGIN } from '../actions/index.actions';
 
 const initialState = {
 	gallery: null,
@@ -16,6 +16,11 @@ const galleryReducer = (state = initialState, action = {}) => {
 			return {
 				...state,
 				userGallery: action.payload.data
+			};
+		case FETCH_LOGIN:
+			return {
+				...state,
+				gallery: action.payload.userGallery
 			};
 		default:
 			return state;

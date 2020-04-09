@@ -148,6 +148,22 @@ export const fetchHistoryInfo = async (id) => {
 	}
 };
 
+export const fetchLogin = async (userId, lat, lon) => {
+	const options = {
+		method: 'GET',
+		url: `${Config.OTHERS_API_URL}/fetchLogin?userId=${userId}&lat=${lat}&lon=${lon}`
+	};
+
+	try {
+		const res = await axios(options);
+
+		return res.data;
+	} catch (err) {
+		console.log('Error! ', err, options);
+		return null;
+	}
+};
+
 export const testGet = async () => {
 	const options = {
 		method: 'GET',

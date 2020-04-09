@@ -21,6 +21,7 @@ import _ from 'lodash';
 import { ScrollView, TouchableOpacity } from 'react-native-gesture-handler';
 import Colors from '../../constants/Colors';
 import { sleep } from '../../Utils/Sleep';
+import Config from '../../config';
 
 const Login = (props) => {
 	const [ email, setEmail ] = useState(null);
@@ -73,8 +74,6 @@ const Login = (props) => {
 					updatedUser = await updateUser(user.attributes.sub, body);
 				}
 
-				await props.setDBUser(updatedUser ? updatedUser : DBUser);
-
 				if (user) {
 					let currentLocation;
 					await navigator.geolocation.getCurrentPosition(
@@ -83,29 +82,13 @@ const Login = (props) => {
 								lat: position.coords.latitude,
 								lon: position.coords.longitude
 							};
-							await props.setCurrentLocation(currentLocation);
-							await props.fetchMeetups({
-								lat: currentLocation.lat,
-								lon: currentLocation.lon
-							});
-							await props.fetchUserMeetups(user.attributes.sub, {
-								lat: currentLocation.lat,
-								lon: currentLocation.lon
-							});
+							await props.fetchDataLogin(user.attributes.sub, currentLocation.lat, currentLocation.lon);
 						},
 						async (error) => {
-							await props.fetchMeetups();
-							await props.fetchUserMeetups(user.attributes.sub);
+							await props.fetchDataLogin(user.attributes.sub, Config.DEFAULT_LAT, Config.DEFAULT_LON);
 						},
 						{ enableHighAccuracy: true, timeout: 10000, maximumAge: 1000 }
 					);
-					await props.fetchUserGallery(user.attributes.sub, 0);
-					await props.fetchPosts({ type: 'general' });
-					await props.fetchUserPosts(user.attributes.sub, { type: 'general' });
-					await props.fetchNews();
-					await props.fetchFriendsActivity(DBUser.id, {
-						friendsActivity: formatUsersIdsParams(DBUser.friends.friends)
-					});
 				}
 
 				// setIsLoggingin(false);

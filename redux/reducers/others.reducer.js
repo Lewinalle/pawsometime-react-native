@@ -1,5 +1,10 @@
-import { FETCH_NEWS, SET_CURRENT_LOCATION, FETCH_FIRENDS_RECENT_ACTIVITY } from '../actions/index.actions';
+import { FETCH_NEWS, SET_CURRENT_LOCATION, FETCH_FIRENDS_RECENT_ACTIVITY, FETCH_LOGIN } from '../actions/index.actions';
 import Config from '../../config';
+
+let now;
+let dogsNews;
+let catsNews;
+let petsNews;
 
 const initialState = {
 	news: {
@@ -18,10 +23,10 @@ const initialState = {
 const newsReducer = (state = initialState, action = {}) => {
 	switch (action.type) {
 		case FETCH_NEWS:
-			const now = new Date();
-			const dogsNews = action.payload.data.filter((item) => item.tag === 'dogs');
-			const catsNews = action.payload.data.filter((item) => item.tag === 'cats');
-			const petsNews = action.payload.data.filter((item) => item.tag === 'pets');
+			now = new Date();
+			dogsNews = action.payload.data.filter((item) => item.tag === 'dogs');
+			catsNews = action.payload.data.filter((item) => item.tag === 'cats');
+			petsNews = action.payload.data.filter((item) => item.tag === 'pets');
 
 			return {
 				...state,
@@ -41,6 +46,23 @@ const newsReducer = (state = initialState, action = {}) => {
 			return {
 				...state,
 				friendsActivity: action.payload.data
+			};
+		case FETCH_LOGIN:
+			now = new Date();
+			dogsNews = action.payload.news.filter((item) => item.tag === 'dogs');
+			catsNews = action.payload.news.filter((item) => item.tag === 'cats');
+			petsNews = action.payload.news.filter((item) => item.tag === 'pets');
+
+			return {
+				...state,
+				news: {
+					dogs: dogsNews,
+					cats: catsNews,
+					pets: petsNews
+				},
+				newsLastFetched: now,
+				currentLocation: action.payload.currentLocation,
+				friendsActivity: action.payload.friendsActivity
 			};
 		default:
 			return state;
